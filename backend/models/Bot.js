@@ -55,30 +55,52 @@ const BotSchema = new mongoose.Schema({
   },
   stats: {
     totalMessages: { type: Number, default: 0 },
-    activeUsers: { type: Number, default: 0 },
-    lastActivity: { type: Date, default: null },
+    activeUsers:   { type: Number, default: 0 },
+    seenUserIds:   { type: [String], default: [], select: false }, // hidden from API
+    lastActivity:  { type: Date, default: null },
   },
   logs: {
     type: [LogSchema],
     default: [],
   },
 }, {
-  // ✅ FIX: timestamps activé pour que updatedAt existe (cache webhook)
   timestamps: true,
 });
 
-BotSchema.methods.addLog = async function (type, message) {
-  this.logs.push({ type, message });
-  if (this.logs.length > 100) {
-    this.logs = this.logs.slice(-100);
+// ─── ATOMIC incrementStats ─────────────────────────────────────────────────
+// Uses MongoDB $inc — safe even with stale in-memory docs or concurrent calls.
+BotSchema.methods.incrementStats = async function (userId) {
+  const update = {
+    $inc: { 'stats.totalMessages': 1 },
+    $set: { 'stats.lastActivity': new Date() },
+  };
+
+  // Track unique active users (avoid double-counting the same user)
+  if (userId) {
+    const userStr = String(userId);
+    const bot = await Bot.findById(this._id).select('stats.seenUserIds');
+    const alreadySeen = bot?.stats?.seenUserIds?.includes(userStr);
+    if (!alreadySeen) {
+      update.$inc['stats.activeUsers'] = 1;
+      if (!update.$push) update.$push = {};
+      update.$push['stats.seenUserIds'] = userStr;
+    }
   }
-  await this.save();
+
+  await Bot.findByIdAndUpdate(this._id, update);
 };
 
-BotSchema.methods.incrementStats = async function () {
-  this.stats.totalMessages += 1;
-  this.stats.lastActivity = new Date();
-  await this.save();
+// ─── ATOMIC addLog ─────────────────────────────────────────────────────────
+// Uses $push with $slice so we never accumulate >100 logs, atomically.
+BotSchema.methods.addLog = async function (type, message) {
+  await Bot.findByIdAndUpdate(this._id, {
+    $push: {
+      logs: {
+        $each: [{ type, message, timestamp: new Date() }],
+        $slice: -100,
+      },
+    },
+  });
 };
 
 BotSchema.methods.getMaskedToken = function () {
@@ -88,4 +110,5 @@ BotSchema.methods.getMaskedToken = function () {
   return `${parts[0]}:${parts[1].substring(0, 4)}${'*'.repeat(parts[1].length - 4)}`;
 };
 
-module.exports = mongoose.model('Bot', BotSchema);
+const Bot = mongoose.model('Bot', BotSchema);
+module.exports = Bot;

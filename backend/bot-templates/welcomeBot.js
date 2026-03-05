@@ -1,10 +1,6 @@
 // bot-templates/welcomeBot.js - Template 2: Bot de Bienvenue
 const TelegramBot = require('node-telegram-bot-api');
 
-/**
- * Remplace les variables dans un template de message
- * Variables supportées: {username}, {first_name}, {last_name}, {chat_title}
- */
 const interpolate = (template, data) => {
   return template
     .replace(/{username}/g, data.username ? `@${data.username}` : data.first_name || 'Utilisateur')
@@ -16,71 +12,57 @@ const interpolate = (template, data) => {
 
 const createWelcomeBot = (botDoc) => {
   const bot = new TelegramBot(botDoc.token, { polling: false });
-  const config = botDoc.config;
 
   return {
-    handleUpdate: async (update) => {
+    handleUpdate: async (update, freshDoc = botDoc) => {
       try {
         const msg = update.message;
         if (!msg) return;
 
-        const chatId = msg.chat.id;
+        const chatId    = msg.chat.id;
         const chatTitle = msg.chat.title;
+        const config    = freshDoc.config;
 
-        // Commande /start
         if (msg.text === '/start') {
           await bot.sendMessage(
             chatId,
-            `👋 <b>Bot de bienvenue activé !</b>\n\n` +
-            `Ajoutez-moi dans un groupe et je accueillerai automatiquement les nouveaux membres.\n\n` +
-            `N'oubliez pas de me donner les droits d'administrateur !`,
+            `👋 <b>Bot de bienvenue activé !</b>\n\nAjoutez-moi dans un groupe et j'accueillerai automatiquement les nouveaux membres.\n\nN'oubliez pas de me donner les droits d'administrateur !`,
             { parse_mode: 'HTML' }
           );
           return;
         }
 
-        // Nouveaux membres dans un groupe
-        if (msg.new_chat_members && msg.new_chat_members.length > 0) {
+        // Nouveaux membres
+        if (msg.new_chat_members?.length > 0) {
+          const me = await bot.getMe();
           for (const member of msg.new_chat_members) {
-            // Ignorer si c'est le bot lui-même qui rejoint
-            const me = await bot.getMe();
             if (member.id === me.id) continue;
-
-            const welcomeTemplate = config.welcome_joinMessage || '👋 Bienvenue {first_name} dans le groupe !';
-            const welcomeMsg = interpolate(welcomeTemplate, {
-              username: member.username,
-              first_name: member.first_name,
-              last_name: member.last_name,
-              chat_title: chatTitle,
-            });
-
-            await bot.sendMessage(chatId, welcomeMsg, { parse_mode: 'HTML' });
-            await botDoc.addLog('info', `Bienvenue envoyé à ${member.first_name} dans ${chatTitle}`);
-            await botDoc.incrementStats();
+            const text = interpolate(
+              config.welcome_joinMessage || '👋 Bienvenue {first_name} dans le groupe !',
+              { username: member.username, first_name: member.first_name, last_name: member.last_name, chat_title: chatTitle }
+            );
+            await bot.sendMessage(chatId, text, { parse_mode: 'HTML' });
+            await freshDoc.addLog('info', `Bienvenue envoyé à ${member.first_name} dans ${chatTitle}`);
+            await freshDoc.incrementStats(member.id);
           }
         }
 
-        // Membres quittant le groupe
+        // Membre quittant
         if (msg.left_chat_member) {
           const member = msg.left_chat_member;
           const me = await bot.getMe();
           if (member.id === me.id) return;
-
-          const leaveTemplate = config.welcome_leaveMessage || '👋 Au revoir {first_name} !';
-          const leaveMsg = interpolate(leaveTemplate, {
-            username: member.username,
-            first_name: member.first_name,
-            last_name: member.last_name,
-            chat_title: chatTitle,
-          });
-
-          await bot.sendMessage(chatId, leaveMsg, { parse_mode: 'HTML' });
-          await botDoc.addLog('info', `Au revoir envoyé pour ${member.first_name}`);
+          const text = interpolate(
+            config.welcome_leaveMessage || '👋 Au revoir {first_name} !',
+            { username: member.username, first_name: member.first_name, last_name: member.last_name, chat_title: chatTitle }
+          );
+          await bot.sendMessage(chatId, text, { parse_mode: 'HTML' });
+          await freshDoc.addLog('info', `Au revoir envoyé pour ${member.first_name}`);
         }
 
-      } catch (error) {
-        console.error('WelcomeBot error:', error.message);
-        await botDoc.addLog('error', `Erreur: ${error.message}`);
+      } catch (err) {
+        console.error('WelcomeBot error:', err.message);
+        await freshDoc.addLog('error', `Erreur: ${err.message}`);
       }
     },
   };

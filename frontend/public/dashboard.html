@@ -37,6 +37,11 @@
         <div class="stat-value" id="stat-total-messages">—</div>
       </div>
       <div class="stat-card">
+        <span class="stat-icon">👥</span>
+        <div class="stat-label">Utilisateurs actifs</div>
+        <div class="stat-value" id="stat-total-users">—</div>
+      </div>
+      <div class="stat-card">
         <span class="stat-icon">🤖</span>
         <div class="stat-label">Bots créés</div>
         <div class="stat-value" id="stat-total-bots">—</div>
@@ -93,6 +98,9 @@
     document.getElementById('stat-active-bots').textContent = bots.filter(b => b.isActive).length;
     document.getElementById('stat-total-messages').textContent =
       formatNumber(bots.reduce((acc, b) => acc + (b.stats?.totalMessages || 0), 0));
+    const totalUsers = bots.reduce((acc, b) => acc + (b.stats?.activeUsers || 0), 0);
+    const statUsersEl = document.getElementById('stat-total-users');
+    if (statUsersEl) statUsersEl.textContent = formatNumber(totalUsers);
 
     // Affichage bots
     if (bots.length === 0) {
