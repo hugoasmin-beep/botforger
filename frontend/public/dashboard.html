@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — BotForge</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<div id="sidebar-container"></div>
+
+<div class="app-layout">
+  <div class="main-content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle" id="welcome-msg">Bienvenue !</p>
+      </div>
+      <a href="/create-bot.html" class="btn btn-primary">
+        ➕ Nouveau bot
+      </a>
+    </div>
+
+    <!-- Stats cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-icon">🤖</span>
+        <div class="stat-label">Bots actifs</div>
+        <div class="stat-value" id="stat-active-bots">—</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">💬</span>
+        <div class="stat-label">Messages totaux</div>
+        <div class="stat-value" id="stat-total-messages">—</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">🤖</span>
+        <div class="stat-label">Bots créés</div>
+        <div class="stat-value" id="stat-total-bots">—</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">🎯</span>
+        <div class="stat-label">Limite de bots</div>
+        <div class="stat-value" id="stat-bot-limit">3</div>
+      </div>
+    </div>
+
+    <!-- Bots récents -->
+    <div style="margin-bottom:2rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <h2 style="font-size:1.1rem;font-weight:700;">Vos bots récents</h2>
+        <a href="/bots.html" class="btn btn-ghost btn-sm">Voir tous →</a>
+      </div>
+
+      <div id="bots-container">
+        <div style="text-align:center;padding:3rem;color:var(--text-muted);">
+          <div class="loader-spinner" style="margin:0 auto 1rem;"></div>
+          Chargement...
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (!initLayout()) return;
+
+    const user = Auth.getUser();
+    if (user) {
+      document.getElementById('welcome-msg').textContent = `Bienvenue, ${user.email.split('@')[0]} !`;
+      document.getElementById('stat-bot-limit').textContent = user.botsLimit || 3;
+    }
+
+    // Charger les bots
+    const data = await api('/bots');
+
+    if (!data || !data.success) {
+      document.getElementById('bots-container').innerHTML =
+        '<div class="alert alert-error">Erreur lors du chargement des bots</div>';
+      return;
+    }
+
+    const bots = data.bots;
+
+    // Stats
+    document.getElementById('stat-total-bots').textContent = bots.length;
+    document.getElementById('stat-active-bots').textContent = bots.filter(b => b.isActive).length;
+    document.getElementById('stat-total-messages').textContent =
+      formatNumber(bots.reduce((acc, b) => acc + (b.stats?.totalMessages || 0), 0));
+
+    // Affichage bots
+    if (bots.length === 0) {
+      document.getElementById('bots-container').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🤖</div>
+          <div class="empty-title">Aucun bot encore</div>
+          <div class="empty-desc">Créez votre premier bot Telegram en quelques minutes</div>
+          <a href="/create-bot.html" class="btn btn-primary">➕ Créer mon premier bot</a>
+        </div>`;
+      return;
+    }
+
+    const recentBots = bots.slice(0, 3);
+    const template = TEMPLATES;
+
+    document.getElementById('bots-container').innerHTML = `
+      <div class="bots-grid">
+        ${recentBots.map(bot => renderBotCard(bot)).join('')}
+      </div>`;
+  });
+
+  function renderBotCard(bot) {
+    const tpl = TEMPLATES[bot.template] || { emoji: '🤖', name: bot.template };
+    const isActive = bot.isActive;
+    const lastActivity = bot.stats?.lastActivity
+      ? formatDate(bot.stats.lastActivity)
+      : 'Jamais';
+
+    return `
+      <div class="bot-card">
+        <div class="bot-card-header">
+          <div>
+            <div class="bot-name">${bot.name}</div>
+            <div class="bot-username">${bot.telegramUsername ? '@' + bot.telegramUsername : 'Username non chargé'}</div>
+          </div>
+          <span class="bot-template-badge">${tpl.emoji} ${bot.template}</span>
+        </div>
+
+        <div class="bot-status">
+          <span class="status-dot ${isActive ? 'active' : 'inactive'}"></span>
+          <span style="color:${isActive ? 'var(--green)' : 'var(--text-muted)'}">
+            ${isActive ? 'Actif' : 'Désactivé'}
+          </span>
+        </div>
+
+        <div class="bot-stats-mini">
+          <div class="bot-stat-mini">
+            <span class="bot-stat-mini-label">Messages</span>
+            <span class="bot-stat-mini-value">${formatNumber(bot.stats?.totalMessages || 0)}</span>
+          </div>
+          <div class="bot-stat-mini">
+            <span class="bot-stat-mini-label">Dernière activité</span>
+            <span class="bot-stat-mini-value" style="font-size:0.75rem;">${lastActivity}</span>
+          </div>
+        </div>
+
+        <div class="bot-actions">
+          <a href="/bot-detail.html?id=${bot._id}" class="btn btn-secondary btn-sm">⚙️ Gérer</a>
+          ${bot.telegramUsername
+            ? `<a href="https://t.me/${bot.telegramUsername}" target="_blank" class="btn btn-ghost btn-sm">Voir sur Telegram ↗</a>`
+            : ''}
+        </div>
+      </div>`;
+  }
+</script>
+</body>
+</html>

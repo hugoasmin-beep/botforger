@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mes Bots — BotForge</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<div id="sidebar-container"></div>
+
+<div class="app-layout">
+  <div class="main-content">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Mes Bots</h1>
+        <p class="page-subtitle" id="bot-count-label">Chargement...</p>
+      </div>
+      <a href="/create-bot.html" class="btn btn-primary">
+        ➕ Nouveau bot
+      </a>
+    </div>
+
+    <div id="bots-container">
+      <div style="text-align:center;padding:4rem;color:var(--text-muted);">
+        <div class="loader-spinner" style="margin:0 auto 1rem;"></div>
+        Chargement de vos bots...
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">⚠️ Supprimer ce bot ?</h3>
+      <button class="modal-close" onclick="closeDeleteModal()">✕</button>
+    </div>
+    <p style="color:var(--text-secondary);margin-bottom:1.5rem;">
+      Cette action est irréversible. Le bot sera supprimé et son webhook Telegram sera désactivé.
+    </p>
+    <div style="display:flex;gap:1rem;justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="closeDeleteModal()">Annuler</button>
+      <button class="btn btn-danger" id="confirm-delete-btn">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+  let botToDelete = null;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (!initLayout()) return;
+    await loadBots();
+  });
+
+  async function loadBots() {
+    const data = await api('/bots');
+
+    if (!data || !data.success) {
+      document.getElementById('bots-container').innerHTML =
+        '<div class="alert alert-error">Erreur lors du chargement</div>';
+      return;
+    }
+
+    const bots = data.bots;
+    const user = Auth.getUser();
+    const limit = user?.botsLimit || 3;
+
+    document.getElementById('bot-count-label').textContent =
+      `${bots.length} / ${limit} bots`;
+
+    if (bots.length === 0) {
+      document.getElementById('bots-container').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🤖</div>
+          <div class="empty-title">Aucun bot encore</div>
+          <div class="empty-desc">Créez votre premier bot en moins de 5 minutes, sans coder.</div>
+          <a href="/create-bot.html" class="btn btn-primary">➕ Créer mon premier bot</a>
+        </div>`;
+      return;
+    }
+
+    document.getElementById('bots-container').innerHTML = `
+      <div class="bots-grid">
+        ${bots.map(bot => renderBotCard(bot)).join('')}
+      </div>`;
+  }
+
+  function renderBotCard(bot) {
+    const tpl = TEMPLATES[bot.template] || { emoji: '🤖', name: bot.template };
+    const isActive = bot.isActive;
+    const lastActivity = bot.stats?.lastActivity
+      ? formatDate(bot.stats.lastActivity)
+      : 'Jamais';
+
+    return `
+      <div class="bot-card" id="bot-${bot._id}">
+        <div class="bot-card-header">
+          <div>
+            <div class="bot-name">${bot.name}</div>
+            <div class="bot-username mono" style="font-size:0.78rem;color:var(--text-muted);">
+              ${bot.telegramUsername ? '@' + bot.telegramUsername : '—'}
+            </div>
+          </div>
+          <span class="bot-template-badge">${tpl.emoji} ${bot.template}</span>
+        </div>
+
+        <div class="bot-status">
+          <span class="status-dot ${isActive ? 'active' : 'inactive'}"></span>
+          <span style="color:${isActive ? 'var(--green)' : 'var(--text-muted)'};">
+            ${isActive ? 'Actif' : 'Désactivé'}
+          </span>
+          <span style="color:var(--text-muted);font-size:0.78rem;margin-left:auto;">
+            Créé le ${formatDate(bot.createdAt)}
+          </span>
+        </div>
+
+        <div class="bot-stats-mini">
+          <div class="bot-stat-mini">
+            <span class="bot-stat-mini-label">Messages</span>
+            <span class="bot-stat-mini-value">${formatNumber(bot.stats?.totalMessages || 0)}</span>
+          </div>
+          <div class="bot-stat-mini">
+            <span class="bot-stat-mini-label">Dernière activité</span>
+            <span class="bot-stat-mini-value" style="font-size:0.72rem;">${lastActivity}</span>
+          </div>
+        </div>
+
+        <div class="bot-actions">
+          <a href="/bot-detail.html?id=${bot._id}" class="btn btn-secondary btn-sm">⚙️ Gérer</a>
+          <button class="btn btn-ghost btn-sm" onclick="toggleBot('${bot._id}', ${isActive})" id="toggle-${bot._id}">
+            ${isActive ? '⏸ Désactiver' : '▶️ Activer'}
+          </button>
+          ${bot.telegramUsername
+            ? `<a href="https://t.me/${bot.telegramUsername}" target="_blank" class="btn btn-ghost btn-sm">↗ Telegram</a>`
+            : ''}
+          <button class="btn btn-danger btn-sm" onclick="openDeleteModal('${bot._id}', '${bot.name.replace(/'/g, "\\'")}')">
+            🗑️
+          </button>
+        </div>
+      </div>`;
+  }
+
+  async function toggleBot(botId, currentlyActive) {
+    const btn = document.getElementById(`toggle-${botId}`);
+    btn.disabled = true;
+
+    const data = await api(`/bots/${botId}/toggle`, { method: 'PUT' });
+
+    if (data?.success) {
+      Toast.success(data.message);
+      await loadBots(); // Recharger
+    } else {
+      Toast.error(data?.error || 'Erreur');
+      btn.disabled = false;
+    }
+  }
+
+  function openDeleteModal(botId, botName) {
+    botToDelete = botId;
+    document.querySelector('#delete-modal .modal-title').textContent = `⚠️ Supprimer "${botName}" ?`;
+    document.getElementById('delete-modal').classList.add('active');
+  }
+
+  function closeDeleteModal() {
+    botToDelete = null;
+    document.getElementById('delete-modal').classList.remove('active');
+  }
+
+  document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+    if (!botToDelete) return;
+
+    const btn = document.getElementById('confirm-delete-btn');
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+
+    const data = await api(`/bots/${botToDelete}`, { method: 'DELETE' });
+
+    btn.classList.remove('btn-loading');
+    btn.disabled = false;
+
+    if (data?.success) {
+      closeDeleteModal();
+      Toast.success('Bot supprimé');
+      await loadBots();
+    } else {
+      Toast.error(data?.error || 'Erreur lors de la suppression');
+    }
+  });
+</script>
+</body>
+</html>

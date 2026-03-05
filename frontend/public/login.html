@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion — BotForge</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="auth-page">
+
+<div class="auth-card">
+  <a href="/" class="auth-logo">
+    <span class="logo-icon" style="width:32px;height:32px;background:linear-gradient(135deg,#00d4ff,#0090cc);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 0 20px rgba(0,212,255,0.4);">🤖</span>
+    BotForge
+  </a>
+
+  <h1 class="auth-title">Bon retour !</h1>
+  <p class="auth-subtitle">Connectez-vous pour gérer vos bots</p>
+
+  <div id="alert-container"></div>
+
+  <form id="login-form">
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input
+        type="email"
+        class="form-control"
+        id="email"
+        placeholder="vous@exemple.com"
+        autocomplete="email"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Mot de passe</label>
+      <input
+        type="password"
+        class="form-control"
+        id="password"
+        placeholder="Votre mot de passe"
+        autocomplete="current-password"
+        required
+      />
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.5rem;" id="submit-btn">
+      Se connecter
+    </button>
+  </form>
+
+  <p class="auth-switch">
+    Pas encore de compte ? <a href="/register.html">S'inscrire gratuitement</a>
+  </p>
+</div>
+
+<script>
+  const API = '/api';
+
+  // Si déjà connecté
+  const token = localStorage.getItem('bf_token');
+  if (token) window.location.href = '/dashboard.html';
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('submit-btn');
+    const alertContainer = document.getElementById('alert-container');
+
+    alertContainer.innerHTML = '';
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem('bf_token', data.token);
+        localStorage.setItem('bf_user', JSON.stringify(data.user));
+        window.location.href = '/dashboard.html';
+      } else {
+        alertContainer.innerHTML = `<div class="alert alert-error">⚠️ ${data.error}</div>`;
+      }
+    } catch (err) {
+      alertContainer.innerHTML = '<div class="alert alert-error">⚠️ Erreur de connexion au serveur</div>';
+    } finally {
+      btn.classList.remove('btn-loading');
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

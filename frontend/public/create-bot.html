@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Créer un bot — BotForge</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<div id="sidebar-container"></div>
+
+<div class="app-layout">
+  <div class="main-content" style="max-width:800px;">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Créer un nouveau bot</h1>
+        <p class="page-subtitle">Configurez votre bot en quelques étapes</p>
+      </div>
+      <a href="/bots.html" class="btn btn-secondary btn-sm">← Mes bots</a>
+    </div>
+
+    <div id="alert-global"></div>
+
+    <!-- Step 1: Token + Nom -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <h3 style="margin-bottom:0.3rem;font-size:1rem;">
+        <span style="font-family:var(--font-mono);color:var(--cyan);">01</span> — Informations de base
+      </h3>
+      <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1.5rem;">
+        Entrez votre token Telegram et un nom pour identifier ce bot dans votre dashboard.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">Token API Telegram <span class="required">*</span></label>
+        <input type="text" class="form-control mono" id="bot-token"
+          placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"
+          autocomplete="off" />
+        <div class="form-hint">
+          Obtenez votre token en écrivant à <strong>@BotFather</strong> sur Telegram avec la commande /newbot
+        </div>
+        <div id="token-status"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nom du bot dans le dashboard <span class="required">*</span></label>
+        <input type="text" class="form-control" id="bot-name"
+          placeholder="Ex: Mon bot de bienvenue, Bot Stats Serveur"
+          maxlength="50" />
+        <div class="form-hint">Pour vous aider à identifier ce bot (pas le username Telegram)</div>
+      </div>
+
+      <button class="btn btn-secondary" id="validate-token-btn">
+        🔍 Vérifier le token
+      </button>
+    </div>
+
+    <!-- Step 2: Template -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <h3 style="margin-bottom:0.3rem;font-size:1rem;">
+        <span style="font-family:var(--font-mono);color:var(--cyan);">02</span> — Choisir un template
+      </h3>
+      <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1.5rem;">
+        Sélectionnez le type de bot que vous souhaitez créer.
+      </p>
+
+      <div class="template-selector">
+        <div class="template-option" data-template="echo">
+          <div class="template-option-emoji">🔁</div>
+          <div class="template-option-name">Bot Echo</div>
+          <p class="template-option-desc">Répond en écho à chaque message reçu</p>
+        </div>
+        <div class="template-option" data-template="welcome">
+          <div class="template-option-emoji">👋</div>
+          <div class="template-option-name">Bienvenue</div>
+          <p class="template-option-desc">Accueille les nouveaux membres de groupe</p>
+        </div>
+        <div class="template-option" data-template="poll">
+          <div class="template-option-emoji">🗳️</div>
+          <div class="template-option-name">Sondages</div>
+          <p class="template-option-desc">Crée des sondages avec /poll</p>
+        </div>
+        <div class="template-option" data-template="reminder">
+          <div class="template-option-emoji">⏰</div>
+          <div class="template-option-name">Rappels</div>
+          <p class="template-option-desc">Programme des rappels avec /remind</p>
+        </div>
+        <div class="template-option" data-template="translate">
+          <div class="template-option-emoji">🌍</div>
+          <div class="template-option-name">Traducteur</div>
+          <p class="template-option-desc">Traduit du texte dans 14 langues</p>
+        </div>
+        <div class="template-option" data-template="stats">
+          <div class="template-option-emoji">📊</div>
+          <div class="template-option-name">Stats Groupe</div>
+          <p class="template-option-desc">Classement des membres par messages</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Config du template (dynamique) -->
+    <div class="card" style="margin-bottom:1.5rem;" id="config-section">
+      <h3 style="margin-bottom:0.3rem;font-size:1rem;">
+        <span style="font-family:var(--font-mono);color:var(--cyan);">03</span> — Personnalisation
+      </h3>
+      <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
+        Choisissez d'abord un template pour voir les options de personnalisation.
+      </p>
+      <div id="template-config-fields">
+        <div style="text-align:center;padding:2rem;color:var(--text-muted);">
+          ← Sélectionnez un template ci-dessus
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div style="display:flex;justify-content:flex-end;gap:1rem;">
+      <a href="/bots.html" class="btn btn-secondary">Annuler</a>
+      <button class="btn btn-primary btn-lg" id="create-btn" disabled>
+        🚀 Créer le bot
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!initLayout()) return;
+  });
+
+  let selectedTemplate = null;
+  let tokenValidated = false;
+
+  // Variables disponibles pour les templates de message
+  const VARIABLES_DOC = `
+    <div class="variables-help">
+      <div class="variables-help-title">Variables disponibles (cliquez pour insérer) :</div>
+      <div class="variables-list">
+        <span class="variable-tag" onclick="insertVariable(this, '{first_name}')">{first_name}</span>
+        <span class="variable-tag" onclick="insertVariable(this, '{last_name}')">{last_name}</span>
+        <span class="variable-tag" onclick="insertVariable(this, '{username}')">{username}</span>
+        <span class="variable-tag" onclick="insertVariable(this, '{chat_title}')">{chat_title}</span>
+        <span class="variable-tag" onclick="insertVariable(this, '{full_name}')">{full_name}</span>
+      </div>
+    </div>`;
+
+  let lastFocused = null;
+  function insertVariable(span, variable) {
+    if (lastFocused) {
+      const pos = lastFocused.selectionStart;
+      const val = lastFocused.value;
+      lastFocused.value = val.slice(0, pos) + variable + val.slice(pos);
+      lastFocused.focus();
+      lastFocused.setSelectionRange(pos + variable.length, pos + variable.length);
+    }
+  }
+
+  // Vérification du token
+  document.getElementById('validate-token-btn').addEventListener('click', async () => {
+    const token = document.getElementById('bot-token').value.trim();
+    const btn = document.getElementById('validate-token-btn');
+    const statusEl = document.getElementById('token-status');
+
+    if (!token) {
+      statusEl.innerHTML = '<div class="form-error">Entrez votre token d\'abord</div>';
+      return;
+    }
+
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    statusEl.innerHTML = '';
+
+    // On valide en créant le bot (le serveur va vérifier)
+    // Pour éviter un endpoint dédié, on valide à la création
+    // Mais on peut faire une vérification simple côté client du format
+    const tokenRegex = /^\d+:[A-Za-z0-9_-]{35,}$/;
+    if (!tokenRegex.test(token)) {
+      statusEl.innerHTML = '<div class="form-error">⚠️ Format de token invalide. Format attendu: 123456789:ABCdefGHI...</div>';
+      btn.classList.remove('btn-loading');
+      btn.disabled = false;
+      return;
+    }
+
+    // Simuler une vérification (la vraie vérification se fait à la création)
+    await new Promise(r => setTimeout(r, 500));
+    tokenValidated = true;
+    statusEl.innerHTML = '<div class="alert alert-success" style="margin-top:0.5rem;">✅ Format valide ! Le token sera vérifié lors de la création.</div>';
+
+    btn.textContent = '✅ Vérifié';
+    btn.classList.remove('btn-loading');
+    updateCreateBtn();
+  });
+
+  // Sélection du template
+  document.querySelectorAll('.template-option').forEach(option => {
+    option.addEventListener('click', () => {
+      document.querySelectorAll('.template-option').forEach(o => o.classList.remove('selected'));
+      option.classList.add('selected');
+      selectedTemplate = option.dataset.template;
+      renderConfigFields(selectedTemplate);
+      updateCreateBtn();
+    });
+  });
+
+  function renderConfigFields(templateKey) {
+    const tpl = TEMPLATES[templateKey];
+    if (!tpl) return;
+
+    const container = document.getElementById('template-config-fields');
+
+    let html = `<div class="config-section-title">⚙️ Configuration — ${tpl.emoji} ${tpl.name}</div>`;
+
+    tpl.configFields.forEach(field => {
+      html += `<div class="form-group">`;
+      html += `<label class="form-label">${field.label}</label>`;
+
+      if (field.type === 'textarea') {
+        html += `<textarea class="form-control" id="config-${field.key}" placeholder="${field.placeholder || ''}" rows="2"
+          onfocus="lastFocused=this">${field.default || ''}</textarea>`;
+        if (field.variables) html += VARIABLES_DOC;
+      } else if (field.type === 'toggle') {
+        html += `
+          <div class="toggle-wrap">
+            <div class="toggle" id="config-${field.key}" onclick="toggleField(this)"></div>
+            <label class="toggle-label" onclick="toggleField(document.getElementById('config-${field.key}'))">${field.label}</label>
+          </div>`;
+      } else if (field.type === 'select') {
+        html += `<select class="form-control" id="config-${field.key}">`;
+        field.options.forEach(opt => {
+          html += `<option value="${opt.value}">${opt.label}</option>`;
+        });
+        html += `</select>`;
+      } else {
+        html += `<input type="text" class="form-control" id="config-${field.key}" placeholder="${field.placeholder || ''}" value="${field.default || ''}" onfocus="lastFocused=this" />`;
+      }
+
+      if (field.hint) html += `<div class="form-hint">${field.hint}</div>`;
+      html += `</div>`;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function toggleField(el) {
+    el.classList.toggle('active');
+  }
+
+  function updateCreateBtn() {
+    const hasToken = document.getElementById('bot-token').value.trim().length > 0;
+    const hasName = document.getElementById('bot-name').value.trim().length > 0;
+    const hasTemplate = !!selectedTemplate;
+    document.getElementById('create-btn').disabled = !(hasToken && hasName && hasTemplate);
+  }
+
+  document.getElementById('bot-token').addEventListener('input', updateCreateBtn);
+  document.getElementById('bot-name').addEventListener('input', updateCreateBtn);
+
+  // Récupération de la config depuis les champs
+  function getConfig() {
+    const tpl = TEMPLATES[selectedTemplate];
+    if (!tpl) return {};
+
+    const config = {};
+    tpl.configFields.forEach(field => {
+      const el = document.getElementById(`config-${field.key}`);
+      if (!el) return;
+
+      if (field.type === 'toggle') {
+        config[field.key] = el.classList.contains('active');
+      } else {
+        config[field.key] = el.value;
+      }
+    });
+
+    return config;
+  }
+
+  // Création du bot
+  document.getElementById('create-btn').addEventListener('click', async () => {
+    const token = document.getElementById('bot-token').value.trim();
+    const name = document.getElementById('bot-name').value.trim();
+    const btn = document.getElementById('create-btn');
+    const alertGlobal = document.getElementById('alert-global');
+
+    if (!token || !name || !selectedTemplate) return;
+
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    alertGlobal.innerHTML = '';
+
+    const config = getConfig();
+
+    const data = await api('/bots', {
+      method: 'POST',
+      body: JSON.stringify({ token, name, template: selectedTemplate, config }),
+    });
+
+    btn.classList.remove('btn-loading');
+
+    if (!data) return;
+
+    if (data.success) {
+      Toast.success('Bot créé avec succès ! 🎉');
+      setTimeout(() => {
+        window.location.href = `/bot-detail.html?id=${data.bot._id}`;
+      }, 1000);
+    } else {
+      const errors = data.errors
+        ? data.errors.map(e => e.msg).join('<br>')
+        : data.error;
+      alertGlobal.innerHTML = `<div class="alert alert-error">⚠️ ${errors}</div>`;
+      btn.disabled = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+</script>
+</body>
+</html>
