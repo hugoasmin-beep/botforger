@@ -2,9 +2,51 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 const getByPath = (obj, path) => {
-  if (!path || path === '.') return JSON.stringify(obj, null, 2);
+  if (!path || path === '.') return obj;
   try { return path.split('.').reduce((acc, key) => acc?.[key], obj); }
   catch (_) { return undefined; }
+};
+
+/**
+ * Formate intelligemment une valeur extraite d'une API JSON
+ * → Si c'est une string/number : retourne tel quel
+ * → Si c'est un tableau de strings/objects simples : liste formatée
+ * → Sinon : JSON lisible tronqué
+ */
+const formatApiResult = (value) => {
+  if (value === undefined || value === null) return '(vide)';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+
+  if (Array.isArray(value)) {
+    // Tableau de strings → liste à puces
+    if (value.every(v => typeof v === 'string' || typeof v === 'number')) {
+      return value.map(v => `• ${v}`).join('\n');
+    }
+    // Tableau d'objets → extraire les valeurs textuelles connues
+    const textKeys = ['name','title','text','content','description','value','label','message','fact','joke','quote'];
+    const extracted = value.map(item => {
+      if (typeof item !== 'object') return String(item);
+      for (const k of textKeys) { if (typeof item[k] === 'string') return item[k]; }
+      // Prendre le premier champ string
+      const firstStr = Object.values(item).find(v => typeof v === 'string' || typeof v === 'number');
+      return firstStr !== undefined ? String(firstStr) : JSON.stringify(item);
+    });
+    return extracted.slice(0, 5).join('\n\n');
+  }
+
+  if (typeof value === 'object') {
+    // Objet : chercher champs texte connus
+    const textKeys = ['name','title','text','content','description','message','fact','joke','quote','result','answer','data'];
+    for (const k of textKeys) {
+      if (typeof value[k] === 'string') return value[k];
+      if (Array.isArray(value[k])) return formatApiResult(value[k]);
+    }
+    // Fallback : JSON lisible
+    return JSON.stringify(value, null, 2).substring(0, 1500);
+  }
+
+  return String(value);
 };
 
 const interpolate = (template, vars) =>
@@ -143,8 +185,9 @@ const createApiBot = (botDoc) => {
         const ct = response.headers.get('content-type') || '';
         if (ct.includes('json')) {
           const json      = await response.json();
-          const extracted = getByPath(json, config.api_response_path || '');
-          result = extracted !== undefined ? String(extracted) : JSON.stringify(json, null, 2).substring(0, 3000);
+          const path      = config.api_response_path?.trim() || '';
+          const extracted = path ? getByPath(json, path) : json;
+          result = formatApiResult(extracted !== undefined ? extracted : json).substring(0, 3000);
         } else {
           result = (await response.text()).substring(0, 3000);
         }
