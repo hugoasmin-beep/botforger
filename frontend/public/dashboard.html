@@ -5,29 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — BotForge</title>
   <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .activity-table { width: 100%; border-collapse: collapse; }
+    .activity-table th { text-align: left; font-size: 0.68rem; font-weight: 800; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; padding: 0 0.75rem 0.6rem; border-bottom: 1px solid var(--border); }
+    .activity-table td { padding: 0.72rem 0.75rem; font-size: 0.83rem; color: var(--text-2); border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    .activity-table tr:last-child td { border-bottom: none; }
+    .activity-table tr:hover td { background: rgba(255,255,255,0.015); }
+    .activity-table td:first-child { color: var(--text); font-weight: 700; }
+    .quick-actions { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.8rem; margin-bottom: 2rem; }
+    .quick-action { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem 1.1rem; text-decoration: none; color: var(--text); display: flex; align-items: center; gap: 0.75rem; transition: all var(--t); }
+    .quick-action:hover { border-color: rgba(124,102,255,0.3); transform: translateY(-1px); background: var(--card-hover); }
+    .quick-action-icon { width: 36px; height: 36px; border-radius: 9px; background: var(--accent-dim); border: 1px solid rgba(124,102,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .quick-action-title { font-size: 0.85rem; font-weight: 700; }
+    .quick-action-desc  { font-size: 0.73rem; color: var(--text-2); margin-top: 0.08rem; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .section-title { font-family: var(--font-display); font-size: 1rem; font-weight: 800; }
+  </style>
 </head>
 <body>
-
 <div id="sidebar-container"></div>
 
 <div class="app-layout">
   <div class="main-content">
-
-    <!-- Page header -->
     <div class="page-header">
       <div>
-        <h1 class="page-title">Dashboard</h1>
-        <p class="page-subtitle" id="welcome-msg">Bienvenue !</p>
+        <h1 class="page-title" id="welcome-msg">Dashboard</h1>
+        <p class="page-subtitle">Bienvenue ! Voici l'état de vos bots.</p>
       </div>
-      <a href="/create-bot.html" class="btn btn-primary">
-        ➕ Nouveau bot
-      </a>
+      <a href="/create-bot.html" class="btn btn-primary">✦ Nouveau bot</a>
     </div>
 
-    <!-- Stats cards -->
+    <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card">
-        <span class="stat-icon">🤖</span>
+        <span class="stat-icon">🟢</span>
         <div class="stat-label">Bots actifs</div>
         <div class="stat-value" id="stat-active-bots">—</div>
       </div>
@@ -43,34 +54,39 @@
       </div>
       <div class="stat-card">
         <span class="stat-icon">🤖</span>
-        <div class="stat-label">Bots créés</div>
+        <div class="stat-label">Bots créés / limite</div>
         <div class="stat-value" id="stat-total-bots">—</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-icon">🎯</span>
-        <div class="stat-label">Limite de bots</div>
-        <div class="stat-value" id="stat-bot-limit">3</div>
       </div>
     </div>
 
-    <!-- Bots récents -->
-    <div style="margin-bottom:2rem;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-        <h2 style="font-size:1.1rem;font-weight:700;">Vos bots récents</h2>
-        <a href="/bots.html" class="btn btn-ghost btn-sm">Voir tous →</a>
-      </div>
+    <!-- Quick actions -->
+    <div class="quick-actions">
+      <a href="/create-bot.html" class="quick-action">
+        <span class="quick-action-icon">✦</span>
+        <div><div class="quick-action-title">Nouveau bot</div><div class="quick-action-desc">Démarrer en 2 minutes</div></div>
+      </a>
+      <a href="/bots.html" class="quick-action">
+        <span class="quick-action-icon">🤖</span>
+        <div><div class="quick-action-title">Mes bots</div><div class="quick-action-desc">Gérer et configurer</div></div>
+      </a>
+    </div>
 
-      <div id="bots-container">
-        <div style="text-align:center;padding:3rem;color:var(--text-muted);">
-          <div class="loader-spinner" style="margin:0 auto 1rem;"></div>
-          Chargement...
-        </div>
+    <!-- Bots récents -->
+    <div class="section-header">
+      <span class="section-title">Bots récents</span>
+      <a href="/bots.html" class="btn btn-ghost btn-sm">Voir tous →</a>
+    </div>
+
+    <div class="card" id="bots-container">
+      <div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:2rem;color:var(--text-2);">
+        <div class="loader-spinner"></div> Chargement...
       </div>
     </div>
 
   </div>
 </div>
 
+<div class="toast-container" id="toast-container"></div>
 <script src="/js/app.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
@@ -78,94 +94,63 @@
 
     const user = Auth.getUser();
     if (user) {
-      document.getElementById('welcome-msg').textContent = `Bienvenue, ${user.email.split('@')[0]} !`;
-      document.getElementById('stat-bot-limit').textContent = user.botsLimit || 3;
+      document.getElementById('welcome-msg').textContent = `Bonjour, ${user.email.split('@')[0]} 👋`;
     }
 
-    // Charger les bots
     const data = await api('/bots');
-
-    if (!data || !data.success) {
-      document.getElementById('bots-container').innerHTML =
-        '<div class="alert alert-error">Erreur lors du chargement des bots</div>';
+    if (!data?.success) {
+      document.getElementById('bots-container').innerHTML = '<div class="alert alert-error">Erreur lors du chargement des bots</div>';
       return;
     }
 
     const bots = data.bots;
+    const limit = user?.botsLimit || 3;
 
-    // Stats
-    document.getElementById('stat-total-bots').textContent = bots.length;
+    document.getElementById('stat-total-bots').textContent = `${bots.length} / ${limit}`;
     document.getElementById('stat-active-bots').textContent = bots.filter(b => b.isActive).length;
-    document.getElementById('stat-total-messages').textContent =
-      formatNumber(bots.reduce((acc, b) => acc + (b.stats?.totalMessages || 0), 0));
-    const totalUsers = bots.reduce((acc, b) => acc + (b.stats?.activeUsers || 0), 0);
-    const statUsersEl = document.getElementById('stat-total-users');
-    if (statUsersEl) statUsersEl.textContent = formatNumber(totalUsers);
+    document.getElementById('stat-total-messages').textContent = formatNumber(bots.reduce((a,b) => a + (b.stats?.totalMessages||0), 0));
+    document.getElementById('stat-total-users').textContent = formatNumber(bots.reduce((a,b) => a + (b.stats?.activeUsers||0), 0));
 
-    // Affichage bots
-    if (bots.length === 0) {
+    if (!bots.length) {
       document.getElementById('bots-container').innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">🤖</div>
           <div class="empty-title">Aucun bot encore</div>
-          <div class="empty-desc">Créez votre premier bot Telegram en quelques minutes</div>
-          <a href="/create-bot.html" class="btn btn-primary">➕ Créer mon premier bot</a>
+          <div class="empty-desc">Créez votre premier bot Telegram en quelques minutes.</div>
+          <a href="/create-bot.html" class="btn btn-primary">✦ Créer mon premier bot</a>
         </div>`;
       return;
     }
 
-    const recentBots = bots.slice(0, 3);
-    const template = TEMPLATES;
-
+    const recentBots = bots.slice(0, 5);
     document.getElementById('bots-container').innerHTML = `
-      <div class="bots-grid">
-        ${recentBots.map(bot => renderBotCard(bot)).join('')}
-      </div>`;
+      <table class="activity-table">
+        <thead><tr>
+          <th>Nom</th><th>Template</th><th>Statut</th><th>Messages</th><th>Dernière activité</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${recentBots.map(bot => {
+            const tpl = TEMPLATES[bot.template] || { emoji: '🤖', name: bot.template };
+            return `<tr>
+              <td>
+                <div style="font-family:var(--font-display);font-weight:700;font-size:0.88rem;">${bot.name}</div>
+                ${bot.telegramUsername ? `<div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-3);">@${bot.telegramUsername}</div>` : ''}
+              </td>
+              <td><span class="bot-template-badge">${tpl.emoji} ${tpl.name}</span></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:0.4rem;">
+                  <span class="status-dot ${bot.isActive ? 'active' : 'inactive'}"></span>
+                  <span style="color:${bot.isActive ? 'var(--green)' : 'var(--text-3)'};">${bot.isActive ? 'Actif' : 'Off'}</span>
+                </div>
+              </td>
+              <td style="font-family:var(--font-display);font-weight:700;">${formatNumber(bot.stats?.totalMessages||0)}</td>
+              <td>${bot.stats?.lastActivity ? formatDate(bot.stats.lastActivity) : '—'}</td>
+              <td><a href="/bot-detail.html?id=${bot._id}" class="btn btn-secondary btn-sm">Gérer →</a></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
   });
-
-  function renderBotCard(bot) {
-    const tpl = TEMPLATES[bot.template] || { emoji: '🤖', name: bot.template };
-    const isActive = bot.isActive;
-    const lastActivity = bot.stats?.lastActivity
-      ? formatDate(bot.stats.lastActivity)
-      : 'Jamais';
-
-    return `
-      <div class="bot-card">
-        <div class="bot-card-header">
-          <div>
-            <div class="bot-name">${bot.name}</div>
-            <div class="bot-username">${bot.telegramUsername ? '@' + bot.telegramUsername : 'Username non chargé'}</div>
-          </div>
-          <span class="bot-template-badge">${tpl.emoji} ${bot.template}</span>
-        </div>
-
-        <div class="bot-status">
-          <span class="status-dot ${isActive ? 'active' : 'inactive'}"></span>
-          <span style="color:${isActive ? 'var(--green)' : 'var(--text-muted)'}">
-            ${isActive ? 'Actif' : 'Désactivé'}
-          </span>
-        </div>
-
-        <div class="bot-stats-mini">
-          <div class="bot-stat-mini">
-            <span class="bot-stat-mini-label">Messages</span>
-            <span class="bot-stat-mini-value">${formatNumber(bot.stats?.totalMessages || 0)}</span>
-          </div>
-          <div class="bot-stat-mini">
-            <span class="bot-stat-mini-label">Dernière activité</span>
-            <span class="bot-stat-mini-value" style="font-size:0.75rem;">${lastActivity}</span>
-          </div>
-        </div>
-
-        <div class="bot-actions">
-          <a href="/bot-detail.html?id=${bot._id}" class="btn btn-secondary btn-sm">⚙️ Gérer</a>
-          ${bot.telegramUsername
-            ? `<a href="https://t.me/${bot.telegramUsername}" target="_blank" class="btn btn-ghost btn-sm">Voir sur Telegram ↗</a>`
-            : ''}
-        </div>
-      </div>`;
-  }
 </script>
 </body>
 </html>

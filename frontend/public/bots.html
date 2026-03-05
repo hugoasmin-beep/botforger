@@ -5,194 +5,230 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mes Bots — BotForge</title>
   <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .bots-toolbar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .search-input { flex: 1; min-width: 200px; }
+    .filter-select { width: 150px; }
+    .view-toggle { display: flex; gap: 0.2rem; }
+    .view-btn { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 0.38rem 0.6rem; cursor: pointer; color: var(--text-2); font-size: 0.85rem; transition: all var(--t); }
+    .view-btn.active { background: var(--accent-dim); border-color: rgba(124,102,255,0.3); color: var(--accent); }
+    .bots-table { width: 100%; border-collapse: collapse; }
+    .bots-table th { text-align: left; font-size: 0.66rem; font-weight: 800; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; padding: 0 0.9rem 0.65rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .bots-table td { padding: 0.82rem 0.9rem; font-size: 0.84rem; color: var(--text-2); border-bottom: 1px solid rgba(255,255,255,0.035); vertical-align: middle; }
+    .bots-table tr:last-child td { border-bottom: none; }
+    .bots-table tr:hover td { background: rgba(255,255,255,0.015); }
+    .bot-row-name { color: var(--text); font-family: var(--font-display); font-weight: 700; }
+    .actions-cell { display: flex; gap: 0.35rem; justify-content: flex-end; }
+  </style>
 </head>
 <body>
-
 <div id="sidebar-container"></div>
 
 <div class="app-layout">
   <div class="main-content">
-
     <div class="page-header">
       <div>
         <h1 class="page-title">Mes Bots</h1>
-        <p class="page-subtitle" id="bot-count-label">Chargement...</p>
+        <p class="page-subtitle" id="bot-count-label">Chargement…</p>
       </div>
-      <a href="/create-bot.html" class="btn btn-primary">
-        ➕ Nouveau bot
-      </a>
+      <a href="/create-bot.html" class="btn btn-primary">✦ Nouveau bot</a>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="bots-toolbar">
+      <input type="text" class="form-control search-input" id="search-input" placeholder="🔍  Rechercher un bot…" />
+      <select class="form-control filter-select" id="filter-status">
+        <option value="all">Tous les statuts</option>
+        <option value="active">Actifs</option>
+        <option value="inactive">Désactivés</option>
+      </select>
+      <select class="form-control filter-select" id="filter-template">
+        <option value="all">Tous les templates</option>
+      </select>
+      <div class="view-toggle">
+        <button class="view-btn active" id="view-grid" title="Grille">⊞</button>
+        <button class="view-btn" id="view-list" title="Liste">☰</button>
+      </div>
     </div>
 
     <div id="bots-container">
-      <div style="text-align:center;padding:4rem;color:var(--text-muted);">
-        <div class="loader-spinner" style="margin:0 auto 1rem;"></div>
-        Chargement de vos bots...
+      <div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:3rem;color:var(--text-2);">
+        <div class="loader-spinner"></div> Chargement…
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- Modal de confirmation de suppression -->
+<!-- Delete modal -->
 <div class="modal-overlay" id="delete-modal">
   <div class="modal">
     <div class="modal-header">
-      <h3 class="modal-title">⚠️ Supprimer ce bot ?</h3>
+      <span class="modal-title" id="delete-modal-title">⚠️ Supprimer ce bot ?</span>
       <button class="modal-close" onclick="closeDeleteModal()">✕</button>
     </div>
-    <p style="color:var(--text-secondary);margin-bottom:1.5rem;">
+    <p style="color:var(--text-2);margin-bottom:1.5rem;font-size:0.88rem;">
       Cette action est irréversible. Le bot sera supprimé et son webhook Telegram sera désactivé.
     </p>
-    <div style="display:flex;gap:1rem;justify-content:flex-end;">
-      <button class="btn btn-secondary" onclick="closeDeleteModal()">Annuler</button>
-      <button class="btn btn-danger" id="confirm-delete-btn">Supprimer</button>
+    <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeDeleteModal()">Annuler</button>
+      <button class="btn btn-danger" id="confirm-delete-btn">Supprimer définitivement</button>
     </div>
   </div>
 </div>
 
+<div class="toast-container" id="toast-container"></div>
 <script src="/js/app.js"></script>
 <script>
+  let allBots = [];
+  let viewMode = 'grid';
   let botToDelete = null;
 
   document.addEventListener('DOMContentLoaded', async () => {
     if (!initLayout()) return;
     await loadBots();
+    document.getElementById('search-input').addEventListener('input', renderFiltered);
+    document.getElementById('filter-status').addEventListener('change', renderFiltered);
+    document.getElementById('filter-template').addEventListener('change', renderFiltered);
+    document.getElementById('view-grid').addEventListener('click', () => setView('grid'));
+    document.getElementById('view-list').addEventListener('click', () => setView('list'));
+    document.getElementById('confirm-delete-btn').addEventListener('click', doDelete);
   });
+
+  function setView(v) {
+    viewMode = v;
+    document.getElementById('view-grid').classList.toggle('active', v === 'grid');
+    document.getElementById('view-list').classList.toggle('active', v === 'list');
+    renderFiltered();
+  }
 
   async function loadBots() {
     const data = await api('/bots');
-
-    if (!data || !data.success) {
-      document.getElementById('bots-container').innerHTML =
-        '<div class="alert alert-error">Erreur lors du chargement</div>';
+    if (!data?.success) {
+      document.getElementById('bots-container').innerHTML = '<div class="alert alert-error">Erreur lors du chargement</div>';
       return;
     }
-
-    const bots = data.bots;
+    allBots = data.bots;
     const user = Auth.getUser();
     const limit = user?.botsLimit || 3;
+    document.getElementById('bot-count-label').textContent = `${allBots.length} / ${limit} bots`;
 
-    document.getElementById('bot-count-label').textContent =
-      `${bots.length} / ${limit} bots`;
+    // Fill template filter
+    const templates = [...new Set(allBots.map(b => b.template))];
+    const sel = document.getElementById('filter-template');
+    templates.forEach(t => {
+      const tpl = TEMPLATES[t] || { emoji: '🤖', name: t };
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = `${tpl.emoji} ${tpl.name}`;
+      sel.appendChild(opt);
+    });
 
-    if (bots.length === 0) {
-      document.getElementById('bots-container').innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">🤖</div>
-          <div class="empty-title">Aucun bot encore</div>
-          <div class="empty-desc">Créez votre premier bot en moins de 5 minutes, sans coder.</div>
-          <a href="/create-bot.html" class="btn btn-primary">➕ Créer mon premier bot</a>
-        </div>`;
+    renderFiltered();
+  }
+
+  function renderFiltered() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const st = document.getElementById('filter-status').value;
+    const tpl = document.getElementById('filter-template').value;
+
+    let bots = allBots.filter(b => {
+      if (q && !b.name.toLowerCase().includes(q) && !(b.telegramUsername||'').toLowerCase().includes(q)) return false;
+      if (st === 'active' && !b.isActive) return false;
+      if (st === 'inactive' && b.isActive) return false;
+      if (tpl !== 'all' && b.template !== tpl) return false;
+      return true;
+    });
+
+    const container = document.getElementById('bots-container');
+    if (!bots.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Aucun bot trouvé</div><div class="empty-desc">Essayez d'ajuster vos filtres.</div></div>`;
       return;
     }
 
-    document.getElementById('bots-container').innerHTML = `
-      <div class="bots-grid">
-        ${bots.map(bot => renderBotCard(bot)).join('')}
-      </div>`;
+    if (viewMode === 'grid') {
+      container.innerHTML = `<div class="bots-grid">${bots.map(renderBotCard).join('')}</div>`;
+    } else {
+      container.innerHTML = `
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table class="bots-table">
+            <thead><tr>
+              <th>Nom</th><th>Template</th><th>Statut</th><th>Messages</th><th>Activité</th><th>Actions</th>
+            </tr></thead>
+            <tbody>${bots.map(renderBotRow).join('')}</tbody>
+          </table>
+        </div>`;
+    }
   }
 
   function renderBotCard(bot) {
     const tpl = TEMPLATES[bot.template] || { emoji: '🤖', name: bot.template };
-    const isActive = bot.isActive;
-    const lastActivity = bot.stats?.lastActivity
-      ? formatDate(bot.stats.lastActivity)
-      : 'Jamais';
-
     return `
       <div class="bot-card" id="bot-${bot._id}">
         <div class="bot-card-header">
           <div>
             <div class="bot-name">${bot.name}</div>
-            <div class="bot-username mono" style="font-size:0.78rem;color:var(--text-muted);">
-              ${bot.telegramUsername ? '@' + bot.telegramUsername : '—'}
-            </div>
+            <div class="bot-username">${bot.telegramUsername ? '@'+bot.telegramUsername : '—'}</div>
           </div>
-          <span class="bot-template-badge">${tpl.emoji} ${bot.template}</span>
+          <span class="bot-template-badge">${tpl.emoji} ${tpl.name}</span>
         </div>
-
         <div class="bot-status">
-          <span class="status-dot ${isActive ? 'active' : 'inactive'}"></span>
-          <span style="color:${isActive ? 'var(--green)' : 'var(--text-muted)'};">
-            ${isActive ? 'Actif' : 'Désactivé'}
-          </span>
-          <span style="color:var(--text-muted);font-size:0.78rem;margin-left:auto;">
-            Créé le ${formatDate(bot.createdAt)}
-          </span>
+          <span class="status-dot ${bot.isActive ? 'active' : 'inactive'}"></span>
+          <span style="color:${bot.isActive?'var(--green)':'var(--text-3)'};">${bot.isActive ? 'Actif' : 'Désactivé'}</span>
+          <span style="margin-left:auto;font-size:0.7rem;color:var(--text-3);">${formatDate(bot.createdAt)}</span>
         </div>
-
         <div class="bot-stats-mini">
-          <div class="bot-stat-mini">
-            <span class="bot-stat-mini-label">Messages</span>
-            <span class="bot-stat-mini-value">${formatNumber(bot.stats?.totalMessages || 0)}</span>
-          </div>
-          <div class="bot-stat-mini">
-            <span class="bot-stat-mini-label">Dernière activité</span>
-            <span class="bot-stat-mini-value" style="font-size:0.72rem;">${lastActivity}</span>
-          </div>
+          <div class="bot-stat-mini"><span class="bot-stat-mini-label">Messages</span><span class="bot-stat-mini-value">${formatNumber(bot.stats?.totalMessages||0)}</span></div>
+          <div class="bot-stat-mini"><span class="bot-stat-mini-label">Utilisateurs</span><span class="bot-stat-mini-value">${formatNumber(bot.stats?.activeUsers||0)}</span></div>
         </div>
-
         <div class="bot-actions">
-          <a href="/bot-detail.html?id=${bot._id}" class="btn btn-secondary btn-sm">⚙️ Gérer</a>
-          <button class="btn btn-ghost btn-sm" onclick="toggleBot('${bot._id}', ${isActive})" id="toggle-${bot._id}">
-            ${isActive ? '⏸ Désactiver' : '▶️ Activer'}
-          </button>
-          ${bot.telegramUsername
-            ? `<a href="https://t.me/${bot.telegramUsername}" target="_blank" class="btn btn-ghost btn-sm">↗ Telegram</a>`
-            : ''}
-          <button class="btn btn-danger btn-sm" onclick="openDeleteModal('${bot._id}', '${bot.name.replace(/'/g, "\\'")}')">
-            🗑️
-          </button>
+          <a href="/bot-detail.html?id=${bot._id}" class="btn btn-secondary btn-sm">⚙ Gérer</a>
+          <button class="btn btn-ghost btn-sm" onclick="toggleBot('${bot._id}',${bot.isActive})">${bot.isActive ? '⏸ Off' : '▶ On'}</button>
+          ${bot.telegramUsername ? `<a href="https://t.me/${bot.telegramUsername}" target="_blank" class="btn btn-ghost btn-sm">↗</a>` : ''}
+          <button class="btn btn-danger btn-sm" onclick="openDeleteModal('${bot._id}','${bot.name.replace(/'/g,"\\'")}')">🗑</button>
         </div>
       </div>`;
   }
 
+  function renderBotRow(bot) {
+    const tpl = TEMPLATES[bot.template] || { emoji: '🤖', name: bot.template };
+    return `<tr id="bot-${bot._id}">
+      <td>
+        <div class="bot-row-name">${bot.name}</div>
+        ${bot.telegramUsername ? `<div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-3);">@${bot.telegramUsername}</div>` : ''}
+      </td>
+      <td><span class="bot-template-badge">${tpl.emoji} ${tpl.name}</span></td>
+      <td><div style="display:flex;align-items:center;gap:0.4rem;"><span class="status-dot ${bot.isActive?'active':'inactive'}"></span><span style="color:${bot.isActive?'var(--green)':'var(--text-3)'};">${bot.isActive?'Actif':'Off'}</span></div></td>
+      <td style="font-family:var(--font-display);font-weight:700;">${formatNumber(bot.stats?.totalMessages||0)}</td>
+      <td>${bot.stats?.lastActivity ? formatDate(bot.stats.lastActivity) : '—'}</td>
+      <td><div class="actions-cell">
+        <a href="/bot-detail.html?id=${bot._id}" class="btn btn-secondary btn-sm">Gérer</a>
+        <button class="btn btn-ghost btn-sm" onclick="toggleBot('${bot._id}',${bot.isActive})">${bot.isActive ? '⏸' : '▶'}</button>
+        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('${bot._id}','${bot.name.replace(/'/g,"\\'")}')">🗑</button>
+      </div></td>
+    </tr>`;
+  }
+
   async function toggleBot(botId, currentlyActive) {
-    const btn = document.getElementById(`toggle-${botId}`);
-    btn.disabled = true;
-
     const data = await api(`/bots/${botId}/toggle`, { method: 'PUT' });
-
-    if (data?.success) {
-      Toast.success(data.message);
-      await loadBots(); // Recharger
-    } else {
-      Toast.error(data?.error || 'Erreur');
-      btn.disabled = false;
-    }
+    if (data?.success) { Toast.success(data.message); await loadBots(); }
+    else Toast.error(data?.error || 'Erreur');
   }
 
   function openDeleteModal(botId, botName) {
     botToDelete = botId;
-    document.querySelector('#delete-modal .modal-title').textContent = `⚠️ Supprimer "${botName}" ?`;
+    document.getElementById('delete-modal-title').textContent = `⚠️ Supprimer "${botName}" ?`;
     document.getElementById('delete-modal').classList.add('active');
   }
+  function closeDeleteModal() { botToDelete = null; document.getElementById('delete-modal').classList.remove('active'); }
 
-  function closeDeleteModal() {
-    botToDelete = null;
-    document.getElementById('delete-modal').classList.remove('active');
-  }
-
-  document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+  async function doDelete() {
     if (!botToDelete) return;
-
     const btn = document.getElementById('confirm-delete-btn');
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-
+    btn.classList.add('btn-loading'); btn.disabled = true;
     const data = await api(`/bots/${botToDelete}`, { method: 'DELETE' });
-
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-
-    if (data?.success) {
-      closeDeleteModal();
-      Toast.success('Bot supprimé');
-      await loadBots();
-    } else {
-      Toast.error(data?.error || 'Erreur lors de la suppression');
-    }
-  });
+    btn.classList.remove('btn-loading'); btn.disabled = false;
+    if (data?.success) { closeDeleteModal(); Toast.success('Bot supprimé'); await loadBots(); }
+    else Toast.error(data?.error || 'Erreur');
+  }
 </script>
 </body>
 </html>

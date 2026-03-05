@@ -3,60 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gérer le bot — BotForge</title>
+  <title>Bot — BotForge</title>
   <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .detail-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.8rem; margin-bottom: 1.75rem; }
+    @media(max-width:700px){ .detail-stats{ grid-template-columns:repeat(2,1fr); } }
+    .stat-sm { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 0.85rem 1rem; }
+    .stat-sm-label { font-size: 0.67rem; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+    .stat-sm-value { font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; margin-top: 0.15rem; }
+    .diag-table { width:100%; border-collapse:collapse; }
+    .diag-table td { padding: 0.42rem 0; font-size: 0.82rem; border-bottom: 1px solid var(--border); }
+    .diag-table td:first-child { color: var(--text-2); width: 45%; padding-right: 0.75rem; }
+    .diag-table tr:last-child td { border-bottom: none; }
+    .log-stream { display: flex; flex-direction: column; gap: 0.2rem; max-height: 400px; overflow-y: auto; }
+    .log-line { display: grid; grid-template-columns: 140px 70px 1fr; gap: 0.5rem; align-items: start; padding: 0.38rem 0.6rem; border-radius: 5px; font-size: 0.76rem; font-family: var(--font-mono); }
+    .log-line:hover { background: rgba(255,255,255,0.025); }
+    .log-line.error  { background: rgba(231,76,60,0.05); }
+    .log-line.warning{ background: rgba(243,156,18,0.05); }
+    .log-ts  { color: var(--text-3); }
+    .log-lvl { font-weight: 700; }
+    .log-lvl.info    { color: var(--accent); }
+    .log-lvl.error   { color: var(--red); }
+    .log-lvl.warning { color: var(--amber); }
+    .log-msg { color: var(--text-2); white-space: pre-wrap; word-break: break-all; }
+    .cmd-row-card { border: 1px solid var(--border); border-radius: var(--r); padding: 0.9rem 1rem; margin-bottom: 0.7rem; position: relative; background: var(--surface); }
+    .ai-config-card { display: none; margin-top: 1rem; border-color: rgba(124,102,255,0.3); }
+    .danger-zone > div { background: var(--red-dim); border: 1px solid rgba(231,76,60,0.2); border-radius: var(--r); padding: 1.25rem; margin-bottom: 0.75rem; }
+    .danger-zone > div:last-child { margin-bottom: 0; }
+    .danger-zone h4 { margin-bottom: 0.3rem; font-size: 0.93rem; }
+    .danger-zone p { font-size: 0.82rem; color: var(--text-2); margin-bottom: 0.85rem; }
+  </style>
 </head>
 <body>
-
 <div id="sidebar-container"></div>
 
 <div class="app-layout">
-  <div class="main-content" style="max-width:900px;">
+  <div class="main-content">
 
-    <div class="page-header">
+    <!-- Header -->
+    <div class="bot-detail-header">
+      <div class="bot-detail-avatar" id="bot-avatar">🤖</div>
       <div>
-        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.3rem;">
-          <div class="status-dot" id="header-status-dot"></div>
-          <h1 class="page-title" id="page-bot-name">Chargement...</h1>
+        <h1 class="bot-detail-name" id="page-bot-name">Chargement…</h1>
+        <div class="bot-detail-meta">
+          <span class="status-dot" id="header-status-dot"></span>
+          <span id="page-bot-username" style="font-family:var(--font-mono);font-size:0.75rem;"></span>
         </div>
-        <p class="page-subtitle" id="page-bot-username"></p>
       </div>
-      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
-        <button class="btn btn-secondary btn-sm" id="toggle-bot-btn">⏸ Désactiver</button>
-        <a href="/bots.html" class="btn btn-ghost btn-sm">← Mes bots</a>
+      <div class="bot-detail-actions">
+        <button class="btn btn-secondary btn-sm" id="toggle-bot-btn">…</button>
+        <a href="/bots.html" class="btn btn-ghost btn-sm">← Retour</a>
       </div>
     </div>
 
-    <!-- Stat cards -->
-    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem;">
-      <div class="stat-card">
-        <span class="stat-icon">💬</span>
-        <div class="stat-label">Messages</div>
-        <div class="stat-value" id="stat-messages">—</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-icon">👥</span>
-        <div class="stat-label">Utilisateurs</div>
-        <div class="stat-value" id="stat-active-users">—</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-icon">📅</span>
-        <div class="stat-label">Créé le</div>
-        <div class="stat-value" id="stat-created" style="font-size:0.9rem;">—</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-icon">🕐</span>
-        <div class="stat-label">Dernière activité</div>
-        <div class="stat-value" id="stat-last-activity" style="font-size:0.85rem;">—</div>
-      </div>
+    <!-- Stat mini cards -->
+    <div class="detail-stats">
+      <div class="stat-sm"><div class="stat-sm-label">Messages</div><div class="stat-sm-value" id="stat-messages">—</div></div>
+      <div class="stat-sm"><div class="stat-sm-label">Utilisateurs</div><div class="stat-sm-value" id="stat-active-users">—</div></div>
+      <div class="stat-sm"><div class="stat-sm-label">Créé le</div><div class="stat-sm-value" style="font-size:0.78rem;padding-top:0.25rem;" id="stat-created">—</div></div>
+      <div class="stat-sm"><div class="stat-sm-label">Dernière activité</div><div class="stat-sm-value" style="font-size:0.78rem;padding-top:0.25rem;" id="stat-last-activity">—</div></div>
     </div>
 
     <!-- Tabs -->
     <div class="tabs">
-      <button class="tab-btn active" data-tab="config">⚙️ Configuration</button>
+      <button class="tab-btn active" data-tab="config">⚙ Configuration</button>
+      <button class="tab-btn" data-tab="commands">⌨ Commandes</button>
       <button class="tab-btn" data-tab="logs">📋 Logs</button>
       <button class="tab-btn" data-tab="test">🧪 Test</button>
-      <button class="tab-btn" data-tab="danger" style="color:var(--red);">⚠️ Danger</button>
+      <button class="tab-btn" data-tab="danger" style="color:var(--red);">⚠ Danger</button>
     </div>
 
     <!-- Tab: CONFIG -->
@@ -72,64 +86,55 @@
           <label class="form-label">Nom dans le dashboard</label>
           <input type="text" class="form-control" id="cfg-name" />
         </div>
-        <div class="form-group">
-          <label class="form-label">Token Telegram</label>
-          <input type="text" class="form-control mono" id="cfg-token-masked" disabled style="color:var(--text-muted);" />
-          <div class="form-hint">Le token est masqué par sécurité</div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Template</label>
-          <input type="text" class="form-control" id="cfg-template" disabled style="color:var(--text-muted);" />
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.9rem;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Token Telegram</label>
+            <input type="text" class="form-control mono" id="cfg-token-masked" disabled style="color:var(--text-2);" />
+            <div class="form-hint">Masqué par sécurité</div>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Template</label>
+            <input type="text" class="form-control" id="cfg-template" disabled style="color:var(--text-2);" />
+          </div>
         </div>
 
-        <!-- Champs spécifiques au template -->
         <div id="template-specific-config" style="margin-top:1rem;"></div>
       </div>
 
-      <!-- Section IA (affichée seulement pour template ai) -->
-      <div id="ai-config-card" class="card" style="display:none;margin-top:1rem;border-color:rgba(168,85,247,0.3);">
-        <div class="card-header" style="border-color:rgba(168,85,247,0.2);">
+      <!-- IA config card -->
+      <div id="ai-config-card" class="card ai-config-card" style="margin-top:1rem;border-color:rgba(124,102,255,0.28);">
+        <div class="card-header" style="border-bottom:1px solid var(--border);padding-bottom:0.75rem;margin-bottom:1rem;">
           <h3 class="card-title">✨ Configuration IA</h3>
-          <div style="display:flex;align-items:center;gap:0.5rem;">
-            <span id="ai-status-badge" style="font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:999px;background:var(--red-dim);color:var(--red);">Non configuré</span>
-          </div>
+          <span id="ai-status-badge" class="badge badge-red">Non configurée</span>
         </div>
-
         <div class="form-group">
-          <label class="form-label">🔑 Clé API <span style="color:var(--text-muted);font-size:0.8rem;">(chiffrement en transit)</span></label>
+          <label class="form-label">🔑 Clé API <span style="color:var(--text-2);font-size:0.75rem;">(chiffrée en transit)</span></label>
           <div style="display:flex;gap:0.5rem;">
-            <input type="password" class="form-control mono" id="ai-key-input"
-              placeholder="Saisir une nouvelle clé pour la mettre à jour"
-              autocomplete="new-password" style="flex:1;" />
-            <button class="btn btn-ghost btn-sm" id="toggle-ai-key-btn" style="white-space:nowrap;">👁 Voir</button>
-            <button class="btn btn-primary btn-sm" id="save-ai-key-btn" style="white-space:nowrap;">💾 Enregistrer</button>
+            <input type="password" class="form-control" id="ai-key-input" placeholder="sk-…" style="flex:1;" />
+            <button class="btn btn-ghost btn-sm" id="toggle-ai-key-btn">👁 Voir</button>
+            <button class="btn btn-primary btn-sm" id="save-ai-key-btn">Enregistrer</button>
           </div>
-          <div id="ai-key-status" style="margin-top:0.4rem;font-size:0.8rem;color:var(--text-secondary);font-family:var(--font-mono);"></div>
-          <div class="form-hint" style="color:var(--yellow);">
-            ⚠️ La clé est masquée dès qu'elle est sauvegardée et ne s'affiche jamais en clair.
-          </div>
+          <div class="form-hint" id="ai-key-status">Aucune clé API enregistrée</div>
         </div>
-
-        <div class="form-group">
-          <label class="form-label">Tester la connexion IA</label>
-          <button class="btn btn-secondary btn-sm" id="test-ai-btn">🧪 Tester l'API</button>
-          <div id="ai-test-result" style="margin-top:0.5rem;"></div>
-        </div>
+        <button class="btn btn-secondary btn-sm" id="test-ai-btn">🧪 Tester la connexion IA</button>
+        <div id="ai-test-result" style="margin-top:0.6rem;"></div>
       </div>
     </div>
 
-    <!-- Carte : Commandes personnalisées (tous templates) -->
-    <div class="card" id="custom-commands-card" style="margin-top:1rem;border-color:rgba(255,211,42,0.3);">
-      <div class="card-header" style="border-color:rgba(255,211,42,0.2);">
-        <h3 class="card-title">⌨️ Commandes personnalisées</h3>
-        <button class="btn btn-primary btn-sm" id="save-commands-btn">💾 Sauvegarder</button>
+    <!-- Tab: COMMANDS -->
+    <div class="tab-content" id="tab-commands">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">⌨ Commandes personnalisées</h3>
+          <button class="btn btn-primary btn-sm" id="save-commands-btn">💾 Sauvegarder</button>
+        </div>
+        <div id="alert-commands"></div>
+        <p style="font-size:0.83rem;color:var(--text-2);margin-bottom:1rem;">
+          Ajoutez vos propres commandes Telegram (<code>/test</code>, <code>/info</code>…). Elles fonctionnent sur <strong>tous les templates</strong>, en priorité absolue.
+        </p>
+        <div id="commands-list"></div>
+        <button class="btn btn-ghost btn-sm" id="add-command-btn" style="margin-top:0.6rem;">＋ Ajouter une commande</button>
       </div>
-      <div id="alert-commands"></div>
-      <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
-        Ajoutez vos propres commandes Telegram (ex&nbsp;: <code>/test</code>, <code>/info</code>…). Elles fonctionnent sur <b>tous les templates</b> et sont traitées en priorité.
-      </p>
-      <div id="commands-list"></div>
-      <button class="btn btn-ghost btn-sm" id="add-command-btn" style="margin-top:0.75rem;">＋ Ajouter une commande</button>
     </div>
 
     <!-- Tab: LOGS -->
@@ -137,56 +142,47 @@
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">📋 Logs d'activité</h3>
-          <div style="display:flex;gap:0.5rem;align-items:center;">
-            <span id="auto-refresh-badge" style="font-size:0.72rem;font-family:var(--font-mono);color:var(--green);display:none;">● AUTO</span>
+          <div style="display:flex;gap:0.4rem;align-items:center;">
+            <span id="log-count" style="font-size:0.72rem;color:var(--text-2);"></span>
+            <span id="auto-refresh-badge" class="badge badge-green" style="display:none;">● LIVE</span>
             <button class="btn btn-ghost btn-sm" id="toggle-auto-refresh-btn">⏱ Auto</button>
-            <button class="btn btn-secondary btn-sm" id="refresh-logs-btn">🔄 Actualiser</button>
+            <button class="btn btn-secondary btn-sm" id="refresh-logs-btn">↻ Actualiser</button>
+            <button class="btn btn-ghost btn-sm" id="clear-logs-btn">✕</button>
           </div>
         </div>
-        <div id="bot-diagnostic" style="margin-bottom:1rem;"></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
-          <span id="log-count" style="font-size:0.8rem;color:var(--text-muted);"></span>
-          <button class="btn btn-ghost btn-sm" id="clear-logs-btn" style="font-size:0.75rem;">✕ Vider</button>
-        </div>
-        <div class="logs-container" id="logs-container" style="min-height:200px;">
-          <div style="color:var(--text-muted);padding:1rem;text-align:center;">Cliquez sur Actualiser</div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:1rem;border-color:rgba(0,212,255,0.2);">
-        <div class="card-header">
-          <h3 class="card-title">🔍 Diagnostic webhook</h3>
-          <button class="btn btn-secondary btn-sm" id="check-webhook-btn">Vérifier</button>
-        </div>
-        <div id="webhook-diagnostic" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-secondary);">
-          Cliquez sur Vérifier pour tester la connexion Telegram → Serveur
+        <div id="bot-diagnostic" style="margin-bottom:0.75rem;"></div>
+        <div class="log-stream" id="logs-container">
+          <div style="text-align:center;padding:2rem;color:var(--text-2);">Cliquez sur Actualiser pour charger les logs</div>
         </div>
       </div>
     </div>
 
     <!-- Tab: TEST -->
     <div class="tab-content" id="tab-test">
-      <div class="card">
-        <div class="card-header"><h3 class="card-title">Envoyer un message de test</h3></div>
-        <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1.5rem;">
-          Entrez votre Chat ID Telegram. Obtenez-le en écrivant à <strong>@userinfobot</strong>.
-        </p>
-        <div id="alert-test"></div>
-        <div class="form-group">
-          <label class="form-label">Votre Chat ID Telegram</label>
-          <input type="text" class="form-control mono" id="test-chat-id" placeholder="Ex: 123456789" />
-          <div class="form-hint">Envoyez /start à @userinfobot pour obtenir votre ID</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom:1rem;">🧪 Message de test</h3>
+          <div id="alert-test"></div>
+          <div class="form-group">
+            <label class="form-label">Votre Chat ID Telegram</label>
+            <input type="text" class="form-control mono" id="test-chat-id" placeholder="Ex: 123456789" />
+            <div class="form-hint">Obtenez-le via @userinfobot sur Telegram</div>
+          </div>
+          <button class="btn btn-primary" id="send-test-btn">🧪 Envoyer le message de test</button>
         </div>
-        <button class="btn btn-primary" id="send-test-btn">🧪 Envoyer le message de test</button>
-      </div>
 
-      <div class="card" style="margin-top:1rem;">
-        <h3 class="card-title" style="margin-bottom:1rem;">Informations webhook</h3>
-        <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:1rem;">
-          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.3rem;font-family:var(--font-mono);">WEBHOOK URL</div>
-          <div style="display:flex;align-items:center;gap:0.5rem;">
-            <div class="mono" id="webhook-url" style="font-size:0.82rem;word-break:break-all;color:var(--cyan);flex:1;"></div>
-            <button class="btn btn-ghost btn-sm" id="copy-webhook-btn" style="white-space:nowrap;flex-shrink:0;">📋 Copier</button>
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom:1rem;">🔗 Diagnostic Webhook</h3>
+          <div class="form-group">
+            <label class="form-label">URL du webhook</label>
+            <div class="webhook-box" id="webhook-url">—</div>
+          </div>
+          <div style="display:flex;gap:0.4rem;margin-bottom:0.9rem;">
+            <button class="btn btn-secondary btn-sm" id="copy-webhook-btn">📋 Copier</button>
+            <button class="btn btn-secondary btn-sm" id="check-webhook-btn">⚡ Vérifier</button>
+          </div>
+          <div id="webhook-diagnostic" style="font-size:0.82rem;color:var(--text-2);">
+            Cliquez sur Vérifier pour tester la connexion Telegram → Serveur
           </div>
         </div>
       </div>
@@ -194,20 +190,16 @@
 
     <!-- Tab: DANGER -->
     <div class="tab-content" id="tab-danger">
-      <div class="card" style="border-color:rgba(255,71,87,0.3);">
-        <h3 class="card-title" style="color:var(--red);margin-bottom:0.5rem;">⚠️ Zone de danger</h3>
-        <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1.5rem;">Ces actions sont irréversibles.</p>
-
-        <div style="background:var(--red-dim);border:1px solid rgba(255,71,87,0.3);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
-          <h4 style="margin-bottom:0.3rem;">Régénérer le webhook</h4>
-          <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">Génère un nouveau secret webhook. L'ancien ne fonctionnera plus.</p>
-          <button class="btn btn-secondary btn-sm" id="reset-webhook-btn">🔄 Régénérer le webhook</button>
+      <div class="danger-zone">
+        <div>
+          <h4>Régénérer le webhook</h4>
+          <p>Génère un nouveau secret webhook. L'ancien ne fonctionnera plus immédiatement.</p>
+          <button class="btn btn-secondary btn-sm" id="reset-webhook-btn">🔄 Régénérer</button>
         </div>
-
-        <div style="background:var(--red-dim);border:1px solid rgba(255,71,87,0.3);border-radius:12px;padding:1.5rem;">
-          <h4 style="margin-bottom:0.3rem;">Supprimer ce bot</h4>
-          <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">Supprime définitivement le bot, sa configuration, ses logs et son webhook Telegram.</p>
-          <button class="btn btn-danger" id="delete-bot-btn">🗑️ Supprimer définitivement</button>
+        <div>
+          <h4 style="color:var(--red);">Supprimer ce bot</h4>
+          <p>Supprime définitivement le bot, sa configuration, ses logs et son webhook Telegram.</p>
+          <button class="btn btn-danger" id="delete-bot-btn">🗑 Supprimer définitivement</button>
         </div>
       </div>
     </div>
@@ -241,11 +233,9 @@
     if (!initLayout()) return;
     bindButtons();
     await loadBot();
-    // Rafraîchir les stats toutes les 20s
     statsRefreshInterval = setInterval(refreshStats, 20000);
   });
 
-  // ─── Binding des boutons ──────────────────────────────────────────────────
   function bindButtons() {
     document.querySelectorAll('.tab-btn[data-tab]').forEach(btn =>
       btn.addEventListener('click', () => switchTab(btn.dataset.tab, btn))
@@ -255,8 +245,7 @@
     document.getElementById('refresh-logs-btn').addEventListener('click', loadLogs);
     document.getElementById('toggle-auto-refresh-btn').addEventListener('click', toggleAutoRefresh);
     document.getElementById('clear-logs-btn').addEventListener('click', () => {
-      document.getElementById('logs-container').innerHTML =
-        '<div style="color:var(--text-muted);text-align:center;padding:1rem;">Affichage vidé</div>';
+      document.getElementById('logs-container').innerHTML = '<div style="color:var(--text-2);text-align:center;padding:2rem;">Affichage vidé</div>';
       document.getElementById('log-count').textContent = '';
     });
     document.getElementById('check-webhook-btn').addEventListener('click', checkWebhookStatus);
@@ -266,8 +255,6 @@
     document.getElementById('reset-webhook-btn').addEventListener('click', resetWebhook);
     document.getElementById('add-command-btn').addEventListener('click', () => addCommandRow());
     document.getElementById('save-commands-btn').addEventListener('click', saveCustomCommands);
-
-    // IA
     document.getElementById('toggle-ai-key-btn').addEventListener('click', () => {
       const input = document.getElementById('ai-key-input');
       const btn   = document.getElementById('toggle-ai-key-btn');
@@ -278,7 +265,6 @@
     document.getElementById('test-ai-btn').addEventListener('click', testAiConnection);
   }
 
-  // ─── Tabs ─────────────────────────────────────────────────────────────────
   function switchTab(tabName, btn) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -287,7 +273,6 @@
     if (tabName === 'logs') loadLogs();
   }
 
-  // ─── loadBot ──────────────────────────────────────────────────────────────
   async function loadBot() {
     const data = await api('/bots/' + botId);
     if (!data?.success) {
@@ -303,18 +288,18 @@
     const tpl      = TEMPLATES[bot.template] || { emoji: '🤖', name: bot.template };
     const isActive = bot.isActive;
 
+    document.getElementById('bot-avatar').textContent = tpl.emoji;
     document.getElementById('page-bot-name').textContent = bot.name;
-    document.getElementById('page-bot-username').textContent =
-      bot.telegramUsername ? `@${bot.telegramUsername} · ${tpl.emoji} ${tpl.name}` : `${tpl.emoji} ${tpl.name}`;
+    document.getElementById('page-bot-username').textContent = bot.telegramUsername ? `@${bot.telegramUsername} · ${tpl.emoji} ${tpl.name}` : `${tpl.emoji} ${tpl.name}`;
     document.getElementById('header-status-dot').className = 'status-dot ' + (isActive ? 'active' : 'inactive');
 
     const toggleBtn = document.getElementById('toggle-bot-btn');
-    toggleBtn.textContent = isActive ? '⏸ Désactiver' : '▶️ Activer';
+    toggleBtn.textContent = isActive ? '⏸ Désactiver' : '▶ Activer';
     toggleBtn.className   = 'btn btn-sm ' + (isActive ? 'btn-secondary' : 'btn-success');
 
-    document.getElementById('stat-messages').textContent     = formatNumber(bot.stats?.totalMessages || 0);
-    document.getElementById('stat-active-users').textContent = formatNumber(bot.stats?.activeUsers || 0);
-    document.getElementById('stat-created').textContent      = formatDate(bot.createdAt);
+    document.getElementById('stat-messages').textContent      = formatNumber(bot.stats?.totalMessages || 0);
+    document.getElementById('stat-active-users').textContent  = formatNumber(bot.stats?.activeUsers || 0);
+    document.getElementById('stat-created').textContent       = formatDate(bot.createdAt);
     document.getElementById('stat-last-activity').textContent = bot.stats?.lastActivity ? formatDate(bot.stats.lastActivity) : 'Jamais';
 
     document.getElementById('cfg-name').value         = bot.name;
@@ -322,105 +307,72 @@
     document.getElementById('cfg-template').value     = `${tpl.emoji} ${tpl.name}`;
     document.getElementById('webhook-url').textContent = `${window.location.origin}/api/webhooks/${bot.webhookSecret}`;
 
-    // Lien Telegram
     const existingLink = document.getElementById('tg-link-btn');
     if (existingLink) existingLink.remove();
     if (bot.telegramUsername) {
       const link = document.createElement('a');
-      link.id = 'tg-link-btn';
-      link.href = 'https://t.me/' + bot.telegramUsername;
-      link.target = '_blank';
-      link.className = 'btn btn-ghost btn-sm';
-      link.textContent = '↗ Telegram';
+      link.id = 'tg-link-btn'; link.href = 'https://t.me/' + bot.telegramUsername;
+      link.target = '_blank'; link.className = 'btn btn-ghost btn-sm'; link.textContent = '↗ Telegram';
       document.getElementById('toggle-bot-btn').insertAdjacentElement('afterend', link);
     }
 
     renderTemplateConfig(bot);
     renderCustomCommands(bot);
 
-    // Section IA
     const isAi = bot.template === 'ai';
     document.getElementById('ai-config-card').style.display = isAi ? 'block' : 'none';
     if (isAi) renderAiConfig(bot);
   }
 
-  // ─── Config spécifique au template ───────────────────────────────────────
   function renderTemplateConfig(bot) {
     const tpl = TEMPLATES[bot.template];
     if (!tpl) return;
-
     const container = document.getElementById('template-specific-config');
-    let html = '<hr style="border-color:var(--border);margin:1.5rem 0;" />';
-    html += `<div class="config-section-title">⚙️ Options — ${tpl.emoji} ${tpl.name}</div>`;
+    let html = '<hr style="border:none;border-top:1px solid var(--border);margin:1rem 0;" />';
+    html += `<div class="config-section-title">Options — ${tpl.emoji} ${tpl.name}</div>`;
 
     tpl.configFields.forEach(field => {
       const val = bot.config?.[field.key];
       html += `<div class="form-group"><label class="form-label">${field.label}</label>`;
-
       if (field.type === 'textarea') {
         html += `<textarea class="form-control" id="cfg-${field.key}" rows="2">${val !== undefined ? val : (field.placeholder || '')}</textarea>`;
         if (field.variables) html += VARIABLES_DOC;
       } else if (field.type === 'toggle') {
         const on = val === true || val === 'true';
-        html += `<div class="toggle-wrap">
-          <div class="toggle ${on ? 'active' : ''}" id="cfg-${field.key}" data-toggle></div>
-          <label class="toggle-label" data-for="cfg-${field.key}">${field.label}</label>
-        </div>`;
+        html += `<div class="toggle-wrap"><div class="toggle ${on ? 'active' : ''}" id="cfg-${field.key}" data-toggle></div><label class="toggle-label" data-for="cfg-${field.key}">${field.label}</label></div>`;
       } else if (field.type === 'select') {
         html += `<select class="form-control" id="cfg-${field.key}">`;
-        field.options.forEach(o => {
-          html += `<option value="${o.value}"${o.value === val ? ' selected' : ''}>${o.label}</option>`;
-        });
+        field.options.forEach(o => { html += `<option value="${o.value}"${o.value === val ? ' selected' : ''}>${o.label}</option>`; });
         html += `</select>`;
       } else {
         html += `<input type="text" class="form-control" id="cfg-${field.key}" value="${val !== undefined ? val : ''}" placeholder="${field.placeholder || ''}" />`;
       }
-
       if (field.hint) html += `<div class="form-hint">${field.hint}</div>`;
       html += `</div>`;
     });
 
     container.innerHTML = html;
-
-    container.querySelectorAll('[data-toggle]').forEach(el =>
-      el.addEventListener('click', () => el.classList.toggle('active'))
-    );
-    container.querySelectorAll('[data-for]').forEach(lbl =>
-      lbl.addEventListener('click', () => {
-        const t = document.getElementById(lbl.dataset.for);
-        if (t) t.classList.toggle('active');
-      })
-    );
-    container.querySelectorAll('[data-var]').forEach(t =>
-      t.addEventListener('click', () => {
-        if (!lastFocused) return;
-        const pos = lastFocused.selectionStart, val = lastFocused.value, v = t.dataset.var;
-        lastFocused.value = val.slice(0, pos) + v + val.slice(pos);
-        lastFocused.focus();
-        lastFocused.setSelectionRange(pos + v.length, pos + v.length);
-      })
-    );
-    container.querySelectorAll('textarea, input[type=text]').forEach(el =>
-      el.addEventListener('focus', () => { lastFocused = el; })
-    );
+    container.querySelectorAll('[data-toggle]').forEach(el => el.addEventListener('click', () => el.classList.toggle('active')));
+    container.querySelectorAll('[data-for]').forEach(lbl => lbl.addEventListener('click', () => { const t = document.getElementById(lbl.dataset.for); if (t) t.classList.toggle('active'); }));
+    container.querySelectorAll('[data-var]').forEach(t => t.addEventListener('click', () => {
+      if (!lastFocused) return;
+      const pos = lastFocused.selectionStart, v = t.dataset.var;
+      lastFocused.value = lastFocused.value.slice(0, pos) + v + lastFocused.value.slice(pos);
+      lastFocused.focus(); lastFocused.setSelectionRange(pos + v.length, pos + v.length);
+    }));
+    container.querySelectorAll('textarea, input[type=text]').forEach(el => el.addEventListener('focus', () => { lastFocused = el; }));
   }
 
-  // ─── Config IA ────────────────────────────────────────────────────────────
   function renderAiConfig(bot) {
     const hasKey = bot.config?.ai_apiKey && bot.config.ai_apiKey.length > 0;
     const badge  = document.getElementById('ai-status-badge');
     const status = document.getElementById('ai-key-status');
-
     if (hasKey) {
-      badge.style.background = 'var(--green-dim)';
-      badge.style.color      = 'var(--green)';
-      badge.textContent      = '✅ Clé configurée';
-      status.textContent     = 'Clé actuelle : ' + bot.config.ai_apiKey;
+      badge.className = 'badge badge-green'; badge.textContent = '✅ Clé configurée';
+      status.textContent = 'Clé actuelle : ' + bot.config.ai_apiKey;
     } else {
-      badge.style.background = 'var(--red-dim)';
-      badge.style.color      = 'var(--red)';
-      badge.textContent      = '❌ Clé manquante';
-      status.textContent     = 'Aucune clé API enregistrée';
+      badge.className = 'badge badge-red'; badge.textContent = '❌ Clé manquante';
+      status.textContent = 'Aucune clé API enregistrée';
     }
   }
 
@@ -428,72 +380,113 @@
     const apiKey = document.getElementById('ai-key-input').value.trim();
     const btn    = document.getElementById('save-ai-key-btn');
     if (!apiKey) { Toast.error('Entrez une clé API'); return; }
-
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-
-    const data = await api('/bots/' + botId + '/ai-key', {
-      method: 'PUT',
-      body: JSON.stringify({ apiKey }),
-    });
-
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-
+    btn.classList.add('btn-loading'); btn.disabled = true;
+    const data = await api('/bots/' + botId + '/ai-key', { method: 'PUT', body: JSON.stringify({ apiKey }) });
+    btn.classList.remove('btn-loading'); btn.disabled = false;
     if (data?.success) {
       Toast.success('Clé API IA sauvegardée !');
       document.getElementById('ai-key-input').value = '';
       document.getElementById('ai-key-input').type  = 'password';
       document.getElementById('toggle-ai-key-btn').textContent = '👁 Voir';
-
-      const badge  = document.getElementById('ai-status-badge');
-      badge.style.background = 'var(--green-dim)';
-      badge.style.color      = 'var(--green)';
-      badge.textContent      = '✅ Clé configurée';
+      const badge = document.getElementById('ai-status-badge');
+      badge.className = 'badge badge-green'; badge.textContent = '✅ Clé configurée';
       document.getElementById('ai-key-status').textContent = 'Clé actuelle : ' + (data.maskedKey || '***');
-
-      // Activer le bot IA automatiquement
-      const idx = currentBot?.config ? null : null;
       await loadBot();
-    } else {
-      Toast.error(data?.error || 'Erreur lors de la sauvegarde');
-    }
+    } else Toast.error(data?.error || 'Erreur');
   }
 
   async function testAiConnection() {
     const btn    = document.getElementById('test-ai-btn');
     const result = document.getElementById('ai-test-result');
-
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-    result.innerHTML = '<span style="color:var(--text-muted);">⏳ Test en cours...</span>';
-
-    // On envoie un message de test via le webhook de test
-    const testData = await api('/bots/' + botId + '/test', {
-      method: 'POST',
-      body: JSON.stringify({ chatId: 'ai_test', aiTest: true }),
-    });
-
-    // Fallback: juste vérifier que la config est là
+    btn.classList.add('btn-loading'); btn.disabled = true;
+    result.innerHTML = '<span style="color:var(--text-2);font-size:0.82rem;">⏳ Test en cours…</span>';
+    await api('/bots/' + botId + '/test', { method: 'POST', body: JSON.stringify({ chatId: 'ai_test', aiTest: true }) });
     const botData = await api('/bots/' + botId);
     const hasKey  = botData?.bot?.config?.ai_apiKey?.length > 0;
     const provider = botData?.bot?.config?.ai_provider || 'openai';
     const model    = botData?.bot?.config?.ai_model || '(auto)';
-
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-
-    if (hasKey) {
-      result.innerHTML = `<div class="alert alert-success">
-        ✅ Configuration IA valide<br>
-        <span style="font-size:0.8rem;opacity:0.8;">Provider: <b>${provider}</b> · Modèle: <b>${model}</b></span>
-      </div>`;
-    } else {
-      result.innerHTML = '<div class="alert alert-error">❌ Aucune clé API configurée — ajoutez-en une ci-dessus</div>';
-    }
+    btn.classList.remove('btn-loading'); btn.disabled = false;
+    result.innerHTML = hasKey
+      ? `<div class="alert alert-success">✅ Config IA valide — <strong>${provider}</strong> · ${model}</div>`
+      : '<div class="alert alert-error">❌ Aucune clé API — ajoutez-en une ci-dessus</div>';
   }
 
-  // ─── Save config ──────────────────────────────────────────────────────────
+  // ─── Custom commands ─────────────────────────────────────────────────────
+  function renderCustomCommands(bot) {
+    let commands = [];
+    try { commands = JSON.parse(bot.config?.custom_commands || '[]'); } catch(_) {}
+    const list = document.getElementById('commands-list');
+    list.innerHTML = '';
+    if (!commands.length) {
+      list.innerHTML = '<div data-empty style="color:var(--text-2);font-size:0.83rem;padding:0.5rem 0;">Aucune commande personnalisée. Cliquez sur « Ajouter » pour créer votre première commande.</div>';
+    }
+    commands.forEach((cmd, idx) => addCommandRow(cmd, idx));
+  }
+
+  function addCommandRow(cmd = {}, idx = null) {
+    const list = document.getElementById('commands-list');
+    const empty = list.querySelector('[data-empty]');
+    if (empty) empty.remove();
+    const row = document.createElement('div');
+    row.className = 'cmd-row-card';
+    row.dataset.cmdRow = idx !== null ? idx : Date.now();
+    row.innerHTML = `
+      <div style="display:flex;gap:0.7rem;align-items:flex-start;flex-wrap:wrap;">
+        <div class="form-group" style="flex:0 0 155px;margin:0;">
+          <label class="form-label">Commande (sans /)</label>
+          <input type="text" class="form-control mono cmd-name" value="${cmd.name||''}" placeholder="test" />
+        </div>
+        <div class="form-group" style="flex:1 1 200px;margin:0;">
+          <label class="form-label">Réponse</label>
+          <textarea class="form-control cmd-reply" rows="2" placeholder="Bonjour {first_name} !">${cmd.reply||''}</textarea>
+        </div>
+        <div class="form-group" style="flex:0 0 130px;margin:0;">
+          <label class="form-label">Format</label>
+          <select class="form-control cmd-parse_mode">
+            <option value="HTML"${(cmd.parse_mode||'HTML')==='HTML'?' selected':''}>HTML</option>
+            <option value="Markdown"${cmd.parse_mode==='Markdown'?' selected':''}>Markdown</option>
+            <option value=""${cmd.parse_mode===''?' selected':''}>Texte brut</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin:0.5rem 0 0;">
+        <label class="form-label">Description (menu Telegram, optionnel)</label>
+        <input type="text" class="form-control cmd-desc" value="${cmd.desc||''}" placeholder="Affiche un message de test" />
+      </div>
+      <div style="margin-top:0.4rem;font-size:0.72rem;color:var(--text-2);">Variables : <code>{first_name}</code></div>
+      <button class="btn btn-danger btn-sm cmd-remove" style="position:absolute;top:0.75rem;right:0.75rem;">✕</button>`;
+    row.querySelector('.cmd-remove').addEventListener('click', () => {
+      row.remove();
+      if (!list.querySelectorAll('[data-cmd-row]').length) {
+        list.innerHTML = '<div data-empty style="color:var(--text-2);font-size:0.83rem;padding:0.5rem 0;">Aucune commande personnalisée.</div>';
+      }
+    });
+    row.querySelector('.cmd-name').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^a-z0-9_]/gi,'').toLowerCase(); });
+    list.appendChild(row);
+  }
+
+  function getCustomCommandsFromUI() {
+    const rows = document.querySelectorAll('#commands-list [data-cmd-row]');
+    const commands = [];
+    rows.forEach(row => {
+      const name = row.querySelector('.cmd-name')?.value.trim();
+      if (!name) return;
+      commands.push({ name, reply: row.querySelector('.cmd-reply')?.value||'', desc: row.querySelector('.cmd-desc')?.value||'', parse_mode: row.querySelector('.cmd-parse_mode')?.value||'HTML' });
+    });
+    return commands;
+  }
+
+  async function saveCustomCommands() {
+    const btn = document.getElementById('save-commands-btn');
+    const alertEl = document.getElementById('alert-commands');
+    btn.classList.add('btn-loading'); btn.disabled = true; alertEl.innerHTML = '';
+    const commands = getCustomCommandsFromUI();
+    const data = await api('/bots/' + botId, { method: 'PUT', body: JSON.stringify({ name: currentBot.name, config: { custom_commands: JSON.stringify(commands) } }) });
+    btn.classList.remove('btn-loading'); btn.disabled = false;
+    if (data?.success) { currentBot = data.bot; Toast.success(`${commands.length} commande(s) sauvegardée(s) !`); }
+    else alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${data?.error||'Erreur'}</div>`;
+  }
+
   function getConfigFromFields() {
     const tpl = TEMPLATES[currentBot.template];
     if (!tpl) return {};
@@ -506,313 +499,134 @@
     return config;
   }
 
-  // ─── Commandes personnalisées ─────────────────────────────────────────────
-  function renderCustomCommands(bot) {
-    let commands = [];
-    try { commands = JSON.parse(bot.config?.custom_commands || '[]'); } catch(_) {}
-    const list = document.getElementById('commands-list');
-    list.innerHTML = '';
-    if (!commands.length) {
-      list.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem 0;">Aucune commande personnalisée. Cliquez sur « Ajouter » pour créer votre première commande.</div>';
-    }
-    commands.forEach((cmd, idx) => addCommandRow(cmd, idx));
-  }
-
-  function addCommandRow(cmd = {}, idx = null) {
-    const list = document.getElementById('commands-list');
-    // Supprimer le message "aucune commande"
-    const empty = list.querySelector('[data-empty]');
-    if (empty) empty.remove();
-
-    const row = document.createElement('div');
-    row.dataset.cmdRow = idx !== null ? idx : Date.now();
-    row.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.75rem;position:relative;background:var(--bg-secondary);';
-
-    row.innerHTML = `
-      <div style="display:flex;gap:0.75rem;align-items:flex-start;flex-wrap:wrap;">
-        <div class="form-group" style="flex:0 0 160px;margin:0;">
-          <label class="form-label" style="font-size:0.78rem;">Commande (sans /)</label>
-          <input type="text" class="form-control mono cmd-name" value="${cmd.name||''}" placeholder="test" style="font-size:0.85rem;" />
-        </div>
-        <div class="form-group" style="flex:1 1 200px;margin:0;">
-          <label class="form-label" style="font-size:0.78rem;">Réponse</label>
-          <textarea class="form-control cmd-reply" rows="2" placeholder="Bonjour {first_name} !" style="font-size:0.85rem;">${cmd.reply||''}</textarea>
-        </div>
-        <div class="form-group" style="flex:0 0 120px;margin:0;">
-          <label class="form-label" style="font-size:0.78rem;">Format</label>
-          <select class="form-control cmd-parse_mode" style="font-size:0.85rem;">
-            <option value="HTML"${(cmd.parse_mode||'HTML')==='HTML'?' selected':''}>HTML</option>
-            <option value="Markdown"${cmd.parse_mode==='Markdown'?' selected':''}>Markdown</option>
-            <option value=""${cmd.parse_mode===''?' selected':''}>Texte brut</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group" style="margin:0.5rem 0 0;">
-        <label class="form-label" style="font-size:0.78rem;">Description (menu Telegram, optionnel)</label>
-        <input type="text" class="form-control cmd-desc" value="${cmd.desc||''}" placeholder="Affiche un message de test" style="font-size:0.85rem;" />
-      </div>
-      <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--text-muted);">Variables disponibles : <code>{first_name}</code></div>
-      <button class="btn btn-danger btn-sm cmd-remove" style="position:absolute;top:0.75rem;right:0.75rem;padding:0.2rem 0.5rem;font-size:0.75rem;">✕ Supprimer</button>
-    `;
-
-    row.querySelector('.cmd-remove').addEventListener('click', () => {
-      row.remove();
-      if (!list.querySelectorAll('[data-cmd-row]').length) {
-        list.innerHTML = '<div data-empty style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem 0;">Aucune commande personnalisée.</div>';
-      }
-    });
-
-    // Nettoyer le nom (alphanum + underscore seulement)
-    const nameInput = row.querySelector('.cmd-name');
-    nameInput.addEventListener('input', () => {
-      nameInput.value = nameInput.value.replace(/[^a-z0-9_]/gi, '').toLowerCase();
-    });
-
-    list.appendChild(row);
-  }
-
-  function getCustomCommandsFromUI() {
-    const rows = document.querySelectorAll('#commands-list [data-cmd-row]');
-    const commands = [];
-    rows.forEach(row => {
-      const name = row.querySelector('.cmd-name')?.value.trim();
-      if (!name) return; // ignorer les lignes sans nom
-      commands.push({
-        name,
-        reply:      row.querySelector('.cmd-reply')?.value || '',
-        desc:       row.querySelector('.cmd-desc')?.value || '',
-        parse_mode: row.querySelector('.cmd-parse_mode')?.value || 'HTML',
-      });
-    });
-    return commands;
-  }
-
-  async function saveCustomCommands() {
-    const btn     = document.getElementById('save-commands-btn');
-    const alertEl = document.getElementById('alert-commands');
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-    alertEl.innerHTML = '';
-
-    const commands = getCustomCommandsFromUI();
-    const data = await api('/bots/' + botId, {
-      method: 'PUT',
-      body: JSON.stringify({ name: currentBot.name, config: { custom_commands: JSON.stringify(commands) } }),
-    });
-
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-
-    if (data?.success) {
-      currentBot = data.bot;
-      Toast.success(`${commands.length} commande(s) sauvegardée(s) !`);
-    } else {
-      alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${data?.error || 'Erreur'}</div>`;
-    }
-  }
-
   async function saveConfig() {
-    const name  = document.getElementById('cfg-name').value.trim();
+    const name = document.getElementById('cfg-name').value.trim();
     if (!name) { Toast.error('Le nom ne peut pas être vide'); return; }
-
-    const btn    = document.getElementById('save-config-btn');
+    const btn = document.getElementById('save-config-btn');
     const alertEl = document.getElementById('alert-config');
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-    alertEl.innerHTML = '';
-
-    const data = await api('/bots/' + botId, {
-      method: 'PUT',
-      body: JSON.stringify({ name, config: getConfigFromFields() }),
-    });
-
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-
-    if (data?.success) {
-      Toast.success('Configuration sauvegardée !');
-      currentBot = data.bot;
-      document.getElementById('page-bot-name').textContent = data.bot.name;
-    } else {
-      alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${data?.error || 'Erreur'}</div>`;
-    }
+    btn.classList.add('btn-loading'); btn.disabled = true; alertEl.innerHTML = '';
+    const data = await api('/bots/' + botId, { method: 'PUT', body: JSON.stringify({ name, config: getConfigFromFields() }) });
+    btn.classList.remove('btn-loading'); btn.disabled = false;
+    if (data?.success) { Toast.success('Configuration sauvegardée !'); currentBot = data.bot; document.getElementById('page-bot-name').textContent = data.bot.name; }
+    else alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${data?.error||'Erreur'}</div>`;
   }
 
-  // ─── Toggle bot ───────────────────────────────────────────────────────────
   async function toggleBot() {
     const btn = document.getElementById('toggle-bot-btn');
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-
+    btn.classList.add('btn-loading'); btn.disabled = true;
     const data = await api('/bots/' + botId + '/toggle', { method: 'PUT' });
-
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-
+    btn.classList.remove('btn-loading'); btn.disabled = false;
     if (data?.success) { Toast.success(data.message); await loadBot(); }
     else Toast.error(data?.error || 'Erreur');
   }
 
-  // ─── Copy webhook URL ─────────────────────────────────────────────────────
   function copyWebhookUrl() {
     const url = document.getElementById('webhook-url').textContent;
     navigator.clipboard.writeText(url).then(() => {
       Toast.success('URL copiée !');
       const btn = document.getElementById('copy-webhook-btn');
-      btn.textContent = '✅ Copié';
-      setTimeout(() => { btn.textContent = '📋 Copier'; }, 2000);
+      btn.textContent = '✅ Copié'; setTimeout(() => { btn.textContent = '📋 Copier'; }, 2000);
     }).catch(() => Toast.error('Copie impossible'));
   }
 
-  // ─── Reset webhook ────────────────────────────────────────────────────────
   async function resetWebhook() {
     if (!confirm('Régénérer le secret webhook ? L\'ancien ne fonctionnera plus.')) return;
-    // TODO: endpoint backend /api/bots/:id/reset-webhook
     Toast.info('Fonctionnalité bientôt disponible');
   }
 
-  // ─── Auto-refresh logs ────────────────────────────────────────────────────
   function toggleAutoRefresh() {
     const badge = document.getElementById('auto-refresh-badge');
     const btn   = document.getElementById('toggle-auto-refresh-btn');
     if (autoRefreshInterval) {
-      clearInterval(autoRefreshInterval);
-      autoRefreshInterval = null;
-      badge.style.display = 'none';
-      btn.textContent = '⏱ Auto';
-      btn.className   = 'btn btn-ghost btn-sm';
+      clearInterval(autoRefreshInterval); autoRefreshInterval = null;
+      badge.style.display = 'none'; btn.textContent = '⏱ Auto'; btn.className = 'btn btn-ghost btn-sm';
     } else {
-      loadLogs();
-      autoRefreshInterval = setInterval(loadLogs, 5000);
-      badge.style.display = 'inline';
-      btn.textContent = '⏹ Stop';
-      btn.className   = 'btn btn-success btn-sm';
+      loadLogs(); autoRefreshInterval = setInterval(loadLogs, 5000);
+      badge.style.display = 'inline'; btn.textContent = '⏹ Stop'; btn.className = 'btn btn-success btn-sm';
     }
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+  function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   async function loadLogs() {
     const container = document.getElementById('logs-container');
     const countEl   = document.getElementById('log-count');
     const diagEl    = document.getElementById('bot-diagnostic');
     const data      = await api('/bots/' + botId + '/logs');
-
     if (!data) { container.innerHTML = '<div class="alert alert-error">❌ Impossible de contacter l\'API</div>'; return; }
     if (!data.success) { container.innerHTML = `<div class="alert alert-error">❌ ${data.error}</div>`; return; }
-
     const logs = data.logs || [];
-    countEl.textContent = `${logs.length} log(s) — ${new Date().toLocaleTimeString('fr-FR')}`;
-
-    if (logs.length === 0) {
-      diagEl.innerHTML = '<div class="alert alert-info">ℹ️ Aucun log — Envoyez /start à votre bot sur Telegram puis actualisez.</div>';
-      container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:2rem;">📭 Aucun log</div>';
+    countEl.textContent = `${logs.length} entrée(s) — ${new Date().toLocaleTimeString('fr-FR')}`;
+    if (!logs.length) {
+      diagEl.innerHTML = '<div class="alert alert-info">ℹ️ Aucun log — Envoyez /start à votre bot puis actualisez.</div>';
+      container.innerHTML = '<div style="color:var(--text-2);text-align:center;padding:2rem;">📭 Aucun log</div>';
       return;
     }
-
     const errors = logs.filter(l => l.type === 'error');
     diagEl.innerHTML = errors.length > 0
       ? `<div class="alert alert-error">❌ ${errors.length} erreur(s) — ${escapeHtml(errors[0].message)}</div>`
       : `<div class="alert alert-success">✅ ${escapeHtml(logs[0].message)}</div>`;
-
-    const colors = { info: 'var(--cyan)', error: 'var(--red)', warning: 'var(--yellow)' };
     container.innerHTML = logs.map(l =>
-      `<div class="log-entry">
-        <span class="log-time">${new Date(l.timestamp).toLocaleString('fr-FR')}</span>
-        <span class="log-type ${l.type}" style="color:${colors[l.type]||'#fff'}">[${l.type.toUpperCase()}]</span>
-        <span class="log-message">${escapeHtml(l.message)}</span>
+      `<div class="log-line ${l.type}">
+        <span class="log-ts">${new Date(l.timestamp).toLocaleString('fr-FR')}</span>
+        <span class="log-lvl ${l.type}">[${l.type.toUpperCase()}]</span>
+        <span class="log-msg">${escapeHtml(l.message)}</span>
       </div>`
     ).join('');
   }
 
-  // ─── Webhook diagnostic ───────────────────────────────────────────────────
   async function checkWebhookStatus() {
     const diagEl = document.getElementById('webhook-diagnostic');
-    diagEl.innerHTML = '<span style="color:var(--cyan);">⏳ Vérification en cours...</span>';
+    diagEl.innerHTML = '<span style="color:var(--accent);">⏳ Vérification…</span>';
     try {
       const res  = await fetch('/api/webhooks/debug/' + currentBot?.webhookSecret);
       const data = await res.json();
-      if (!data.found) { diagEl.innerHTML = '<div class="alert alert-error">❌ Bot introuvable en base de données</div>'; return; }
-
+      if (!data.found) { diagEl.innerHTML = '<div class="alert alert-error">❌ Bot introuvable</div>'; return; }
       const webhookOk = data.webhookUrl && data.webhookUrl.includes(currentBot?.webhookSecret);
       const rows = [
-        ['Nom',                 data.name],
-        ['Template',            data.template],
-        ['Statut',              data.isActive ? '✅ Actif' : '❌ Désactivé'],
-        ['Token',               data.tokenMasked],
-        ['Messages trackés',    data.totalMessages ?? 0],
-        ['Utilisateurs actifs', data.activeUsers ?? 0],
-        ['Dernière activité',   data.lastActivity ? new Date(data.lastActivity).toLocaleString('fr-FR') : 'Jamais'],
-        ['Webhook Telegram',    webhookOk ? '✅ Configuré' : (data.webhookUrl ? '⚠️ URL différente' : '❌ Non configuré')],
-        ['En attente',          data.webhookPending !== null ? data.webhookPending : '—'],
+        ['Nom', data.name], ['Template', data.template],
+        ['Statut', data.isActive ? '✅ Actif' : '❌ Désactivé'],
+        ['Token', data.tokenMasked], ['Messages', data.totalMessages ?? 0],
+        ['Utilisateurs', data.activeUsers ?? 0],
+        ['Dernière activité', data.lastActivity ? new Date(data.lastActivity).toLocaleString('fr-FR') : 'Jamais'],
+        ['Webhook Telegram', webhookOk ? '✅ Configuré' : (data.webhookUrl ? '⚠️ URL différente' : '❌ Non configuré')],
+        ['En attente', data.webhookPending !== null ? data.webhookPending : '—'],
         ...(data.template === 'ai' ? [['IA configurée', data.aiEnabled ? '✅ Oui' : '❌ Non']] : []),
       ];
-
-      diagEl.innerHTML = `<table style="width:100%;border-collapse:collapse;">`
-        + rows.map(([k, v]) =>
-          `<tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:0.4rem 0.75rem 0.4rem 0;color:var(--text-muted);white-space:nowrap;">${k}</td>
-            <td style="padding:0.4rem 0;">${v}</td>
-          </tr>`
-        ).join('')
-        + `</table>`
-        + (data.lastLogs?.length
-          ? '<div style="margin-top:0.75rem;font-size:0.75rem;color:var(--text-muted);">Derniers logs :</div>'
-            + data.lastLogs.map(l => `<div style="color:var(--text-secondary);margin-top:0.25rem;">&gt; ${escapeHtml(l.message)}</div>`).join('')
-          : '');
-    } catch (_) {
-      diagEl.innerHTML = '<div class="alert alert-error">❌ Impossible de contacter le serveur</div>';
-    }
+      diagEl.innerHTML = `<table class="diag-table">${rows.map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</table>`
+        + (data.lastLogs?.length ? '<div style="margin-top:0.65rem;font-size:0.74rem;color:var(--text-2);">Derniers logs :</div>' + data.lastLogs.map(l => `<div style="color:var(--text-2);font-size:0.74rem;font-family:var(--font-mono);">› ${escapeHtml(l.message)}</div>`).join('') : '');
+    } catch (_) { diagEl.innerHTML = '<div class="alert alert-error">❌ Impossible de contacter le serveur</div>'; }
   }
 
-  // ─── Test message ─────────────────────────────────────────────────────────
   async function sendTestMessage() {
     const chatId  = document.getElementById('test-chat-id').value.trim();
     const alertEl = document.getElementById('alert-test');
     const btn     = document.getElementById('send-test-btn');
-
     if (!chatId) { alertEl.innerHTML = '<div class="alert alert-error">Entrez votre Chat ID</div>'; return; }
-
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-
+    btn.classList.add('btn-loading'); btn.disabled = true;
     const data = await api('/bots/' + botId + '/test', { method: 'POST', body: JSON.stringify({ chatId }) });
-
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-
+    btn.classList.remove('btn-loading'); btn.disabled = false;
     alertEl.innerHTML = data?.success
       ? '<div class="alert alert-success">✅ Message de test envoyé !</div>'
       : `<div class="alert alert-error">⚠️ ${data?.error || 'Erreur'}</div>`;
   }
 
-  // ─── Refresh stats silencieux ─────────────────────────────────────────────
   async function refreshStats() {
     const data = await api('/bots/' + botId);
     if (!data?.success) return;
     const bot = data.bot;
-    document.getElementById('stat-messages').textContent     = formatNumber(bot.stats?.totalMessages || 0);
-    document.getElementById('stat-active-users').textContent = formatNumber(bot.stats?.activeUsers || 0);
+    document.getElementById('stat-messages').textContent      = formatNumber(bot.stats?.totalMessages || 0);
+    document.getElementById('stat-active-users').textContent  = formatNumber(bot.stats?.activeUsers || 0);
     document.getElementById('stat-last-activity').textContent = bot.stats?.lastActivity ? formatDate(bot.stats.lastActivity) : 'Jamais';
   }
 
-  // ─── Supprimer le bot ─────────────────────────────────────────────────────
   async function confirmDeleteBot() {
     if (!confirm(`Supprimer définitivement "${currentBot.name}" ?`)) return;
-
     const btn = document.getElementById('delete-bot-btn');
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-
+    btn.classList.add('btn-loading'); btn.disabled = true;
     const data = await api('/bots/' + botId, { method: 'DELETE' });
     if (data?.success) { Toast.success('Bot supprimé'); setTimeout(() => window.location.href = '/bots.html', 1000); }
-    else {
-      btn.classList.remove('btn-loading');
-      btn.disabled = false;
-      Toast.error(data?.error || 'Erreur');
-    }
+    else { btn.classList.remove('btn-loading'); btn.disabled = false; Toast.error(data?.error || 'Erreur'); }
   }
 </script>
 </body>

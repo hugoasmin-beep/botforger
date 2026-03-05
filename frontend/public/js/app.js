@@ -266,35 +266,32 @@ const SIDEBAR_HTML = `
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <a href="/dashboard.html" class="sidebar-logo">
-      <span class="logo-icon">🤖</span>
+      <span class="logo-mark">🤖</span>
       BotForge
     </a>
   </div>
 
   <div class="sidebar-nav">
-    <p class="sidebar-section-label">Navigation</p>
-
+    <span class="sidebar-section-label">Navigation</span>
     <a href="/dashboard.html" class="sidebar-nav-item" data-page="dashboard">
-      <span class="sidebar-nav-icon">🏠</span> Dashboard
+      <span class="sidebar-nav-icon">⊞</span> Dashboard
     </a>
     <a href="/bots.html" class="sidebar-nav-item" data-page="bots">
       <span class="sidebar-nav-icon">🤖</span> Mes Bots
     </a>
     <a href="/create-bot.html" class="sidebar-nav-item" data-page="create-bot">
-      <span class="sidebar-nav-icon">➕</span> Créer un bot
+      <span class="sidebar-nav-icon">✦</span> Créer un bot
     </a>
-
-    <p class="sidebar-section-label" style="margin-top:1.5rem;">Compte</p>
-
+    <span class="sidebar-section-label">Compte</span>
     <button class="sidebar-nav-item" id="logout-btn">
-      <span class="sidebar-nav-icon">🚪</span> Déconnexion
+      <span class="sidebar-nav-icon">↩</span> Déconnexion
     </button>
   </div>
 
   <div class="sidebar-footer">
     <div class="user-info">
       <div class="user-avatar" id="sidebar-user-avatar">U</div>
-      <div>
+      <div style="min-width:0;flex:1;">
         <div class="user-email" id="sidebar-user-email">chargement...</div>
         <div class="user-plan" id="sidebar-user-plan">FREE</div>
       </div>
@@ -306,8 +303,9 @@ const SIDEBAR_HTML = `
 
 const MOBILE_TOPBAR_HTML = `
 <div class="mobile-topbar">
-  <a href="/" style="display:flex;align-items:center;gap:0.5rem;font-weight:800;text-decoration:none;color:var(--text-primary);">
-    <span style="font-size:1.2rem;">🤖</span> BotForge
+  <a href="/" style="display:flex;align-items:center;gap:0.5rem;font-family:var(--font-display);font-weight:800;text-decoration:none;color:var(--text);">
+    <span style="width:26px;height:26px;background:linear-gradient(135deg,var(--accent),var(--accent-mid));border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;">🤖</span>
+    BotForge
   </a>
   <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
 </div>
