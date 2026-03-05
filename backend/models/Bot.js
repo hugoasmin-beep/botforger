@@ -66,6 +66,12 @@ const BotSchema = new mongoose.Schema({
     msg_start_blocks:  { type: String, default: '' },
     msg_help_blocks:   { type: String, default: '' },
     msg_custom_blocks: { type: String, default: '' },
+    // ─ Commandes personnalisées (universel, tous templates) ─
+    // JSON stringifié : [{name:'test', reply:'Bonjour !', desc:'...', parse_mode:'HTML', buttons:''}]
+    custom_commands:   { type: String, default: '' },
+    // Legacy (premier bloc commande du create-bot)
+    command_name:      { type: String, default: '' },
+    command_reply:     { type: String, default: '' },
   },
 
   stats: {
