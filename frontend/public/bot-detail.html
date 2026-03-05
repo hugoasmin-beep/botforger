@@ -118,6 +118,20 @@
       </div>
     </div>
 
+    <!-- Carte : Commandes personnalisées (tous templates) -->
+    <div class="card" id="custom-commands-card" style="margin-top:1rem;border-color:rgba(255,211,42,0.3);">
+      <div class="card-header" style="border-color:rgba(255,211,42,0.2);">
+        <h3 class="card-title">⌨️ Commandes personnalisées</h3>
+        <button class="btn btn-primary btn-sm" id="save-commands-btn">💾 Sauvegarder</button>
+      </div>
+      <div id="alert-commands"></div>
+      <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
+        Ajoutez vos propres commandes Telegram (ex&nbsp;: <code>/test</code>, <code>/info</code>…). Elles fonctionnent sur <b>tous les templates</b> et sont traitées en priorité.
+      </p>
+      <div id="commands-list"></div>
+      <button class="btn btn-ghost btn-sm" id="add-command-btn" style="margin-top:0.75rem;">＋ Ajouter une commande</button>
+    </div>
+
     <!-- Tab: LOGS -->
     <div class="tab-content" id="tab-logs">
       <div class="card">
@@ -250,6 +264,8 @@
     document.getElementById('copy-webhook-btn').addEventListener('click', copyWebhookUrl);
     document.getElementById('delete-bot-btn').addEventListener('click', confirmDeleteBot);
     document.getElementById('reset-webhook-btn').addEventListener('click', resetWebhook);
+    document.getElementById('add-command-btn').addEventListener('click', () => addCommandRow());
+    document.getElementById('save-commands-btn').addEventListener('click', saveCustomCommands);
 
     // IA
     document.getElementById('toggle-ai-key-btn').addEventListener('click', () => {
@@ -320,6 +336,7 @@
     }
 
     renderTemplateConfig(bot);
+    renderCustomCommands(bot);
 
     // Section IA
     const isAi = bot.template === 'ai';
@@ -487,6 +504,111 @@
       config[field.key] = field.type === 'toggle' ? el.classList.contains('active') : el.value;
     });
     return config;
+  }
+
+  // ─── Commandes personnalisées ─────────────────────────────────────────────
+  function renderCustomCommands(bot) {
+    let commands = [];
+    try { commands = JSON.parse(bot.config?.custom_commands || '[]'); } catch(_) {}
+    const list = document.getElementById('commands-list');
+    list.innerHTML = '';
+    if (!commands.length) {
+      list.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem 0;">Aucune commande personnalisée. Cliquez sur « Ajouter » pour créer votre première commande.</div>';
+    }
+    commands.forEach((cmd, idx) => addCommandRow(cmd, idx));
+  }
+
+  function addCommandRow(cmd = {}, idx = null) {
+    const list = document.getElementById('commands-list');
+    // Supprimer le message "aucune commande"
+    const empty = list.querySelector('[data-empty]');
+    if (empty) empty.remove();
+
+    const row = document.createElement('div');
+    row.dataset.cmdRow = idx !== null ? idx : Date.now();
+    row.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.75rem;position:relative;background:var(--bg-secondary);';
+
+    row.innerHTML = `
+      <div style="display:flex;gap:0.75rem;align-items:flex-start;flex-wrap:wrap;">
+        <div class="form-group" style="flex:0 0 160px;margin:0;">
+          <label class="form-label" style="font-size:0.78rem;">Commande (sans /)</label>
+          <input type="text" class="form-control mono cmd-name" value="${cmd.name||''}" placeholder="test" style="font-size:0.85rem;" />
+        </div>
+        <div class="form-group" style="flex:1 1 200px;margin:0;">
+          <label class="form-label" style="font-size:0.78rem;">Réponse</label>
+          <textarea class="form-control cmd-reply" rows="2" placeholder="Bonjour {first_name} !" style="font-size:0.85rem;">${cmd.reply||''}</textarea>
+        </div>
+        <div class="form-group" style="flex:0 0 120px;margin:0;">
+          <label class="form-label" style="font-size:0.78rem;">Format</label>
+          <select class="form-control cmd-parse_mode" style="font-size:0.85rem;">
+            <option value="HTML"${(cmd.parse_mode||'HTML')==='HTML'?' selected':''}>HTML</option>
+            <option value="Markdown"${cmd.parse_mode==='Markdown'?' selected':''}>Markdown</option>
+            <option value=""${cmd.parse_mode===''?' selected':''}>Texte brut</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin:0.5rem 0 0;">
+        <label class="form-label" style="font-size:0.78rem;">Description (menu Telegram, optionnel)</label>
+        <input type="text" class="form-control cmd-desc" value="${cmd.desc||''}" placeholder="Affiche un message de test" style="font-size:0.85rem;" />
+      </div>
+      <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--text-muted);">Variables disponibles : <code>{first_name}</code></div>
+      <button class="btn btn-danger btn-sm cmd-remove" style="position:absolute;top:0.75rem;right:0.75rem;padding:0.2rem 0.5rem;font-size:0.75rem;">✕ Supprimer</button>
+    `;
+
+    row.querySelector('.cmd-remove').addEventListener('click', () => {
+      row.remove();
+      if (!list.querySelectorAll('[data-cmd-row]').length) {
+        list.innerHTML = '<div data-empty style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem 0;">Aucune commande personnalisée.</div>';
+      }
+    });
+
+    // Nettoyer le nom (alphanum + underscore seulement)
+    const nameInput = row.querySelector('.cmd-name');
+    nameInput.addEventListener('input', () => {
+      nameInput.value = nameInput.value.replace(/[^a-z0-9_]/gi, '').toLowerCase();
+    });
+
+    list.appendChild(row);
+  }
+
+  function getCustomCommandsFromUI() {
+    const rows = document.querySelectorAll('#commands-list [data-cmd-row]');
+    const commands = [];
+    rows.forEach(row => {
+      const name = row.querySelector('.cmd-name')?.value.trim();
+      if (!name) return; // ignorer les lignes sans nom
+      commands.push({
+        name,
+        reply:      row.querySelector('.cmd-reply')?.value || '',
+        desc:       row.querySelector('.cmd-desc')?.value || '',
+        parse_mode: row.querySelector('.cmd-parse_mode')?.value || 'HTML',
+      });
+    });
+    return commands;
+  }
+
+  async function saveCustomCommands() {
+    const btn     = document.getElementById('save-commands-btn');
+    const alertEl = document.getElementById('alert-commands');
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    alertEl.innerHTML = '';
+
+    const commands = getCustomCommandsFromUI();
+    const data = await api('/bots/' + botId, {
+      method: 'PUT',
+      body: JSON.stringify({ name: currentBot.name, config: { custom_commands: JSON.stringify(commands) } }),
+    });
+
+    btn.classList.remove('btn-loading');
+    btn.disabled = false;
+
+    if (data?.success) {
+      currentBot = data.bot;
+      Toast.success(`${commands.length} commande(s) sauvegardée(s) !`);
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${data?.error || 'Erreur'}</div>`;
+    }
   }
 
   async function saveConfig() {
