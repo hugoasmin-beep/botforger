@@ -25,6 +25,30 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
+// ─── POST /api/bots/proxy-test ───────────────────────────────────────────
+// Proxy côté serveur pour tester les endpoints API externes
+// (contourne la CSP connect-src 'self' du navigateur)
+router.post('/proxy-test', protect, async (req, res) => {
+  const { url, method = 'GET', headers = {}, body: reqBody } = req.body;
+  if (!url || typeof url !== 'string') {
+    return res.status(400).json({ success: false, error: 'URL manquante' });
+  }
+  // Bloquer les URLs locales (SSRF protection)
+  const blocked = /^(https?:\/\/)?(localhost|127\.|10\.|192\.168\.|::1)/i;
+  if (blocked.test(url)) {
+    return res.status(403).json({ success: false, error: 'URL locale non autorisée' });
+  }
+  try {
+    const fetchOpts = { method, headers: { 'Content-Type': 'application/json', ...headers } };
+    if (['POST','PUT','PATCH'].includes(method) && reqBody) fetchOpts.body = reqBody;
+    const upstream = await fetch(url, fetchOpts);
+    const text = await upstream.text();
+    res.json({ success: true, status: upstream.status, ok: upstream.ok, body: text });
+  } catch (err) {
+    res.status(502).json({ success: false, error: err.message });
+  }
+});
+
 // ─── GET /api/bots/validate-token ────────────────────────────────────────
 // Doit être AVANT /:id sinon Express le capture comme id="validate-token"
 router.post('/validate-token', protect, async (req, res) => {

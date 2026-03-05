@@ -5,72 +5,214 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Créer un bot — BotForge</title>
   <link rel="stylesheet" href="/css/style.css" />
-  <link rel="stylesheet" href="/css/create-bot.css" />
+  <style>
+    body { margin:0; background:var(--bg-base); }
+    .create-bot-page { min-height:100vh; overflow:hidden; }
+    .wizard-shell { display:flex; height:100vh; overflow:hidden; }
+
+    /* Sidebar */
+    .wizard-sidebar { width:252px; flex-shrink:0; background:var(--bg-surface); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:1.5rem 1.25rem; overflow-y:auto; }
+    .wizard-logo { display:flex; align-items:center; gap:.5rem; font-weight:800; font-size:1.05rem; color:var(--text-primary); text-decoration:none; margin-bottom:2rem; }
+    .wizard-steps { display:flex; flex-direction:column; }
+    .wizard-step { display:flex; align-items:center; gap:.75rem; padding:.4rem 0; opacity:.35; transition:opacity .3s; }
+    .wizard-step.active { opacity:1; }
+    .wizard-step.done   { opacity:.65; }
+    .ws-dot { width:30px; height:30px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; color:var(--text-muted); flex-shrink:0; transition:all .3s; background:var(--bg-input); }
+    .wizard-step.active .ws-dot { border-color:var(--cyan); color:var(--cyan); background:var(--cyan-dim); box-shadow:0 0 10px rgba(0,212,255,.3); }
+    .wizard-step.done .ws-dot { border-color:var(--green); color:var(--green); background:var(--green-dim); }
+    .wizard-step.done .ws-dot::after { content:'✓'; font-size:.8rem; }
+    .wizard-step.done .ws-dot span { display:none; }
+    .wizard-step-line { width:2px; height:20px; background:var(--border); margin-left:14px; }
+    .ws-label { font-size:.82rem; font-weight:700; color:var(--text-primary); }
+    .ws-sub   { font-size:.72rem; color:var(--text-muted); }
+    .wizard-step.active .ws-label { color:var(--cyan); }
+
+    .preview-phone { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; overflow:hidden; font-size:.78rem; margin-top:1.5rem; }
+    .preview-phone-header { display:flex; align-items:center; gap:.6rem; padding:.6rem .85rem; border-bottom:1px solid var(--border); background:rgba(0,212,255,.04); }
+    .preview-bot-avatar { width:28px; height:28px; border-radius:50%; background:var(--cyan-dim); display:flex; align-items:center; justify-content:center; font-size:.8rem; flex-shrink:0; }
+    .preview-bot-name  { font-weight:700; font-size:.8rem; }
+    .preview-bot-status { font-size:.68rem; color:var(--green); }
+    .preview-messages { padding:.7rem .85rem; min-height:55px; display:flex; flex-direction:column; gap:.4rem; }
+    .preview-bubble { padding:.4rem .7rem; border-radius:10px 10px 10px 2px; background:var(--bg-input); max-width:85%; font-size:.75rem; line-height:1.4; }
+
+    /* Main */
+    .wizard-main { flex:1; overflow-y:auto; padding:2rem 2.5rem; display:flex; flex-direction:column; }
+    .wizard-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.75rem; }
+    .wizard-title  { font-size:1.5rem; font-weight:800; margin:0 0 .25rem; }
+    .wizard-subtitle { font-size:.82rem; color:var(--text-muted); margin:0; }
+
+    .btn { padding:.55rem 1.2rem; border-radius:8px; border:none; cursor:pointer; font-weight:600; font-size:.85rem; font-family:inherit; transition:all .2s; display:inline-flex; align-items:center; gap:.4rem; }
+    .btn-primary { background:linear-gradient(135deg,var(--cyan),#0090cc); color:#000; }
+    .btn-primary:hover:not(:disabled) { filter:brightness(1.1); transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,212,255,.35); }
+    .btn-primary:disabled { opacity:.4; cursor:not-allowed; }
+    .btn-ghost { background:transparent; color:var(--text-secondary); border:1px solid var(--border); }
+    .btn-ghost:hover { border-color:var(--border-hover); color:var(--text-primary); }
+    .btn-secondary { background:var(--bg-card); color:var(--text-primary); border:1px solid var(--border); }
+    .btn-secondary:hover { border-color:var(--border-hover); }
+    .btn-sm { padding:.35rem .8rem; font-size:.78rem; }
+    .btn-lg { padding:.7rem 1.75rem; font-size:.95rem; }
+    .btn-loading { opacity:.6; pointer-events:none; }
+
+    .wizard-panel { display:none; flex:1; flex-direction:column; }
+    .wizard-panel.active { display:flex; animation:fadeIn .25s; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .wizard-nav { display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:1.25rem; border-top:1px solid var(--border); }
+
+    .form-control { width:100%; padding:.55rem .85rem; background:var(--bg-input); border:1px solid var(--border); border-radius:8px; color:var(--text-primary); font-size:.85rem; font-family:inherit; transition:border-color .2s; box-sizing:border-box; }
+    .form-control:focus { outline:none; border-color:var(--border-focus); }
+    .form-hint { font-size:.75rem; color:var(--text-muted); margin-top:.35rem; line-height:1.4; }
+    .form-error { color:var(--red); font-size:.82rem; margin-top:.3rem; }
+    .code-area { font-family:var(--font-mono); font-size:.78rem; }
+
+    /* Step 1 */
+    .token-hero { text-align:center; padding:1.25rem 0 1.75rem; }
+    .token-hero-icon { font-size:2.5rem; margin-bottom:.75rem; }
+    .token-hero h2 { font-size:1.25rem; margin:0 0 .4rem; }
+    .token-hero p  { color:var(--text-secondary); font-size:.87rem; margin:0; }
+    .token-input-wrap { display:flex; gap:.75rem; margin-bottom:1rem; }
+    .token-input { flex:1; font-family:var(--font-mono); font-size:.82rem; }
+    .token-hint-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; margin-top:1.25rem; }
+    .hint-card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:.85rem; display:flex; gap:.6rem; align-items:flex-start; font-size:.8rem; color:var(--text-secondary); }
+    .token-success-card { display:flex; align-items:center; gap:.75rem; background:rgba(0,255,136,.08); border:1px solid rgba(0,255,136,.25); border-radius:10px; padding:.75rem 1rem; margin-top:.75rem; }
+    .token-success-avatar { width:36px; height:36px; border-radius:50%; background:rgba(0,255,136,.15); display:flex; align-items:center; justify-content:center; }
+    .token-success-name { font-weight:700; font-size:.9rem; }
+    .token-success-user { font-size:.75rem; color:var(--text-muted); font-family:var(--font-mono); }
+    .token-success-check { margin-left:auto; font-size:1.2rem; }
+    .token-error-card { background:rgba(255,71,87,.08); border:1px solid rgba(255,71,87,.25); border-radius:10px; padding:.65rem 1rem; margin-top:.75rem; color:var(--red); font-size:.85rem; }
+    .token-loading { color:var(--text-muted); font-size:.85rem; margin-top:.5rem; }
+
+    /* Step 2 */
+    .template-header { margin-bottom:1.1rem; }
+    .template-header h3 { font-size:1rem; font-weight:700; margin:0 0 .2rem; }
+    .template-header p { font-size:.82rem; color:var(--text-muted); margin:0; }
+    .template-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:.8rem; overflow-y:auto; }
+    .tpl-card { background:var(--bg-card); border:1.5px solid var(--border); border-radius:14px; padding:1.1rem .9rem; cursor:pointer; transition:all .2s; position:relative; overflow:hidden; }
+    .tpl-card:hover { border-color:var(--border-hover); transform:translateY(-2px); }
+    .tpl-card.selected { border-color:var(--card-color,var(--cyan)); box-shadow:0 0 16px rgba(0,212,255,.2); }
+    .tpl-card-glow { position:absolute; inset:0; background:radial-gradient(circle at 50% 100%,var(--glow,#00d4ff)18,transparent 70%); opacity:.07; pointer-events:none; transition:opacity .2s; }
+    .tpl-card.selected .tpl-card-glow { opacity:.15; }
+    .tpl-icon { font-size:1.7rem; margin-bottom:.45rem; }
+    .tpl-name { font-size:.88rem; font-weight:700; margin-bottom:.2rem; }
+    .tpl-desc { font-size:.75rem; color:var(--text-secondary); line-height:1.4; }
+    .tpl-tags { display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.55rem; }
+    .tpl-tags span { font-size:.67rem; padding:.12rem .4rem; border-radius:99px; background:var(--bg-input); color:var(--text-muted); border:1px solid var(--border); }
+    .tpl-check { position:absolute; top:.65rem; right:.65rem; width:20px; height:20px; border-radius:50%; background:var(--card-color,var(--cyan)); color:#000; font-size:.65rem; font-weight:900; display:none; align-items:center; justify-content:center; }
+    .tpl-card.selected .tpl-check { display:flex; }
+    .tpl-badge { position:absolute; top:.55rem; right:.55rem; font-size:.6rem; font-weight:800; padding:.15rem .4rem; border-radius:6px; }
+
+    /* Step 3 - Builder */
+    .builder-shell { display:grid; grid-template-columns:192px 1fr 252px; gap:.85rem; flex:1; min-height:0; overflow:hidden; }
+
+    .builder-palette { background:var(--bg-surface); border:1px solid var(--border); border-radius:14px; padding:.75rem; overflow-y:auto; display:flex; flex-direction:column; gap:.4rem; }
+    .palette-title { font-size:.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.08em; margin:.35rem 0 .1rem; }
+    .palette-item { display:flex; align-items:center; gap:.55rem; padding:.48rem .65rem; border-radius:9px; background:var(--bg-card); border:1px solid var(--border); cursor:grab; font-size:.79rem; font-weight:600; transition:all .2s; user-select:none; }
+    .palette-item:hover { border-color:var(--border-hover); background:var(--bg-card-hover); transform:translateX(2px); }
+    .palette-item:active { cursor:grabbing; }
+    .palette-item-icon { font-size:.95rem; width:18px; text-align:center; flex-shrink:0; }
+    .palette-sep { height:1px; background:var(--border); margin:.25rem 0; }
+
+    .builder-canvas-wrap { display:flex; flex-direction:column; gap:.65rem; min-height:0; }
+    .canvas-topbar { display:flex; align-items:center; justify-content:space-between; background:var(--bg-surface); border:1px solid var(--border); border-radius:10px; padding:.45rem .85rem; flex-shrink:0; }
+    .canvas-topbar-title { font-size:.8rem; font-weight:700; color:var(--text-secondary); }
+
+    .canvas-drop-zone { flex:1; background:var(--bg-surface); border:1.5px dashed var(--border); border-radius:14px; padding:.85rem; display:flex; flex-direction:column; gap:.6rem; min-height:280px; transition:border-color .2s, background .2s; overflow-y:auto; }
+    .canvas-drop-zone.drag-over { border-color:var(--cyan); background:rgba(0,212,255,.03); }
+    .canvas-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.4rem; color:var(--text-muted); text-align:center; padding:2rem; }
+    .canvas-empty-icon { font-size:2.2rem; opacity:.35; }
+    .canvas-empty p { font-size:.8rem; line-height:1.5; margin:0; }
+
+    .canvas-block { background:var(--bg-card); border:1.5px solid var(--border); border-radius:12px; overflow:hidden; transition:all .2s; cursor:pointer; }
+    .canvas-block:hover, .canvas-block.selected { border-color:var(--bclr, var(--cyan)); box-shadow:0 0 12px rgba(0,212,255,.12); }
+    .canvas-block-header { display:flex; align-items:center; gap:.55rem; padding:.55rem .8rem; border-bottom:1px solid var(--border); }
+    .bclr-dot { width:7px; height:7px; border-radius:50%; background:var(--bclr,var(--cyan)); flex-shrink:0; }
+    .bh-name { font-size:.8rem; font-weight:700; flex:1; }
+    .bh-type { font-size:.67rem; color:var(--text-muted); }
+    .b-del { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:.8rem; padding:.15rem .3rem; transition:color .2s; }
+    .b-del:hover { color:var(--red); }
+    .canvas-block-body { padding:.55rem .8rem; }
+    .b-summary { font-size:.75rem; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .botname-bar { background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:.9rem 1.1rem; margin-bottom:.75rem; display:flex; flex-direction:column; gap:.4rem; flex-shrink:0; }
+    .botname-lbl { font-size:.77rem; font-weight:700; color:var(--text-secondary); }
+
+    .builder-inspector { background:var(--bg-surface); border:1px solid var(--border); border-radius:14px; overflow-y:auto; display:flex; flex-direction:column; }
+    .inspector-header { padding:.7rem 1rem; border-bottom:1px solid var(--border); font-size:.77rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.06em; flex-shrink:0; }
+    .inspector-body { padding:.75rem .9rem; flex:1; display:flex; flex-direction:column; gap:.75rem; overflow-y:auto; }
+    .inspector-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; color:var(--text-muted); font-size:.78rem; text-align:center; gap:.4rem; padding:1.5rem; }
+    .inspector-empty-icon { font-size:1.6rem; opacity:.4; }
+    .insp-sec { display:flex; flex-direction:column; gap:.4rem; }
+    .insp-title { font-size:.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.07em; }
+
+    .kv-list { display:flex; flex-direction:column; gap:.35rem; }
+    .kv-row { display:flex; align-items:center; gap:.35rem; }
+    .kv-sep { color:var(--text-muted); font-size:.72rem; }
+    .kv-del { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:.78rem; padding:.2rem; }
+    .kv-del:hover { color:var(--red); }
+
+    .method-row { display:flex; gap:.4rem; }
+    .method-select { padding:.4rem .5rem; background:var(--bg-input); border:1px solid var(--border); border-radius:8px; color:var(--text-primary); font-size:.82rem; font-family:inherit; width:86px; flex-shrink:0; }
+
+    .test-box { background:rgba(0,212,255,.04); border:1px solid rgba(0,212,255,.14); border-radius:10px; padding:.65rem; display:flex; flex-direction:column; gap:.45rem; }
+    .test-box-title { font-size:.73rem; font-weight:700; color:var(--cyan); }
+    .test-row { display:flex; gap:.4rem; }
+    .api-test-success { background:rgba(0,255,136,.06); border:1px solid rgba(0,255,136,.2); border-radius:8px; padding:.6rem; font-size:.74rem; }
+    .api-test-status { font-weight:700; margin-bottom:.25rem; }
+    .api-test-message { color:var(--text-secondary); white-space:pre-wrap; max-height:75px; overflow:auto; }
+
+    .toggle-wrap { display:flex; align-items:center; gap:.55rem; }
+    .toggle { width:34px; height:19px; border-radius:99px; background:var(--bg-input); border:1.5px solid var(--border); cursor:pointer; position:relative; transition:all .2s; flex-shrink:0; }
+    .toggle.active { background:var(--cyan-dim); border-color:var(--cyan); }
+    .toggle::after { content:''; position:absolute; top:2px; left:2px; width:11px; height:11px; border-radius:50%; background:var(--text-muted); transition:all .2s; }
+    .toggle.active::after { left:17px; background:var(--cyan); }
+    .toggle-label { font-size:.8rem; color:var(--text-secondary); cursor:pointer; }
+
+    /* Step 4 */
+    .launch-summary-card { display:flex; align-items:center; gap:1rem; background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:1.25rem; margin-bottom:1.5rem; }
+    .launch-summary-avatar { width:48px; height:48px; border-radius:50%; background:var(--cyan-dim); display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+    .launch-summary-name { font-size:1.1rem; font-weight:800; }
+    .launch-summary-template { font-size:.82rem; color:var(--text-muted); }
+    .launch-summary-token { font-family:var(--font-mono); font-size:.74rem; color:var(--text-muted); margin-top:.2rem; }
+    .launch-checklist { display:flex; flex-direction:column; gap:.6rem; }
+    .check-item { display:flex; align-items:center; gap:.75rem; padding:.7rem 1rem; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; font-size:.85rem; }
+    .check-icon { font-size:1rem; }
+    .check-item.done  { border-color:rgba(0,255,136,.25); }
+    .check-item.error { border-color:rgba(255,71,87,.25); }
+    .alert { padding:.75rem 1rem; border-radius:10px; font-size:.85rem; }
+    .alert-error { background:rgba(255,71,87,.1); border:1px solid rgba(255,71,87,.3); color:var(--red); }
+
+    ::-webkit-scrollbar { width:4px; height:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
+
+    .var-chip { font-size:.68rem; padding:.13rem .38rem; border-radius:5px; background:var(--bg-input); border:1px solid var(--border); color:var(--cyan); cursor:pointer; font-family:var(--font-mono); transition:all .15s; user-select:none; }
+    .var-chip:hover { border-color:var(--cyan); background:var(--cyan-dim); }
+  </style>
 </head>
 <body class="create-bot-page">
-
 <div class="wizard-shell">
 
-  <!-- ── Sidebar steps ──────────────────────────────────────────── -->
   <aside class="wizard-sidebar">
-    <a href="/dashboard.html" class="wizard-logo">
-      <span>🤖</span> BotForge
-    </a>
-
+    <a href="/dashboard.html" class="wizard-logo"><span>🤖</span> BotForge</a>
     <nav class="wizard-steps">
-      <div class="wizard-step active" data-step="1">
-        <div class="ws-dot"><span>1</span></div>
-        <div class="ws-info">
-          <div class="ws-label">Token Telegram</div>
-          <div class="ws-sub">Vérification du bot</div>
-        </div>
-      </div>
+      <div class="wizard-step active" data-step="1"><div class="ws-dot"><span>1</span></div><div><div class="ws-label">Token Telegram</div><div class="ws-sub">Connexion</div></div></div>
       <div class="wizard-step-line"></div>
-      <div class="wizard-step" data-step="2">
-        <div class="ws-dot"><span>2</span></div>
-        <div class="ws-info">
-          <div class="ws-label">Template</div>
-          <div class="ws-sub">Type de bot</div>
-        </div>
-      </div>
+      <div class="wizard-step" data-step="2"><div class="ws-dot"><span>2</span></div><div><div class="ws-label">Template</div><div class="ws-sub">Point de départ</div></div></div>
       <div class="wizard-step-line"></div>
-      <div class="wizard-step" data-step="3">
-        <div class="ws-dot"><span>3</span></div>
-        <div class="ws-info">
-          <div class="ws-label">Configuration</div>
-          <div class="ws-sub">Messages & options</div>
-        </div>
-      </div>
+      <div class="wizard-step" data-step="3"><div class="ws-dot"><span>3</span></div><div><div class="ws-label">Constructeur</div><div class="ws-sub">Glisser-déposer</div></div></div>
       <div class="wizard-step-line"></div>
-      <div class="wizard-step" data-step="4">
-        <div class="ws-dot"><span>4</span></div>
-        <div class="ws-info">
-          <div class="ws-label">Lancement</div>
-          <div class="ws-sub">Déploiement</div>
-        </div>
-      </div>
+      <div class="wizard-step" data-step="4"><div class="ws-dot"><span>4</span></div><div><div class="ws-label">Déploiement</div><div class="ws-sub">Lancer</div></div></div>
     </nav>
-
-    <!-- Preview panel -->
-    <div class="wizard-preview" id="wizard-preview">
-      <div class="preview-phone">
-        <div class="preview-phone-header">
-          <div class="preview-bot-avatar" id="preview-avatar">🤖</div>
-          <div>
-            <div class="preview-bot-name" id="preview-name">Votre bot</div>
-            <div class="preview-bot-status">● En ligne</div>
-          </div>
-        </div>
-        <div class="preview-messages" id="preview-messages">
-          <div class="preview-bubble bot">
-            Bonjour ! Je suis prêt à vous aider 👋
-          </div>
-        </div>
+    <div class="preview-phone">
+      <div class="preview-phone-header">
+        <div class="preview-bot-avatar" id="preview-avatar">🤖</div>
+        <div><div class="preview-bot-name" id="preview-name">Votre bot</div><div class="preview-bot-status">● En ligne</div></div>
+      </div>
+      <div class="preview-messages" id="preview-messages">
+        <div class="preview-bubble">Configurez-moi 👋</div>
       </div>
     </div>
   </aside>
 
-  <!-- ── Main content ────────────────────────────────────────────── -->
   <main class="wizard-main">
     <div class="wizard-header">
       <div>
@@ -79,308 +221,147 @@
       </div>
       <a href="/bots.html" class="btn btn-ghost btn-sm">✕ Annuler</a>
     </div>
+    <div id="alert-global" style="margin-bottom:.5rem;"></div>
 
-    <div id="alert-global" style="margin-bottom:1rem;"></div>
-
-    <!-- ── STEP 1: Token ───────────────────────────────────────────── -->
+    <!-- STEP 1 -->
     <div class="wizard-panel active" id="panel-1">
       <div class="token-hero">
         <div class="token-hero-icon">🔑</div>
         <h2>Connectez votre bot Telegram</h2>
-        <p>Obtenez votre token via <strong>@BotFather</strong> sur Telegram avec la commande <code>/newbot</code></p>
+        <p>Obtenez votre token via <strong>@BotFather</strong> sur Telegram avec <code>/newbot</code></p>
       </div>
-
       <div class="token-input-wrap">
-        <input type="text" class="token-input mono" id="bot-token"
-          placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"
-          autocomplete="off" />
-        <button class="btn btn-primary" id="validate-token-btn">
-          Vérifier →
-        </button>
+        <input type="text" class="form-control token-input mono" id="bot-token" placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz" autocomplete="off" />
+        <button class="btn btn-primary" id="validate-token-btn">Vérifier →</button>
       </div>
-
       <div id="token-status"></div>
-
       <div class="token-hint-cards">
-        <div class="hint-card">
-          <div class="hint-icon">1️⃣</div>
-          <div>Ouvrez Telegram et cherchez <strong>@BotFather</strong></div>
-        </div>
-        <div class="hint-card">
-          <div class="hint-icon">2️⃣</div>
-          <div>Envoyez <code>/newbot</code> et suivez les instructions</div>
-        </div>
-        <div class="hint-card">
-          <div class="hint-icon">3️⃣</div>
-          <div>Copiez le token et collez-le ci-dessus</div>
-        </div>
+        <div class="hint-card"><div>1️⃣</div><div>Ouvrez Telegram, cherchez <strong>@BotFather</strong></div></div>
+        <div class="hint-card"><div>2️⃣</div><div>Envoyez <code>/newbot</code> et suivez</div></div>
+        <div class="hint-card"><div>3️⃣</div><div>Copiez le token ici</div></div>
       </div>
-
-      <div class="wizard-nav">
-        <span></span>
-        <button class="btn btn-primary btn-lg" id="step1-next" disabled>
-          Continuer →
-        </button>
-      </div>
+      <div class="wizard-nav"><span></span><button class="btn btn-primary btn-lg" id="step1-next" disabled>Continuer →</button></div>
     </div>
 
-    <!-- ── STEP 2: Template ────────────────────────────────────────── -->
+    <!-- STEP 2 -->
     <div class="wizard-panel" id="panel-2">
+      <div class="template-header">
+        <h3>Point de départ</h3>
+        <p>Commencez de zéro ou choisissez un template — tout reste personnalisable dans le constructeur.</p>
+      </div>
       <div class="template-grid" id="template-grid">
-
+        <div class="tpl-card" data-template="blank" data-color="#4a5568" style="--card-color:#4a5568;border-style:dashed;">
+          <div class="tpl-card-glow" style="--glow:#4a5568"></div>
+          <div class="tpl-icon" style="opacity:.5;">＋</div>
+          <div class="tpl-name">Vide</div>
+          <div class="tpl-desc">Canvas libre, construisez bloc par bloc</div>
+          <div class="tpl-tags"><span>Libre</span></div>
+          <div class="tpl-check" style="background:#4a5568;">✓</div>
+        </div>
         <div class="tpl-card" data-template="echo" data-color="#00d4ff">
           <div class="tpl-card-glow" style="--glow:#00d4ff"></div>
-          <div class="tpl-card-inner">
-            <div class="tpl-icon">🔁</div>
-            <div class="tpl-name">Bot Echo</div>
-            <div class="tpl-desc">Répond en écho, idéal pour tester et prototyper</div>
-            <div class="tpl-tags"><span>Réponses</span><span>Messages</span></div>
-          </div>
-          <div class="tpl-check">✓</div>
+          <div class="tpl-icon">🔁</div><div class="tpl-name">Bot Echo</div>
+          <div class="tpl-desc">Répond en écho, idéal pour tester</div>
+          <div class="tpl-tags"><span>Réponses</span></div><div class="tpl-check">✓</div>
         </div>
-
         <div class="tpl-card" data-template="welcome" data-color="#00ff88">
           <div class="tpl-card-glow" style="--glow:#00ff88"></div>
-          <div class="tpl-card-inner">
-            <div class="tpl-icon">👋</div>
-            <div class="tpl-name">Bienvenue</div>
-            <div class="tpl-desc">Accueille automatiquement les nouveaux membres de groupe</div>
-            <div class="tpl-tags"><span>Groupes</span><span>Auto</span></div>
-          </div>
-          <div class="tpl-check">✓</div>
+          <div class="tpl-icon">👋</div><div class="tpl-name">Bienvenue</div>
+          <div class="tpl-desc">Accueille les nouveaux membres</div>
+          <div class="tpl-tags"><span>Groupes</span></div><div class="tpl-check" style="background:#00ff88;">✓</div>
         </div>
-
         <div class="tpl-card" data-template="poll" data-color="#ffd32a">
           <div class="tpl-card-glow" style="--glow:#ffd32a"></div>
-          <div class="tpl-card-inner">
-            <div class="tpl-icon">🗳️</div>
-            <div class="tpl-name">Sondages</div>
-            <div class="tpl-desc">Crée des sondages interactifs avec /poll</div>
-            <div class="tpl-tags"><span>Votes</span><span>Interaction</span></div>
-          </div>
-          <div class="tpl-check">✓</div>
+          <div class="tpl-icon">🗳️</div><div class="tpl-name">Sondages</div>
+          <div class="tpl-desc">Sondages interactifs /poll</div>
+          <div class="tpl-tags"><span>Votes</span></div><div class="tpl-check" style="background:#ffd32a;color:#000;">✓</div>
         </div>
-
         <div class="tpl-card" data-template="reminder" data-color="#ff6b9d">
           <div class="tpl-card-glow" style="--glow:#ff6b9d"></div>
-          <div class="tpl-card-inner">
-            <div class="tpl-icon">⏰</div>
-            <div class="tpl-name">Rappels</div>
-            <div class="tpl-desc">Programme des rappels automatiques avec /remind</div>
-            <div class="tpl-tags"><span>Scheduler</span><span>Automatique</span></div>
-          </div>
-          <div class="tpl-check">✓</div>
+          <div class="tpl-icon">⏰</div><div class="tpl-name">Rappels</div>
+          <div class="tpl-desc">Rappels programmés /remind</div>
+          <div class="tpl-tags"><span>Scheduler</span></div><div class="tpl-check" style="background:#ff6b9d;">✓</div>
         </div>
-
         <div class="tpl-card" data-template="translate" data-color="#00e5ff">
           <div class="tpl-card-glow" style="--glow:#00e5ff"></div>
-          <div class="tpl-card-inner">
-            <div class="tpl-icon">🌍</div>
-            <div class="tpl-name">Traducteur</div>
-            <div class="tpl-desc">Traduit en temps réel dans 14 langues</div>
-            <div class="tpl-tags"><span>14 langues</span><span>Temps réel</span></div>
-          </div>
-          <div class="tpl-check">✓</div>
+          <div class="tpl-icon">🌍</div><div class="tpl-name">Traducteur</div>
+          <div class="tpl-desc">14 langues en temps réel</div>
+          <div class="tpl-tags"><span>14 langues</span></div><div class="tpl-check" style="background:#00e5ff;color:#000;">✓</div>
         </div>
-
         <div class="tpl-card" data-template="stats" data-color="#ff9f43">
           <div class="tpl-card-glow" style="--glow:#ff9f43"></div>
-          <div class="tpl-card-inner">
-            <div class="tpl-icon">📊</div>
-            <div class="tpl-name">Stats Groupe</div>
-            <div class="tpl-desc">Classement des membres par activité et messages</div>
-            <div class="tpl-tags"><span>Analytics</span><span>Classement</span></div>
-          </div>
-          <div class="tpl-check">✓</div>
+          <div class="tpl-icon">📊</div><div class="tpl-name">Stats Groupe</div>
+          <div class="tpl-desc">Classement par activité</div>
+          <div class="tpl-tags"><span>Analytics</span></div><div class="tpl-check" style="background:#ff9f43;color:#000;">✓</div>
         </div>
-
-        <div class="tpl-card tpl-card-special" data-template="ai" data-color="#a855f7">
-          <div class="tpl-badge" style="background:linear-gradient(135deg,#a855f7,#7c3aed);">✨ NEW</div>
+        <div class="tpl-card" data-template="ai" data-color="#a855f7">
+          <div class="tpl-badge" style="background:linear-gradient(135deg,#a855f7,#7c3aed);">✨ AI</div>
           <div class="tpl-card-glow" style="--glow:#a855f7"></div>
-          <div class="tpl-card-inner">
-            <div class="tpl-icon">🤖</div>
-            <div class="tpl-name">Bot IA</div>
-            <div class="tpl-desc">Chatbot intelligent avec OpenAI, Mistral ou Groq</div>
-            <div class="tpl-tags"><span>OpenAI</span><span>Mistral</span><span>Groq</span></div>
-          </div>
-          <div class="tpl-check">✓</div>
+          <div class="tpl-icon">🤖</div><div class="tpl-name">Bot IA</div>
+          <div class="tpl-desc">OpenAI / Mistral / Groq</div>
+          <div class="tpl-tags"><span>LLM</span></div><div class="tpl-check" style="background:#a855f7;">✓</div>
         </div>
-
-        <div class="tpl-card tpl-card-special" data-template="api" data-color="#00d4ff">
-          <div class="tpl-badge" style="background:linear-gradient(135deg,#00d4ff,#0088ff);">🔗 API</div>
+        <div class="tpl-card" data-template="api" data-color="#00d4ff">
+          <div class="tpl-badge" style="background:linear-gradient(135deg,#00d4ff,#0088ff);color:#000;">🔗 API</div>
           <div class="tpl-card-glow" style="--glow:#00d4ff"></div>
-          <div class="tpl-card-inner">
-            <div class="tpl-icon">⚡</div>
-            <div class="tpl-name">Bot API</div>
-            <div class="tpl-desc">Connecte ton bot à n'importe quelle API REST externe</div>
-            <div class="tpl-tags"><span>GET/POST</span><span>JSON</span><span>Custom</span></div>
-          </div>
-          <div class="tpl-check">✓</div>
+          <div class="tpl-icon">⚡</div><div class="tpl-name">Bot API</div>
+          <div class="tpl-desc">Connecte à n'importe quelle API REST</div>
+          <div class="tpl-tags"><span>GET/POST</span><span>JSON</span></div><div class="tpl-check">✓</div>
         </div>
-
       </div>
-
       <div class="wizard-nav">
         <button class="btn btn-ghost" id="step2-back">← Retour</button>
-        <button class="btn btn-primary btn-lg" id="step2-next" disabled>Configurer →</button>
+        <button class="btn btn-primary btn-lg" id="step2-next" disabled>Construire →</button>
       </div>
     </div>
 
-    <!-- ── STEP 3: Configuration ───────────────────────────────────── -->
+    <!-- STEP 3 - BUILDER -->
     <div class="wizard-panel" id="panel-3">
-
-      <!-- Name field (always shown) -->
-      <div class="cfg-section">
-        <div class="cfg-section-label">
-          <span class="cfg-section-icon">📝</span>
-          Nom du bot dans le dashboard
-        </div>
-        <input type="text" class="form-control" id="bot-name"
-          placeholder="Ex: Mon bot de bienvenue, Bot Stats Serveur"
-          maxlength="50" />
-        <div class="form-hint">Ce nom n'est visible que dans votre dashboard</div>
+      <div class="botname-bar">
+        <div class="botname-lbl">📝 Nom du bot</div>
+        <input type="text" class="form-control" id="bot-name" placeholder="Ex: Mon bot météo, Bot Stats Serveur" maxlength="50" />
+        <div class="form-hint">Visible uniquement dans votre dashboard.</div>
       </div>
 
-      <!-- Dynamic config fields -->
-      <div id="template-config-container"></div>
-
-      <!-- Rich message builder (pour echo, ai, api) -->
-      <div id="rich-media-builder" style="display:none;">
-        <div class="cfg-section">
-          <div class="cfg-section-label">
-            <span class="cfg-section-icon">✉️</span>
-            Message de bienvenue enrichi
-            <span class="cfg-section-hint">Ajoutez des boutons, images ou GIFs</span>
-          </div>
-          <div class="blocks-list" id="blocks-list"></div>
-          <div class="blocks-add-bar">
-            <button class="block-add-btn" data-type="text">＋ Texte</button>
-            <button class="block-add-btn" data-type="image">🖼 Image</button>
-            <button class="block-add-btn" data-type="gif">🎞 GIF</button>
-            <button class="block-add-btn" data-type="buttons">🔘 Boutons</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- API configurator (affiché seulement pour template=api) -->
-      <div id="api-configurator" style="display:none;">
-
-        <!-- Trigger keywords -->
-        <div class="cfg-section">
-          <div class="cfg-section-label"><span class="cfg-section-icon">⚡</span>Mots-clés déclencheurs</div>
-          <input type="text" class="form-control" id="cfg-api_triggers"
-            placeholder="météo, weather, forecast" />
-          <div class="form-hint">Mots-clés séparés par des virgules qui activent l'appel API. Laisser vide = tous les messages.</div>
+      <div class="builder-shell">
+        <!-- Palette -->
+        <div class="builder-palette">
+          <div class="palette-title">Réponses</div>
+          <div class="palette-item" draggable="true" data-type="text_reply"><div class="palette-item-icon">📝</div>Texte</div>
+          <div class="palette-item" draggable="true" data-type="welcome_msg"><div class="palette-item-icon">👋</div>Bienvenue</div>
+          <div class="palette-item" draggable="true" data-type="command"><div class="palette-item-icon">⌨️</div>Commande /</div>
+          <div class="palette-sep"></div>
+          <div class="palette-title">Connecteurs</div>
+          <div class="palette-item" draggable="true" data-type="api_endpoint"><div class="palette-item-icon">🔗</div>Endpoint API</div>
+          <div class="palette-item" draggable="true" data-type="api_key"><div class="palette-item-icon">🔑</div>Clé API</div>
+          <div class="palette-item" draggable="true" data-type="ai_llm"><div class="palette-item-icon">🤖</div>IA / LLM</div>
+          <div class="palette-sep"></div>
+          <div class="palette-title">Actions</div>
+          <div class="palette-item" draggable="true" data-type="reminder"><div class="palette-item-icon">⏰</div>Rappels</div>
+          <div class="palette-item" draggable="true" data-type="poll"><div class="palette-item-icon">🗳️</div>Sondage</div>
+          <div class="palette-item" draggable="true" data-type="translate"><div class="palette-item-icon">🌍</div>Traduction</div>
+          <div class="palette-item" draggable="true" data-type="stats"><div class="palette-item-icon">📊</div>Stats</div>
         </div>
 
-        <!-- Endpoint config -->
-        <div class="cfg-section">
-          <div class="cfg-section-label"><span class="cfg-section-icon">🔗</span>Endpoint API</div>
-          <div class="api-method-row">
-            <select class="method-select" id="cfg-api_method">
-              <option value="GET">GET</option>
-              <option value="POST">POST</option>
-              <option value="PUT">PUT</option>
-              <option value="PATCH">PATCH</option>
-              <option value="DELETE">DELETE</option>
-            </select>
-            <input type="text" class="form-control" id="cfg-api_url"
-              placeholder="https://api.example.com/endpoint?q={query}" style="flex:1;" />
+        <!-- Canvas -->
+        <div class="builder-canvas-wrap">
+          <div class="canvas-topbar">
+            <span class="canvas-topbar-title">🧩 Glissez des modules depuis la palette</span>
+            <span style="font-size:.73rem;color:var(--text-muted);" id="block-count">0 module(s)</span>
           </div>
-          <div class="form-hint">
-            Variables disponibles : <code>{query}</code> (texte après le trigger), <code>{user_id}</code>, <code>{first_name}</code>
-          </div>
-        </div>
-
-        <!-- Headers -->
-        <div class="cfg-section">
-          <div class="cfg-section-label">
-            <span class="cfg-section-icon">📋</span>
-            Headers HTTP
-            <button class="cfg-section-action" id="add-header-btn">+ Ajouter</button>
-          </div>
-          <div id="headers-list" class="kv-list"></div>
-          <div class="form-hint">Ex: Authorization → Bearer mon-token-api</div>
-        </div>
-
-        <!-- Body (POST/PUT) -->
-        <div id="body-section" class="cfg-section" style="display:none;">
-          <div class="cfg-section-label"><span class="cfg-section-icon">📦</span>Corps de la requête (JSON)</div>
-          <textarea class="form-control code-textarea" id="cfg-api_body" rows="4"
-            placeholder='{"query": "{query}", "user": "{user_id}"}'></textarea>
-          <div class="form-hint">Template JSON. Utilisez <code>{query}</code>, <code>{user_id}</code>, <code>{first_name}</code></div>
-        </div>
-
-        <!-- Response parsing -->
-        <div class="cfg-section">
-          <div class="cfg-section-label"><span class="cfg-section-icon">📤</span>Réponse de l'API</div>
-          <div class="api-response-grid">
-            <div class="form-group">
-              <label class="form-label">Chemin JSON <span class="form-hint-inline">(ex: data.result.0.name)</span></label>
-              <input type="text" class="form-control mono" id="cfg-api_response_path"
-                placeholder="data.0.name" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Template de réponse</label>
-              <textarea class="form-control" id="cfg-api_response_template" rows="2"
-                placeholder="🌡️ Résultat : {result}"></textarea>
-            </div>
-          </div>
-          <div class="form-hint">
-            <code>{result}</code> = valeur extraite · <code>{query}</code> = mot-clé tapé · <code>{first_name}</code> = prénom
-          </div>
-
-          <!-- Test live -->
-          <div class="api-test-box">
-            <div class="api-test-title">🧪 Tester l'appel API</div>
-            <div style="display:flex;gap:0.5rem;">
-              <input type="text" class="form-control" id="api-test-query" placeholder="Valeur de {query}" style="flex:1;" />
-              <button class="btn btn-secondary btn-sm" id="api-test-btn">Tester</button>
-            </div>
-            <div id="api-test-result" style="margin-top:0.75rem;"></div>
-          </div>
-        </div>
-
-        <!-- Buttons builder -->
-        <div class="cfg-section">
-          <div class="cfg-section-label">
-            <span class="cfg-section-icon">🔘</span>
-            Boutons de réponse (optionnel)
-            <button class="cfg-section-action" id="add-api-btn-row">+ Ligne</button>
-          </div>
-          <div id="api-buttons-builder" class="btns-builder"></div>
-          <div class="form-hint">Chaque ligne = une rangée de boutons dans Telegram. Max 3 boutons par ligne.</div>
-        </div>
-
-        <!-- Fallback & misc -->
-        <div class="cfg-section">
-          <div class="cfg-section-label"><span class="cfg-section-icon">⚙️</span>Options avancées</div>
-          <div class="api-response-grid">
-            <div class="form-group">
-              <label class="form-label">Message d'erreur</label>
-              <input type="text" class="form-control" id="cfg-api_fallback_message"
-                placeholder="❌ Impossible de récupérer les données." />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Cooldown entre appels (ms)</label>
-              <input type="text" class="form-control" id="cfg-api_cooldown_ms"
-                placeholder="2000" value="2000" />
+          <div class="canvas-drop-zone" id="canvas-drop-zone">
+            <div class="canvas-empty" id="canvas-empty">
+              <div class="canvas-empty-icon">⬇️</div>
+              <p>Glissez un module ici<br><span style="color:var(--text-muted);font-size:.72rem;">Les API endpoints et clés API ont leurs propres blocs</span></p>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- AI key section -->
-      <div id="ai-key-section" style="display:none;">
-        <div class="cfg-section ai-key-cfg">
-          <div class="cfg-section-label"><span class="cfg-section-icon">🔑</span>Clé API IA <span style="color:var(--red)">*</span></div>
-          <div style="display:flex;gap:0.5rem;">
-            <input type="password" class="form-control mono" id="ai-api-key-input"
-              placeholder="sk-... / votre clé API" style="flex:1;" autocomplete="new-password" />
-            <button class="btn btn-ghost btn-sm" id="toggle-api-key-btn">👁</button>
-          </div>
-          <div class="form-hint" style="color:var(--yellow);">
-            ⚠️ Stockée de façon sécurisée — jamais affichée en clair après sauvegarde.
+        <!-- Inspector -->
+        <div class="builder-inspector">
+          <div class="inspector-header">⚙ Inspecteur</div>
+          <div class="inspector-body" id="inspector-body">
+            <div class="inspector-empty"><div class="inspector-empty-icon">🖱</div><span>Cliquez sur un bloc pour l'éditer</span></div>
           </div>
         </div>
       </div>
@@ -391,620 +372,839 @@
       </div>
     </div>
 
-    <!-- ── STEP 4: Launch ──────────────────────────────────────────── -->
+    <!-- STEP 4 -->
     <div class="wizard-panel" id="panel-4">
-      <div class="launch-summary" id="launch-summary">
-        <!-- Filled dynamically -->
+      <div id="launch-summary"></div>
+      <div class="launch-checklist">
+        <div class="check-item" id="chk-token"><div class="check-icon">⏳</div><div>Token Telegram vérifié</div></div>
+        <div class="check-item" id="chk-webhook"><div class="check-icon">⏳</div><div>Webhook Telegram configuré</div></div>
+        <div class="check-item" id="chk-db"><div class="check-icon">⏳</div><div>Bot enregistré en base de données</div></div>
       </div>
-
-      <div class="launch-checklist" id="launch-checklist">
-        <div class="check-item" id="chk-token">
-          <div class="check-icon">⏳</div>
-          <div>Token Telegram vérifié</div>
-        </div>
-        <div class="check-item" id="chk-webhook">
-          <div class="check-icon">⏳</div>
-          <div>Webhook Telegram configuré</div>
-        </div>
-        <div class="check-item" id="chk-db">
-          <div class="check-icon">⏳</div>
-          <div>Bot enregistré en base de données</div>
-        </div>
-      </div>
-
       <div id="launch-error" style="display:none;margin-top:1rem;"></div>
-
       <div class="wizard-nav">
         <button class="btn btn-ghost" id="step4-back">← Modifier</button>
-        <button class="btn btn-primary btn-lg" id="create-btn">
-          🚀 Déployer le bot
-        </button>
+        <button class="btn btn-primary btn-lg" id="create-btn">🚀 Déployer le bot</button>
       </div>
     </div>
-
   </main>
 </div>
 
 <script src="/js/app.js"></script>
 <script>
-// ──────────────────────────────────────────────────────────────────────────
-// BotForge — Create Bot Wizard
-// ──────────────────────────────────────────────────────────────────────────
-
 document.addEventListener('DOMContentLoaded', () => {
-  const container = document.getElementById('sidebar-container');
-  if (container) container.style.display = 'none';
+  const s = document.getElementById('sidebar-container');
+  if (s) s.style.display = 'none';
   if (!Auth.requireAuth()) return;
-  bindAll();
+  init();
 });
 
-let currentStep = 1;
-let selectedTemplate = null;
-let tokenValidated   = false;
-let lastFocused      = null;
-let headerRows       = [];
-let apiBtnRows       = [];
-let blocks           = [];
+let currentStep = 1, selectedTemplate = null, tokenValidated = false;
+let canvasBlocks = [], selectedBlockId = null, dragType = null;
 
-const VARS_DOC = `<div class="vars-inline">
-  <span onclick="insertVar('{first_name}')">{first_name}</span>
-  <span onclick="insertVar('{last_name}')">{last_name}</span>
-  <span onclick="insertVar('{username}')">{username}</span>
-  <span onclick="insertVar('{chat_title}')">{chat_title}</span>
-</div>`;
+const BDEFS = {
+  text_reply:   { icon:'📝', name:'Réponse texte',    color:'#00d4ff' },
+  welcome_msg:  { icon:'👋', name:'Msg bienvenue',    color:'#00ff88' },
+  command:      { icon:'⌨️', name:'Commande /',       color:'#ffd32a' },
+  api_endpoint: { icon:'🔗', name:'Endpoint API',     color:'#00bfff' },
+  api_key:      { icon:'🔑', name:'Clé API / Secret', color:'#ff6b9d' },
+  ai_llm:       { icon:'🤖', name:'IA / LLM',         color:'#a855f7' },
+  reminder:     { icon:'⏰', name:'Rappels',           color:'#ff9f43' },
+  poll:         { icon:'🗳️', name:'Sondages',          color:'#ffd32a' },
+  translate:    { icon:'🌍', name:'Traduction',        color:'#00e5ff' },
+  stats:        { icon:'📊', name:'Stats groupe',      color:'#ff9f43' },
+};
 
-// ── Navigation ─────────────────────────────────────────────────────────────
-function goTo(n) {
-  document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active', 'exit'));
-  document.querySelectorAll('.wizard-step').forEach(s => {
-    const sn = parseInt(s.dataset.step);
-    s.classList.toggle('active', sn === n);
-    s.classList.toggle('done',   sn < n);
-  });
-  const panel = document.getElementById('panel-' + n);
-  if (panel) panel.classList.add('active');
-  currentStep = n;
+const TPL_SEEDS = {
+  blank:    [],
+  echo:     [{ type:'text_reply',   data:{ triggers:'', message:'🔁 Echo : {query}' } }],
+  welcome:  [{ type:'welcome_msg',  data:{ welcome_message:'👋 Bienvenue {first_name} !', include_username:true } }],
+  poll:     [{ type:'poll',         data:{} }],
+  reminder: [{ type:'reminder',     data:{} }],
+  translate:[{ type:'translate',    data:{} }],
+  stats:    [{ type:'stats',        data:{} }],
+  ai:       [{ type:'api_key',      data:{ key_name:'Clé IA', key_value:'', key_provider:'OpenAI / Mistral / Groq' } },
+             { type:'ai_llm',       data:{ ai_model:'gpt-4o-mini', ai_prompt:'Vous êtes un assistant utile.', ai_api_key_ref:'Clé IA' } }],
+  api:      [{ type:'api_endpoint', data:{ api_method:'GET', api_url:'', api_triggers:'', api_headers:'', api_body:'', api_response_path:'', api_response_template:'{result}', api_fallback:'❌ Impossible de récupérer les données.', _headerRows:[] } }],
+};
 
-  const subtitles = ['', 'Étape 1 sur 4 — Connexion Telegram', 'Étape 2 sur 4 — Choisissez un template', 'Étape 3 sur 4 — Configuration', 'Étape 4 sur 4 — Lancement'];
-  document.getElementById('wizard-subtitle').textContent = subtitles[n] || '';
-}
+function uid() { return Math.random().toString(36).slice(2,9); }
 
-// ── Bind all buttons ────────────────────────────────────────────────────────
-function bindAll() {
+function init() {
   document.getElementById('validate-token-btn').addEventListener('click', validateToken);
-  document.getElementById('bot-token').addEventListener('keydown', e => { if (e.key === 'Enter') validateToken(); });
+  document.getElementById('bot-token').addEventListener('keydown', e => { if(e.key==='Enter') validateToken(); });
   document.getElementById('step1-next').addEventListener('click', () => goTo(2));
   document.getElementById('step2-back').addEventListener('click', () => goTo(1));
-  document.getElementById('step2-next').addEventListener('click', () => { buildConfigPanel(); goTo(3); });
+  document.getElementById('step2-next').addEventListener('click', () => { seedCanvas(); goTo(3); });
   document.getElementById('step3-back').addEventListener('click', () => goTo(2));
   document.getElementById('step3-next').addEventListener('click', validateStep3);
   document.getElementById('step4-back').addEventListener('click', () => goTo(3));
   document.getElementById('create-btn').addEventListener('click', createBot);
 
-  // Template cards
   document.querySelectorAll('.tpl-card').forEach(card => {
     card.addEventListener('click', () => {
       document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       selectedTemplate = card.dataset.template;
-      const color = card.dataset.color || '#00d4ff';
-      card.style.setProperty('--card-color', color);
       document.getElementById('step2-next').disabled = false;
       updatePreview();
     });
   });
 
-  // API method toggle (show/hide body)
-  document.getElementById('cfg-api_method')?.addEventListener('change', function() {
-    const show = ['POST','PUT','PATCH'].includes(this.value);
-    document.getElementById('body-section').style.display = show ? 'block' : 'none';
+  document.querySelectorAll('.palette-item').forEach(item => {
+    item.addEventListener('dragstart', e => { dragType = item.dataset.type; e.dataTransfer.effectAllowed = 'copy'; });
+    item.addEventListener('dragend', () => { dragType = null; });
   });
 
-  // Add header row
-  document.getElementById('add-header-btn')?.addEventListener('click', addHeaderRow);
-
-  // Add button row for API
-  document.getElementById('add-api-btn-row')?.addEventListener('click', addApiBtnRow);
-
-  // API live test
-  document.getElementById('api-test-btn')?.addEventListener('click', testApiCall);
-
-  // Block add buttons
-  document.querySelectorAll('.block-add-btn').forEach(btn => {
-    btn.addEventListener('click', () => addBlock(btn.dataset.type));
-  });
-
-  // AI key toggle
-  document.getElementById('toggle-api-key-btn')?.addEventListener('click', () => {
-    const inp = document.getElementById('ai-api-key-input');
-    inp.type = inp.type === 'password' ? 'text' : 'password';
-  });
+  const zone = document.getElementById('canvas-drop-zone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); if(dragType) { addBlock(dragType, {}); dragType = null; } });
 }
 
-// ── Step 1: Validate Token ──────────────────────────────────────────────────
+function goTo(n) {
+  document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.wizard-step').forEach(s => { const sn=parseInt(s.dataset.step); s.classList.toggle('active',sn===n); s.classList.toggle('done',sn<n); });
+  document.getElementById('panel-'+n).classList.add('active');
+  currentStep = n;
+  const subs = ['','Étape 1 sur 4 — Connexion Telegram','Étape 2 sur 4 — Template','Étape 3 sur 4 — Constructeur','Étape 4 sur 4 — Déploiement'];
+  document.getElementById('wizard-subtitle').textContent = subs[n]||'';
+}
+
 async function validateToken() {
-  const token  = document.getElementById('bot-token').value.trim();
-  const btn    = document.getElementById('validate-token-btn');
+  const token = document.getElementById('bot-token').value.trim();
+  const btn = document.getElementById('validate-token-btn');
   const status = document.getElementById('token-status');
-
   if (!token) { status.innerHTML = '<div class="form-error">⚠️ Entrez votre token d\'abord</div>'; return; }
-
-  btn.classList.add('btn-loading');
-  btn.disabled = true;
+  btn.classList.add('btn-loading'); btn.disabled = true;
   status.innerHTML = '<div class="token-loading">⏳ Connexion à Telegram...</div>';
-
-  const data = await api('/bots/validate-token', { method: 'POST', body: JSON.stringify({ token }) });
-
-  btn.classList.remove('btn-loading');
-  btn.disabled = false;
-
-  if (!data) {
-    status.innerHTML = '<div class="form-error">❌ Impossible de contacter le serveur</div>';
-    return;
-  }
-
+  const data = await api('/bots/validate-token', { method:'POST', body:JSON.stringify({token}) });
+  btn.classList.remove('btn-loading'); btn.disabled = false;
+  if (!data) { status.innerHTML = '<div class="form-error">❌ Serveur inaccessible</div>'; return; }
   if (data.success) {
     tokenValidated = true;
     const info = data.botInfo;
-    status.innerHTML = `
-      <div class="token-success-card">
-        <div class="token-success-avatar">${info.first_name?.[0] || '🤖'}</div>
-        <div class="token-success-info">
-          <div class="token-success-name">${info.first_name || 'Bot'}</div>
-          <div class="token-success-user">@${info.username} · ID: ${info.id}</div>
-        </div>
-        <div class="token-success-check">✅</div>
-      </div>`;
-    btn.textContent = '✅ Vérifié';
-    btn.className   = 'btn btn-success';
-
-    // Pré-remplir le nom
-    const nameInput = document.getElementById('bot-name');
-    if (nameInput && !nameInput.value) nameInput.value = info.first_name || '';
-
+    status.innerHTML = `<div class="token-success-card"><div class="token-success-avatar">${info.first_name?.[0]||'🤖'}</div><div><div class="token-success-name">${info.first_name||'Bot'}</div><div class="token-success-user">@${info.username} · ID: ${info.id}</div></div><div class="token-success-check">✅</div></div>`;
+    btn.textContent = '✅ Vérifié'; btn.className = 'btn btn-secondary';
+    const ni = document.getElementById('bot-name');
+    if (ni && !ni.value) ni.value = info.first_name || '';
     document.getElementById('step1-next').disabled = false;
-
-    // Update preview
     document.getElementById('preview-name').textContent = '@' + info.username;
     document.getElementById('preview-avatar').textContent = info.first_name?.[0] || '🤖';
   } else {
-    tokenValidated = false;
-    status.innerHTML = `<div class="token-error-card">❌ ${data.error || 'Token invalide'}</div>`;
+    status.innerHTML = `<div class="token-error-card">❌ ${data.error||'Token invalide'}</div>`;
   }
 }
 
-// ── Step 2: Template ────────────────────────────────────────────────────────
 function updatePreview() {
-  const tpl = TEMPLATES[selectedTemplate];
-  if (!tpl) return;
-  const botName = document.getElementById('bot-name')?.value || tpl.name;
-  document.getElementById('preview-avatar').textContent = tpl.emoji;
-
-  const msgs = {
-    echo:     '🔁 Bonjour ! Envoyez-moi un message, je vous l\'enverrai en écho.',
-    welcome:  '👋 Je surveille ce groupe et accueillerai les nouveaux membres !',
-    poll:     '🗳️ Créez un sondage avec /poll Question | Option1 | Option2',
-    reminder: '⏰ Dites-moi /remind 10min Mon rappel et je vous notifie !',
-    translate:'🌍 Envoyez /translate Bonjour pour traduire en anglais.',
-    stats:    '📊 Envoyez /stats pour voir le classement du groupe.',
-    ai:       '✨ Bonjour ! Je suis un assistant IA. Posez-moi une question !',
-    api:      '🔗 Je peux appeler n\'importe quelle API REST pour vous !',
-  };
-
-  const msgEl = document.getElementById('preview-messages');
-  msgEl.innerHTML = `<div class="preview-bubble bot">${msgs[selectedTemplate] || 'Bonjour !'}</div>`;
+  const msgs = { blank:'＋ Canvas vide — construisez bloc par bloc !', echo:'🔁 Echo : bonjour !', welcome:'👋 Bienvenue dans le groupe !', poll:'🗳️ /poll Question | O1 | O2', reminder:'⏰ /remind 10min rappel', translate:'🌍 /translate Bonjour', stats:'📊 /stats classement', ai:'🤖 Posez n\'importe quelle question !', api:'🔗 Je contacte une API pour vous !' };
+  document.getElementById('preview-messages').innerHTML = `<div class="preview-bubble">${msgs[selectedTemplate]||'Bonjour !'}</div>`;
 }
 
-// ── Step 3: Build config panel ──────────────────────────────────────────────
-function buildConfigPanel() {
-  const tpl = TEMPLATES[selectedTemplate];
-  if (!tpl) return;
-
-  document.getElementById('wizard-title').textContent = `Configurer — ${tpl.emoji} ${tpl.name}`;
-
-  const container = document.getElementById('template-config-container');
-  container.innerHTML = '';
-
-  const isApi = selectedTemplate === 'api';
-  const isAi  = selectedTemplate === 'ai';
-
-  document.getElementById('api-configurator').style.display  = isApi ? 'block' : 'none';
-  document.getElementById('ai-key-section').style.display    = isAi  ? 'block' : 'none';
-  document.getElementById('rich-media-builder').style.display = (isApi || isAi) ? 'none' : 'block';
-
-  if (!isApi) {
-    // Render standard fields
-    tpl.configFields.forEach(field => {
-      const div = document.createElement('div');
-      div.className = 'cfg-section';
-      div.innerHTML = renderField(field);
-      container.appendChild(div);
-
-      // Bind toggles
-      div.querySelectorAll('[data-toggle]').forEach(el =>
-        el.addEventListener('click', () => el.classList.toggle('active'))
-      );
-      div.querySelectorAll('[data-for]').forEach(lbl =>
-        lbl.addEventListener('click', () => {
-          const t = document.getElementById(lbl.dataset.for);
-          if (t) t.classList.toggle('active');
-        })
-      );
-      div.querySelectorAll('[data-var]').forEach(t =>
-        t.addEventListener('click', () => insertVar(t.dataset.var))
-      );
-      div.querySelectorAll('textarea, input[type=text]').forEach(el =>
-        el.addEventListener('focus', () => { lastFocused = el; })
-      );
-    });
-  }
-
-  // Init rich blocks
-  if (!isApi && !isAi) {
-    blocks = [{ type: 'text', value: tpl.configFields?.[0]?.placeholder || 'Bonjour {first_name} ! 👋' }];
-    renderBlocks();
-  }
-
-  // Init API header rows
-  if (isApi) {
-    headerRows = [];
-    apiBtnRows = [];
-    renderHeaderRows();
-    renderApiBtnRows();
-  }
+function seedCanvas() {
+  canvasBlocks = (TPL_SEEDS[selectedTemplate]||[]).map(p => ({ id:uid(), type:p.type, data:{...p.data} }));
+  renderCanvas();
+  selectedBlockId = null;
+  document.getElementById('inspector-body').innerHTML = `<div class="inspector-empty"><div class="inspector-empty-icon">🖱</div><span>Cliquez sur un bloc pour l'éditer</span></div>`;
 }
 
-function renderField(field) {
-  let html = `<div class="cfg-section-label"><span class="cfg-section-icon">⚙️</span>${field.label}</div>`;
-  const idAttr = `id="config-${field.key}"`;
-
-  if (field.type === 'textarea') {
-    html += `<textarea class="form-control" ${idAttr} rows="2" placeholder="${field.placeholder || ''}">${field.default || ''}</textarea>`;
-    if (field.variables) html += `<div class="vars-row">${VARS_DOC}</div>`;
-  } else if (field.type === 'toggle') {
-    html += `<div class="toggle-wrap">
-      <div class="toggle ${field.default ? 'active' : ''}" ${idAttr} data-toggle></div>
-      <label class="toggle-label" data-for="config-${field.key}">${field.label}</label>
-    </div>`;
-  } else if (field.type === 'select') {
-    html += `<select class="form-control" ${idAttr}>${field.options.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}</select>`;
-  } else {
-    html += `<input type="text" class="form-control" ${idAttr} placeholder="${field.placeholder || ''}" value="${field.default || ''}" />`;
-  }
-  if (field.hint) html += `<div class="form-hint">${field.hint}</div>`;
-  return html;
+function addBlock(type, data={}) {
+  const block = { id:uid(), type, data:{...data} };
+  canvasBlocks.push(block);
+  renderCanvas();
+  selectBlock(block.id);
 }
 
-function insertVar(v) {
-  if (!lastFocused) return;
-  const pos = lastFocused.selectionStart, val = lastFocused.value;
-  lastFocused.value = val.slice(0, pos) + v + val.slice(pos);
-  lastFocused.focus();
-  lastFocused.setSelectionRange(pos + v.length, pos + v.length);
+function removeBlock(id) {
+  canvasBlocks = canvasBlocks.filter(b => b.id !== id);
+  if (selectedBlockId === id) { selectedBlockId = null; document.getElementById('inspector-body').innerHTML = `<div class="inspector-empty"><div class="inspector-empty-icon">🖱</div><span>Cliquez sur un bloc pour l'éditer</span></div>`; }
+  renderCanvas();
 }
 
-// ── Rich message blocks ──────────────────────────────────────────────────────
-function addBlock(type) {
-  blocks.push({ type, value: '', alt: '' });
-  renderBlocks();
-}
-
-function renderBlocks() {
-  const list = document.getElementById('blocks-list');
-  if (!list) return;
-  list.innerHTML = blocks.map((b, i) => {
-    if (b.type === 'text') return `
-      <div class="block-item" data-idx="${i}">
-        <div class="block-handle">⠿</div>
-        <div class="block-body">
-          <div class="block-type-tag">✏️ Texte</div>
-          <textarea class="form-control block-text" rows="2" placeholder="Votre message..." oninput="blocks[${i}].value=this.value">${b.value}</textarea>
-          ${VARS_DOC}
-        </div>
-        <button class="block-del" onclick="removeBlock(${i})">✕</button>
-      </div>`;
-    if (b.type === 'image') return `
-      <div class="block-item" data-idx="${i}">
-        <div class="block-handle">⠿</div>
-        <div class="block-body">
-          <div class="block-type-tag">🖼 Image</div>
-          <input type="text" class="form-control" placeholder="https://example.com/image.jpg" value="${b.value}" oninput="blocks[${i}].value=this.value" />
-          <input type="text" class="form-control" placeholder="Légende (optionnel)" value="${b.alt}" oninput="blocks[${i}].alt=this.value" style="margin-top:0.4rem;" />
-          ${b.value ? `<div class="block-image-preview"><img src="${b.value}" onerror="this.style.display='none'" style="max-height:80px;border-radius:6px;margin-top:0.4rem;" /></div>` : ''}
-        </div>
-        <button class="block-del" onclick="removeBlock(${i})">✕</button>
-      </div>`;
-    if (b.type === 'gif') return `
-      <div class="block-item" data-idx="${i}">
-        <div class="block-handle">⠿</div>
-        <div class="block-body">
-          <div class="block-type-tag">🎞 GIF</div>
-          <input type="text" class="form-control" placeholder="https://example.com/anim.gif" value="${b.value}" oninput="blocks[${i}].value=this.value" />
-          ${b.value ? `<div style="margin-top:0.4rem;"><img src="${b.value}" onerror="this.style.display='none'" style="max-height:80px;border-radius:6px;" /></div>` : ''}
-        </div>
-        <button class="block-del" onclick="removeBlock(${i})">✕</button>
-      </div>`;
-    if (b.type === 'buttons') {
-      const rowBtns = b.buttons || [{ text: 'Cliquez ici', type: 'url', value: 'https://' }];
-      return `
-      <div class="block-item" data-idx="${i}">
-        <div class="block-handle">⠿</div>
-        <div class="block-body">
-          <div class="block-type-tag">🔘 Boutons</div>
-          <div id="btns-inline-${i}">
-            ${rowBtns.map((btn, j) => `
-              <div class="btn-row-item">
-                <input class="form-control" style="flex:1;" placeholder="Texte du bouton" value="${btn.text}" oninput="updateBlockBtn(${i},${j},'text',this.value)" />
-                <select class="form-control" style="max-width:100px;" onchange="updateBlockBtn(${i},${j},'type',this.value)">
-                  <option value="url" ${btn.type==='url'?'selected':''}>🔗 URL</option>
-                  <option value="callback" ${btn.type==='callback'?'selected':''}>📩 Callback</option>
-                </select>
-                <input class="form-control mono" style="flex:1;" placeholder="${btn.type==='url'?'https://...':'data_callback'}" value="${btn.value}" oninput="updateBlockBtn(${i},${j},'value',this.value)" />
-                <button class="block-del-sm" onclick="removeBlockBtn(${i},${j})">✕</button>
-              </div>`).join('')}
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="addBlockBtn(${i})" style="margin-top:0.4rem;">+ Bouton</button>
-        </div>
-        <button class="block-del" onclick="removeBlock(${i})">✕</button>
-      </div>`;
-    }
-    return '';
-  }).join('');
-}
-
-function removeBlock(i) { blocks.splice(i, 1); renderBlocks(); }
-function addBlockBtn(i) {
-  if (!blocks[i].buttons) blocks[i].buttons = [];
-  blocks[i].buttons.push({ text: 'Bouton', type: 'url', value: 'https://' });
-  renderBlocks();
-}
-function removeBlockBtn(i, j) { blocks[i].buttons.splice(j, 1); renderBlocks(); }
-function updateBlockBtn(i, j, key, val) {
-  if (!blocks[i].buttons) blocks[i].buttons = [];
-  blocks[i].buttons[j][key] = val;
-}
-
-// ── API headers key-value editor ─────────────────────────────────────────────
-function addHeaderRow(key = '', val = '') {
-  const id = Date.now();
-  headerRows.push({ id, key, val });
-  renderHeaderRows();
-}
-function renderHeaderRows() {
-  const list = document.getElementById('headers-list');
-  if (!list) return;
-  list.innerHTML = headerRows.map((row, i) => `
-    <div class="kv-row">
-      <input class="form-control" placeholder="Nom (ex: Authorization)" value="${row.key}"
-        oninput="headerRows[${i}].key=this.value" />
-      <div class="kv-sep">:</div>
-      <input class="form-control" placeholder="Valeur (ex: Bearer token)" value="${row.val}"
-        oninput="headerRows[${i}].val=this.value" />
-      <button class="kv-del" onclick="removeHeader(${i})">✕</button>
-    </div>`).join('');
-}
-function removeHeader(i) { headerRows.splice(i, 1); renderHeaderRows(); }
-
-// ── API buttons builder ──────────────────────────────────────────────────────
-function addApiBtnRow() {
-  apiBtnRows.push([{ text: 'Bouton', type: 'url', value: 'https://' }]);
-  renderApiBtnRows();
-}
-function renderApiBtnRows() {
-  const builder = document.getElementById('api-buttons-builder');
-  if (!builder) return;
-  builder.innerHTML = apiBtnRows.length === 0
-    ? '<div style="color:var(--text-muted);font-size:0.83rem;padding:0.5rem 0;">Aucun bouton — cliquez sur "+ Ligne" pour ajouter</div>'
-    : apiBtnRows.map((row, ri) => `
-      <div class="btns-row-wrap">
-        <div class="btns-row-label">Ligne ${ri + 1}</div>
-        <div class="btns-row-items" id="api-btn-row-${ri}">
-          ${row.map((btn, bi) => `
-            <div class="api-btn-item">
-              <input class="form-control" placeholder="Texte" value="${btn.text}" oninput="apiBtnRows[${ri}][${bi}].text=this.value" style="width:100%;margin-bottom:0.25rem;" />
-              <select class="form-control" onchange="apiBtnRows[${ri}][${bi}].type=this.value;renderApiBtnRows()">
-                <option value="url" ${btn.type==='url'?'selected':''}>🔗 URL</option>
-                <option value="callback" ${btn.type==='callback'?'selected':''}>📩 Callback</option>
-              </select>
-              <input class="form-control mono" placeholder="${btn.type==='url'?'https://...':'callback_data'}" value="${btn.value}" oninput="apiBtnRows[${ri}][${bi}].value=this.value" style="margin-top:0.25rem;" />
-              <button class="block-del-sm" onclick="removeApiBtnCell(${ri},${bi})">✕</button>
-            </div>`).join('')}
-          ${row.length < 3 ? `<button class="btn-add-cell" onclick="addApiBtnCell(${ri})">+</button>` : ''}
-        </div>
-        <button class="btns-row-del" onclick="removeApiBtnRow(${ri})">🗑 Supprimer la ligne</button>
-      </div>`).join('');
-}
-function addApiBtnCell(ri) {
-  if (apiBtnRows[ri].length >= 3) return;
-  apiBtnRows[ri].push({ text: 'Bouton', type: 'url', value: 'https://' });
-  renderApiBtnRows();
-}
-function removeApiBtnCell(ri, bi) { apiBtnRows[ri].splice(bi, 1); if (!apiBtnRows[ri].length) removeApiBtnRow(ri); else renderApiBtnRows(); }
-function removeApiBtnRow(ri) { apiBtnRows.splice(ri, 1); renderApiBtnRows(); }
-
-// ── API live test ────────────────────────────────────────────────────────────
-async function testApiCall() {
-  const method  = document.getElementById('cfg-api_method')?.value || 'GET';
-  const rawUrl  = document.getElementById('cfg-api_url')?.value?.trim() || '';
-  const query   = document.getElementById('api-test-query')?.value?.trim() || 'test';
-  const resultEl = document.getElementById('api-test-result');
-
-  if (!rawUrl) { resultEl.innerHTML = '<div class="form-error">⚠️ Entrez une URL d\'abord</div>'; return; }
-
-  const interp = (s) => s.replace(/{query}/g, encodeURIComponent(query)).replace(/{raw_query}/g, query).replace(/{user_id}/g, '12345').replace(/{first_name}/g, 'Test');
-  const url = interp(rawUrl);
-
-  resultEl.innerHTML = '<span style="color:var(--text-muted);font-size:0.82rem;">⏳ Appel en cours...</span>';
-
-  try {
-    const headers = { 'Content-Type': 'application/json' };
-    headerRows.forEach(r => { if (r.key) headers[r.key] = r.val; });
-
-    const bodyRaw = document.getElementById('cfg-api_body')?.value;
-    const fetchOpts = { method, headers };
-    if (['POST','PUT','PATCH'].includes(method) && bodyRaw) {
-      fetchOpts.body = interp(bodyRaw);
-    }
-
-    const res = await fetch(url, fetchOpts);
-    const text = await res.text();
-    let parsed;
-    try { parsed = JSON.parse(text); } catch (_) { parsed = text; }
-
-    const path = document.getElementById('cfg-api_response_path')?.value?.trim() || '';
-    let extracted = parsed;
-    if (path && typeof parsed === 'object') {
-      extracted = path.split('.').reduce((a, k) => a?.[k], parsed);
-    }
-
-    const template = document.getElementById('cfg-api_response_template')?.value || '{result}';
-    const message  = template.replace(/{result}/g, String(extracted !== undefined ? extracted : JSON.stringify(parsed).substring(0,200)));
-
-    resultEl.innerHTML = `
-      <div class="api-test-success">
-        <div class="api-test-status">HTTP ${res.status} ${res.ok ? '✅' : '⚠️'}</div>
-        <div class="api-test-message">${message.substring(0, 300)}</div>
-        <details style="margin-top:0.5rem;font-size:0.75rem;color:var(--text-muted);">
-          <summary>Réponse brute</summary>
-          <pre style="overflow:auto;max-height:120px;margin-top:0.3rem;">${JSON.stringify(parsed, null, 2).substring(0, 1000)}</pre>
-        </details>
-      </div>`;
-  } catch (err) {
-    resultEl.innerHTML = `<div class="form-error">❌ ${err.message}</div>`;
-  }
-}
-
-// ── Step 3 validation ────────────────────────────────────────────────────────
-function validateStep3() {
-  const name = document.getElementById('bot-name')?.value?.trim();
-  if (!name) { Toast.error('Le nom du bot est requis'); return; }
-  buildLaunchSummary();
-  goTo(4);
-}
-
-// ── Step 4 summary ───────────────────────────────────────────────────────────
-function buildLaunchSummary() {
-  const tpl    = TEMPLATES[selectedTemplate] || {};
-  const name   = document.getElementById('bot-name')?.value || '—';
-  const token  = document.getElementById('bot-token')?.value;
-  const masked = token ? token.split(':')[0] + ':****' + token.slice(-4) : '***';
-
-  document.getElementById('launch-summary').innerHTML = `
-    <div class="launch-summary-card">
-      <div class="launch-summary-avatar">${tpl.emoji || '🤖'}</div>
-      <div class="launch-summary-info">
-        <div class="launch-summary-name">${name}</div>
-        <div class="launch-summary-template">${tpl.emoji} ${tpl.name || selectedTemplate}</div>
-        <div class="launch-summary-token mono">${masked}</div>
-      </div>
-    </div>`;
-
-  // Reset checklist
-  ['chk-token','chk-webhook','chk-db'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.querySelector('.check-icon').textContent = '⏳'; el.className = 'check-item'; }
+function renderCanvas() {
+  const zone = document.getElementById('canvas-drop-zone');
+  const empty = document.getElementById('canvas-empty');
+  document.getElementById('block-count').textContent = canvasBlocks.length + ' module(s)';
+  zone.querySelectorAll('.canvas-block').forEach(el => el.remove());
+  if (canvasBlocks.length === 0) { if(empty) empty.style.display='flex'; return; }
+  if (empty) empty.style.display = 'none';
+  canvasBlocks.forEach(block => {
+    const def = BDEFS[block.type] || {};
+    const el = document.createElement('div');
+    el.className = 'canvas-block' + (block.id === selectedBlockId ? ' selected' : '');
+    el.dataset.id = block.id;
+    el.style.setProperty('--bclr', def.color || 'var(--cyan)');
+    el.innerHTML = `<div class="canvas-block-header"><div class="bclr-dot"></div><div class="bh-name">${def.icon||''} ${def.name||block.type}</div><div class="bh-type">${block.type}</div><button class="b-del" title="Supprimer">✕</button></div><div class="canvas-block-body"><div class="b-summary">${bSummary(block)}</div></div>`;
+    el.addEventListener('click', e => { if(e.target.classList.contains('b-del')) { removeBlock(block.id); return; } selectBlock(block.id); });
+    zone.appendChild(el);
   });
 }
 
-// ── Collect all config ────────────────────────────────────────────────────────
+function bSummary(block) {
+  const d = block.data;
+  switch(block.type) {
+    case 'api_endpoint': return d.api_url ? `${d.api_method||'GET'} ${d.api_url}` : 'URL non configurée';
+    case 'api_key':      return d.key_name ? `${d.key_name} (${d.key_provider||'?'})` : 'Clé non configurée';
+    case 'ai_llm':       return d.ai_model || 'Modèle non choisi';
+    case 'text_reply':   return d.message || 'Message vide';
+    case 'welcome_msg':  return d.welcome_message || 'Message vide';
+    case 'command':      return d.command_name ? `/${d.command_name}` : 'Commande non définie';
+    default: return BDEFS[block.type]?.name || block.type;
+  }
+}
+
+function selectBlock(id) {
+  selectedBlockId = id;
+  renderCanvas();
+  const block = canvasBlocks.find(b => b.id === id);
+  buildInspector(block);
+}
+
+// ── Variable chips helper ──────────────────────────────────────────────────
+function mkVarChips(vars) {
+  return `<div style="display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.3rem;">${vars.map(v=>`<span class="var-chip" title="Insérer ${v}">${v}</span>`).join('')}</div>`;
+}
+
+function bindVarChips(container, targetEl) {
+  container.querySelectorAll('.var-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const v = chip.textContent;
+      const pos = targetEl.selectionStart ?? targetEl.value.length;
+      targetEl.value = targetEl.value.slice(0,pos) + v + targetEl.value.slice(pos);
+      targetEl.dispatchEvent(new Event('input'));
+      targetEl.focus();
+      targetEl.setSelectionRange(pos+v.length, pos+v.length);
+    });
+  });
+}
+
+function buildInspector(block) {
+  const body = document.getElementById('inspector-body');
+  if (!block) { body.innerHTML = `<div class="inspector-empty"><div class="inspector-empty-icon">🖱</div><span>Cliquez sur un bloc</span></div>`; return; }
+  body.innerHTML = '';
+
+  const mkSec = (title) => {
+    const sec = document.createElement('div'); sec.className = 'insp-sec';
+    const t = document.createElement('div'); t.className = 'insp-title'; t.textContent = title;
+    sec.appendChild(t); body.appendChild(sec); return sec;
+  };
+  const mkInp = (sec, key, placeholder, opts={}) => {
+    if (opts.type === 'password') {
+      const w = document.createElement('div'); w.style.cssText='display:flex;gap:.35rem;';
+      const inp = document.createElement('input'); inp.type='password'; inp.className='form-control'; inp.value=block.data[key]||''; inp.placeholder=placeholder; inp.style.flex='1';
+      inp.addEventListener('input', () => { block.data[key]=inp.value; updateSummary(block); });
+      const eye = document.createElement('button'); eye.className='btn btn-ghost btn-sm'; eye.textContent='👁';
+      eye.addEventListener('click',()=>{ inp.type=inp.type==='password'?'text':'password'; });
+      w.appendChild(inp); w.appendChild(eye); sec.appendChild(w);
+    } else if (opts.type === 'textarea') {
+      const ta = document.createElement('textarea'); ta.className='form-control'+(opts.mono?' code-area':''); ta.rows=opts.rows||2; ta.value=block.data[key]||''; ta.placeholder=placeholder;
+      ta.addEventListener('input',()=>{ block.data[key]=ta.value; updateSummary(block); }); sec.appendChild(ta);
+    } else if (opts.type === 'select') {
+      const sel = document.createElement('select'); sel.className='form-control';
+      opts.options.forEach(o => { const op=document.createElement('option'); op.value=o.v; op.textContent=o.l; if(block.data[key]===o.v) op.selected=true; sel.appendChild(op); });
+      sel.addEventListener('change',()=>{ block.data[key]=sel.value; updateSummary(block); }); sec.appendChild(sel);
+    } else if (opts.type === 'toggle') {
+      const w=document.createElement('div'); w.className='toggle-wrap';
+      const tog=document.createElement('div'); tog.className='toggle'+(block.data[key]?' active':'');
+      tog.addEventListener('click',()=>{ block.data[key]=!block.data[key]; tog.classList.toggle('active'); updateSummary(block); });
+      const lbl=document.createElement('label'); lbl.className='toggle-label'; lbl.textContent=opts.label||key;
+      w.appendChild(tog); w.appendChild(lbl); sec.appendChild(w);
+    } else {
+      const inp=document.createElement('input'); inp.type='text'; inp.className='form-control'; inp.value=block.data[key]||''; inp.placeholder=placeholder;
+      inp.addEventListener('input',()=>{ block.data[key]=inp.value; updateSummary(block); }); sec.appendChild(inp);
+    }
+    if (opts.hint) { const h=document.createElement('div'); h.className='form-hint'; h.innerHTML=opts.hint; sec.appendChild(h); }
+  };
+
+  switch(block.type) {
+    case 'api_endpoint': {
+      // ── Method + URL ──
+      const urlSec = mkSec('Méthode & URL');
+      const methodRow = document.createElement('div'); methodRow.className='method-row';
+      const mSel = document.createElement('select'); mSel.className='method-select';
+      ['GET','POST','PUT','PATCH','DELETE'].forEach(m => { const o=document.createElement('option'); o.value=m; o.textContent=m; if((block.data.api_method||'GET')===m) o.selected=true; mSel.appendChild(o); });
+      const urlI = document.createElement('input'); urlI.type='text'; urlI.className='form-control'; urlI.style.flex='1';
+      urlI.value=block.data.api_url||''; urlI.placeholder='https://api.example.com/v1/data?q={query}';
+      mSel.addEventListener('change',()=>{ block.data.api_method=mSel.value; updateSummary(block); bodySecApi.style.display=['POST','PUT','PATCH'].includes(mSel.value)?'flex':'none'; });
+      urlI.addEventListener('input',()=>{ block.data.api_url=urlI.value; updateSummary(block); });
+      methodRow.appendChild(mSel); methodRow.appendChild(urlI); urlSec.appendChild(methodRow);
+      const urlChips=document.createElement('div'); urlChips.innerHTML=mkVarChips(['{query}','{raw_query}','{user_id}','{first_name}']); urlSec.appendChild(urlChips);
+      bindVarChips(urlChips, urlI);
+
+      // ── Triggers ──
+      const trgSec = mkSec('Mots-clés déclencheurs');
+      const trgI = document.createElement('input'); trgI.type='text'; trgI.className='form-control';
+      trgI.value=block.data.api_triggers||''; trgI.placeholder='météo, weather, forecast';
+      trgI.addEventListener('input',()=>{ block.data.api_triggers=trgI.value; });
+      const trgH=document.createElement('div'); trgH.className='form-hint'; trgH.textContent='Virgules. Vide = déclenché par tous les messages.';
+      trgSec.appendChild(trgI); trgSec.appendChild(trgH);
+
+      // ── Welcome message ──
+      const wSec = mkSec('Message de bienvenue (/start)');
+      const wTa = document.createElement('textarea'); wTa.className='form-control'; wTa.rows=2;
+      wTa.value=block.data.api_welcome_message||''; wTa.placeholder='🔗 Bot prêt ! Envoyez {query} pour déclencher.';
+      wTa.addEventListener('input',()=>{ block.data.api_welcome_message=wTa.value; });
+      const wChips=document.createElement('div'); wChips.innerHTML=mkVarChips(['{first_name}','{username}']);
+      wSec.appendChild(wTa); wSec.appendChild(wChips); bindVarChips(wChips, wTa);
+
+      // ── Headers ──
+      const hdrSec = mkSec('Headers HTTP');
+      if (!block.data._headerRows) block.data._headerRows = [];
+      const hdrList = document.createElement('div'); hdrList.className='kv-list'; hdrSec.appendChild(hdrList);
+      const addHBtn = document.createElement('button'); addHBtn.className='btn btn-ghost btn-sm'; addHBtn.style.marginTop='.3rem'; addHBtn.textContent='+ Header';
+      function renderHdrsApi() {
+        hdrList.innerHTML = '';
+        block.data._headerRows.forEach((r,i)=>{
+          const rEl=document.createElement('div'); rEl.className='kv-row';
+          const k=document.createElement('input'); k.className='form-control'; k.placeholder='Authorization'; k.value=r.key||''; k.style.flex='1';
+          const sep=document.createElement('div'); sep.className='kv-sep'; sep.textContent=':';
+          const v=document.createElement('input'); v.className='form-control'; v.placeholder='Bearer TOKEN'; v.value=r.val||''; v.style.flex='1';
+          const del=document.createElement('button'); del.className='kv-del'; del.textContent='✕';
+          k.addEventListener('input',()=>{ block.data._headerRows[i].key=k.value; syncHdrsApi(); });
+          v.addEventListener('input',()=>{ block.data._headerRows[i].val=v.value; syncHdrsApi(); });
+          del.addEventListener('click',()=>{ block.data._headerRows.splice(i,1); renderHdrsApi(); syncHdrsApi(); });
+          rEl.appendChild(k); rEl.appendChild(sep); rEl.appendChild(v); rEl.appendChild(del); hdrList.appendChild(rEl);
+        });
+      }
+      function syncHdrsApi() { block.data.api_headers=block.data._headerRows.filter(r=>r.key).map(r=>`${r.key}: ${r.val}`).join('\n'); }
+      addHBtn.addEventListener('click',()=>{ block.data._headerRows.push({key:'',val:''}); renderHdrsApi(); });
+      if (block.data.api_headers && !block.data._headerRows.length) {
+        block.data._headerRows = block.data.api_headers.split('\n').filter(l=>l.includes(':')).map(l=>{const[k,...v]=l.split(':');return{key:k.trim(),val:v.join(':').trim()};});
+      }
+      renderHdrsApi(); hdrSec.appendChild(addHBtn);
+
+      // ── Body ──
+      const bodySecApi = mkSec('Corps requête (JSON)');
+      bodySecApi.style.display = ['POST','PUT','PATCH'].includes(block.data.api_method||'GET') ? 'flex' : 'none';
+      const bodyTa = document.createElement('textarea'); bodyTa.className='form-control code-area'; bodyTa.rows=3;
+      bodyTa.value=block.data.api_body||''; bodyTa.placeholder='{"query": "{query}", "user": "{user_id}"}';
+      bodyTa.addEventListener('input',()=>{ block.data.api_body=bodyTa.value; }); bodySecApi.appendChild(bodyTa);
+      const bHint=document.createElement('div'); bHint.className='form-hint'; bHint.innerHTML='Variables: <code>{query}</code> <code>{raw_query}</code> <code>{user_id}</code>'; bodySecApi.appendChild(bHint);
+
+      // ── Response path ──
+      const rpSec = mkSec('Chemin JSON réponse');
+      const rpI = document.createElement('input'); rpI.type='text'; rpI.className='form-control code-area';
+      rpI.value=block.data.api_response_path||''; rpI.placeholder='facts.0  ou  data.items.0.name';
+      rpI.addEventListener('input',()=>{ block.data.api_response_path=rpI.value; });
+      const rpH=document.createElement('div'); rpH.className='form-hint'; rpH.innerHTML='Vide = formatage auto intelligent. <code>data.0.name</code> = valeur imbriquée.';
+      rpSec.appendChild(rpI); rpSec.appendChild(rpH);
+
+      // ── Response template ──
+      const rtSec = mkSec('Template de réponse');
+      const rtTa = document.createElement('textarea'); rtTa.className='form-control'; rtTa.rows=2;
+      rtTa.value=block.data.api_response_template||'🔗 {result}'; rtTa.placeholder='🌡️ Résultat : {result}';
+      rtTa.addEventListener('input',()=>{ block.data.api_response_template=rtTa.value; });
+      const rtChips=document.createElement('div'); rtChips.innerHTML=mkVarChips(['{result}','{query}','{first_name}','{raw_query}']);
+      rtSec.appendChild(rtTa); rtSec.appendChild(rtChips); bindVarChips(rtChips, rtTa);
+
+      // ── Inline Buttons ──
+      const btnsSec = mkSec('Boutons inline Telegram (optionnel)');
+      if (!block.data._inlineBtns) block.data._inlineBtns = [];
+      const btnsWrap = document.createElement('div'); btnsWrap.style.cssText='display:flex;flex-direction:column;gap:.35rem;'; btnsSec.appendChild(btnsWrap);
+      const addBtnInline = document.createElement('button'); addBtnInline.className='btn btn-ghost btn-sm'; addBtnInline.style.marginTop='.3rem'; addBtnInline.textContent='+ Bouton';
+      function syncBtnsApi() { block.data.api_buttons = block.data._inlineBtns.length ? JSON.stringify([block.data._inlineBtns.map(b=>({text:b.text,type:b.type,value:b.value}))]) : ''; }
+      function renderBtnsApi() {
+        btnsWrap.innerHTML='';
+        block.data._inlineBtns.forEach((btn,i)=>{
+          const r=document.createElement('div'); r.style.cssText='display:flex;gap:.3rem;align-items:center;';
+          const tI=document.createElement('input'); tI.className='form-control'; tI.placeholder='Texte bouton'; tI.value=btn.text||''; tI.style.flex='1';
+          const tSel=document.createElement('select'); tSel.className='method-select'; tSel.style.width='68px';
+          [{v:'url',l:'URL'},{v:'callback',l:'CB'}].forEach(o=>{const op=document.createElement('option');op.value=o.v;op.textContent=o.l;if(btn.type===o.v)op.selected=true;tSel.appendChild(op);});
+          const vI=document.createElement('input'); vI.className='form-control code-area'; vI.placeholder=btn.type==='url'?'https://...':'callback_data'; vI.value=btn.value||''; vI.style.flex='1.5';
+          const del=document.createElement('button'); del.className='kv-del'; del.textContent='✕';
+          tI.addEventListener('input',()=>{block.data._inlineBtns[i].text=tI.value;syncBtnsApi();});
+          tSel.addEventListener('change',()=>{block.data._inlineBtns[i].type=tSel.value;syncBtnsApi();});
+          vI.addEventListener('input',()=>{block.data._inlineBtns[i].value=vI.value;syncBtnsApi();});
+          del.addEventListener('click',()=>{block.data._inlineBtns.splice(i,1);renderBtnsApi();syncBtnsApi();});
+          r.appendChild(tI);r.appendChild(tSel);r.appendChild(vI);r.appendChild(del);btnsWrap.appendChild(r);
+        });
+      }
+      addBtnInline.addEventListener('click',()=>{ block.data._inlineBtns.push({text:'Voir plus',type:'url',value:'https://'}); renderBtnsApi(); syncBtnsApi(); });
+      if (block.data.api_buttons && !block.data._inlineBtns.length) {
+        try { const parsed=JSON.parse(block.data.api_buttons); if(Array.isArray(parsed[0])) block.data._inlineBtns=[...parsed[0]]; } catch(_) {}
+      }
+      renderBtnsApi(); btnsSec.appendChild(addBtnInline);
+
+      // ── Advanced options ──
+      const advSec = mkSec('Options avancées');
+      const advGrid=document.createElement('div'); advGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:.4rem;'; advSec.appendChild(advGrid);
+      const fallI=document.createElement('input'); fallI.type='text'; fallI.className='form-control'; fallI.placeholder='❌ Erreur API'; fallI.value=block.data.api_fallback||'';
+      fallI.addEventListener('input',()=>{block.data.api_fallback=fallI.value;});
+      const cdI=document.createElement('input'); cdI.type='text'; cdI.className='form-control'; cdI.placeholder='2000 ms'; cdI.value=block.data.api_cooldown||'2000';
+      cdI.addEventListener('input',()=>{block.data.api_cooldown=cdI.value;});
+      const fLabel=document.createElement('div'); fLabel.className='form-hint'; fLabel.textContent='Message erreur';
+      const cLabel=document.createElement('div'); cLabel.className='form-hint'; cLabel.textContent='Cooldown anti-spam';
+      const c1=document.createElement('div'); c1.appendChild(fallI); c1.appendChild(fLabel);
+      const c2=document.createElement('div'); c2.appendChild(cdI); c2.appendChild(cLabel);
+      advGrid.appendChild(c1); advGrid.appendChild(c2);
+
+      // ── Live test ──
+      const testSec = mkSec('Test en direct (proxy serveur)');
+      const tb = document.createElement('div'); tb.className='test-box';
+      tb.innerHTML = `<div class="test-box-title">🧪 Tester l'appel — résultat en temps réel</div><div class="test-row"><input type="text" class="form-control" id="tq-${block.id}" placeholder="valeur {query}" style="flex:1;" /><button class="btn btn-secondary btn-sm" id="tb-${block.id}">▶ Tester</button></div><div id="tr-${block.id}"></div>`;
+      testSec.appendChild(tb);
+      setTimeout(() => { document.getElementById(`tb-${block.id}`)?.addEventListener('click', () => testApiCall(block, rpI)); }, 0);
+      break;
+    }
+
+    case 'api_key': {
+      const nSec=mkSec('Nom de la clé');
+      const nI=document.createElement('input');nI.type='text';nI.className='form-control';nI.value=block.data.key_name||'';nI.placeholder='OpenAI Key, Weather API…';
+      nI.addEventListener('input',()=>{block.data.key_name=nI.value;updateSummary(block);});
+      const nH=document.createElement('div');nH.className='form-hint';nH.textContent='Ce nom sera référencé par le bloc IA/LLM.';
+      nSec.appendChild(nI);nSec.appendChild(nH);
+
+      const pSec=mkSec('Fournisseur');
+      const pI=document.createElement('input');pI.type='text';pI.className='form-control';pI.value=block.data.key_provider||'';pI.placeholder='OpenAI, Mistral, RapidAPI, Custom…';
+      pI.addEventListener('input',()=>{block.data.key_provider=pI.value;updateSummary(block);});
+      pSec.appendChild(pI);
+
+      const sSec=mkSec('Valeur / Secret');
+      const wrapKey=document.createElement('div');wrapKey.style.cssText='display:flex;gap:.35rem;';
+      const sI=document.createElement('input');sI.type='password';sI.className='form-control';sI.value=block.data.key_value||'';sI.placeholder='sk-… ou votre clé';sI.style.flex='1';
+      sI.addEventListener('input',()=>{block.data.key_value=sI.value;});
+      const eyeBtn=document.createElement('button');eyeBtn.className='btn btn-ghost btn-sm';eyeBtn.textContent='👁';
+      eyeBtn.addEventListener('click',()=>{sI.type=sI.type==='password'?'text':'password';});
+      wrapKey.appendChild(sI);wrapKey.appendChild(eyeBtn);sSec.appendChild(wrapKey);
+      const sH=document.createElement('div');sH.className='form-hint';sH.style.color='var(--yellow)';sH.textContent='⚠️ Stockée chiffrée — jamais affichée après sauvegarde.';sSec.appendChild(sH);
+      break;
+    }
+
+    case 'ai_llm': {
+      const pvSec=mkSec('Fournisseur IA');
+      const pvSel=document.createElement('select');pvSel.className='form-control';
+      [{v:'openai',l:'🟢 OpenAI (ChatGPT)'},{v:'mistral',l:'🟠 Mistral AI'},{v:'groq',l:'🔵 Groq (ultra rapide)'},{v:'custom',l:'⚙️ Endpoint personnalisé'}].forEach(o=>{const op=document.createElement('option');op.value=o.v;op.textContent=o.l;if((block.data.ai_provider||'openai')===o.v)op.selected=true;pvSel.appendChild(op);});
+      pvSec.appendChild(pvSel);
+
+      const epSec=mkSec('Endpoint custom');
+      epSec.style.display=(block.data.ai_provider==='custom')?'flex':'none';
+      const epI=document.createElement('input');epI.type='text';epI.className='form-control';epI.value=block.data.ai_endpoint||'';epI.placeholder='https://api.openai.com/v1/chat/completions';
+      epI.addEventListener('input',()=>{block.data.ai_endpoint=epI.value;});epSec.appendChild(epI);
+      pvSel.addEventListener('change',()=>{block.data.ai_provider=pvSel.value;updateSummary(block);epSec.style.display=pvSel.value==='custom'?'flex':'none';});
+
+      const mdSec=mkSec('Modèle');
+      const mdI=document.createElement('input');mdI.type='text';mdI.className='form-control code-area';mdI.value=block.data.ai_model||'';mdI.placeholder='gpt-4o-mini / mistral-small / llama3-8b-8192';
+      mdI.addEventListener('input',()=>{block.data.ai_model=mdI.value;updateSummary(block);});
+      const mdH=document.createElement('div');mdH.className='form-hint';mdH.textContent='Vide = modèle par défaut du fournisseur.';
+      mdSec.appendChild(mdI);mdSec.appendChild(mdH);
+
+      const pnSec=mkSec('Persona (nom + emoji)');
+      const pnRow=document.createElement('div');pnRow.style.cssText='display:flex;gap:.35rem;';
+      const pnEI=document.createElement('input');pnEI.type='text';pnEI.className='form-control';pnEI.style.width='56px';pnEI.style.flexShrink='0';pnEI.value=block.data.ai_persona_emoji||'🤖';pnEI.placeholder='🤖';
+      pnEI.addEventListener('input',()=>{block.data.ai_persona_emoji=pnEI.value;});
+      const pnI=document.createElement('input');pnI.type='text';pnI.className='form-control';pnI.style.flex='1';pnI.value=block.data.ai_persona_name||'';pnI.placeholder='Mon Assistant IA';
+      pnI.addEventListener('input',()=>{block.data.ai_persona_name=pnI.value;});
+      pnRow.appendChild(pnEI);pnRow.appendChild(pnI);pnSec.appendChild(pnRow);
+
+      const spSec=mkSec('Prompt système (personnalité)');
+      const spTa=document.createElement('textarea');spTa.className='form-control';spTa.rows=4;spTa.value=block.data.ai_system_prompt||'';
+      spTa.placeholder="Tu es un assistant IA utile et amical. Réponds en français sauf si l'utilisateur écrit dans une autre langue.";
+      spTa.addEventListener('input',()=>{block.data.ai_system_prompt=spTa.value;});
+      const spH=document.createElement('div');spH.className='form-hint';spH.textContent='Définit la personnalité et instructions permanentes.';
+      spSec.appendChild(spTa);spSec.appendChild(spH);
+
+      const wSec=mkSec('Message de bienvenue (/start)');
+      const wTa=document.createElement('textarea');wTa.className='form-control';wTa.rows=2;wTa.value=block.data.ai_welcome_message||'';
+      wTa.placeholder='Bonjour {first_name} ! Je suis votre assistant IA. Posez-moi une question !';
+      wTa.addEventListener('input',()=>{block.data.ai_welcome_message=wTa.value;});
+      const wChips=document.createElement('div');wChips.innerHTML=mkVarChips(['{first_name}','{username}']);
+      wSec.appendChild(wTa);wSec.appendChild(wChips);bindVarChips(wChips,wTa);
+
+      const tmpSec=mkSec('Créativité (température)');
+      const tmpI=document.createElement('input');tmpI.type='range';tmpI.min='0';tmpI.max='1';tmpI.step='0.1';tmpI.style.width='100%';tmpI.value=block.data.ai_temperature||'0.7';
+      const tmpV=document.createElement('span');tmpV.className='form-hint';tmpV.textContent=`${tmpI.value} — (0 = précis, 1 = créatif)`;
+      tmpI.addEventListener('input',()=>{block.data.ai_temperature=tmpI.value;tmpV.textContent=`${tmpI.value} — (0 = précis, 1 = créatif)`;});
+      tmpSec.appendChild(tmpI);tmpSec.appendChild(tmpV);
+
+      const krSec=mkSec('Référence clé API');
+      const krI=document.createElement('input');krI.type='text';krI.className='form-control';krI.value=block.data.ai_api_key_ref||'';krI.placeholder='Nom du bloc "Clé API" ci-dessus';
+      krI.addEventListener('input',()=>{block.data.ai_api_key_ref=krI.value;});
+      const krH=document.createElement('div');krH.className='form-hint';krH.textContent='Ou lu automatiquement depuis un bloc Clé API présent.';
+      krSec.appendChild(krI);krSec.appendChild(krH);
+      break;
+    }
+
+    case 'text_reply': {
+      const tSec=mkSec('Mots-clés déclencheurs');
+      const tI=document.createElement('input');tI.type='text';tI.className='form-control';tI.value=block.data.triggers||'';tI.placeholder='bonjour, hello, salut';
+      tI.addEventListener('input',()=>{block.data.triggers=tI.value;updateSummary(block);});
+      const tH=document.createElement('div');tH.className='form-hint';tH.textContent='Virgules. Vide = répond à tous les messages.';
+      tSec.appendChild(tI);tSec.appendChild(tH);
+
+      const mSec=mkSec('Message de réponse');
+      const mTa=document.createElement('textarea');mTa.className='form-control';mTa.rows=4;mTa.value=block.data.message||'';
+      mTa.placeholder='Bonjour {first_name} ! 👋\n\nComment puis-je vous aider ?';
+      mTa.addEventListener('input',()=>{block.data.message=mTa.value;updateSummary(block);});
+      const mChips=document.createElement('div');mChips.innerHTML=mkVarChips(['{first_name}','{last_name}','{username}','{query}','{chat_title}']);
+      mSec.appendChild(mTa);mSec.appendChild(mChips);bindVarChips(mChips,mTa);
+
+      const pSec=mkSec('Préfixe écho (optionnel)');
+      const pI=document.createElement('input');pI.type='text';pI.className='form-control';pI.value=block.data.echo_prefix||'';pI.placeholder='Echo: — ou laisser vide';
+      pI.addEventListener('input',()=>{block.data.echo_prefix=pI.value;});
+      const pH=document.createElement('div');pH.className='form-hint';pH.textContent='Ajouté devant le message répété. Laisser vide pour écho pur.';
+      pSec.appendChild(pI);pSec.appendChild(pH);
+      break;
+    }
+
+    case 'welcome_msg': {
+      const jSec=mkSec("Message d'accueil (nouveau membre)");
+      const jTa=document.createElement('textarea');jTa.className='form-control';jTa.rows=3;jTa.value=block.data.welcome_joinMessage||'';
+      jTa.placeholder='👋 Bienvenue {first_name} dans {chat_title} !';
+      jTa.addEventListener('input',()=>{block.data.welcome_joinMessage=jTa.value;updateSummary(block);});
+      const jChips=document.createElement('div');jChips.innerHTML=mkVarChips(['{first_name}','{last_name}','{username}','{chat_title}']);
+      jSec.appendChild(jTa);jSec.appendChild(jChips);bindVarChips(jChips,jTa);
+
+      const lSec=mkSec("Message d'au revoir (membre quitte)");
+      const lTa=document.createElement('textarea');lTa.className='form-control';lTa.rows=2;lTa.value=block.data.welcome_leaveMessage||'';
+      lTa.placeholder='👋 Au revoir {first_name} !';
+      lTa.addEventListener('input',()=>{block.data.welcome_leaveMessage=lTa.value;});
+      const lChips=document.createElement('div');lChips.innerHTML=mkVarChips(['{first_name}','{username}']);
+      lSec.appendChild(lTa);lSec.appendChild(lChips);bindVarChips(lChips,lTa);
+
+      const oSec=mkSec('Options');
+      const wTogWrap=document.createElement('div');wTogWrap.className='toggle-wrap';
+      const wTog=document.createElement('div');wTog.className='toggle'+(block.data.include_username?' active':'');
+      wTog.addEventListener('click',()=>{block.data.include_username=!block.data.include_username;wTog.classList.toggle('active');});
+      const wLbl=document.createElement('label');wLbl.className='toggle-label';wLbl.textContent="Mentionner @username dans l'accueil";
+      wTogWrap.appendChild(wTog);wTogWrap.appendChild(wLbl);oSec.appendChild(wTogWrap);
+      break;
+    }
+
+    case 'command': {
+      const infoEl=document.createElement('div');
+      infoEl.style.cssText='background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-radius:8px;padding:.55rem .7rem;font-size:.77rem;color:var(--text-secondary);margin-bottom:.5rem;';
+      infoEl.innerHTML='💡 Déclenchée par <code>/nom_commande</code> dans Telegram.';body.appendChild(infoEl);
+
+      const cSec=mkSec('Nom de la commande (sans /)');
+      const cWrap=document.createElement('div');cWrap.style.cssText='display:flex;align-items:center;gap:.3rem;';
+      const cPfx=document.createElement('span');cPfx.style.cssText='color:var(--cyan);font-family:var(--font-mono);font-weight:800;font-size:1rem;';cPfx.textContent='/';
+      const cI=document.createElement('input');cI.type='text';cI.className='form-control code-area';cI.style.flex='1';cI.value=block.data.command_name||'';cI.placeholder='start, help, info, stats…';
+      cI.addEventListener('input',()=>{block.data.command_name=cI.value.replace(/[^a-z0-9_]/gi,'').toLowerCase();cI.value=block.data.command_name;updateSummary(block);});
+      cWrap.appendChild(cPfx);cWrap.appendChild(cI);cSec.appendChild(cWrap);
+      const cH=document.createElement('div');cH.className='form-hint';cH.textContent='Lettres, chiffres et _ uniquement.';cSec.appendChild(cH);
+
+      const rSec=mkSec('Texte de réponse');
+      const rTa=document.createElement('textarea');rTa.className='form-control';rTa.rows=4;rTa.value=block.data.reply_text||'';
+      rTa.placeholder='Bonjour {first_name} !\n\nVoici les commandes :\n/help — Aide\n/start — Démarrer';
+      rTa.addEventListener('input',()=>{block.data.reply_text=rTa.value;});
+      const rChips=document.createElement('div');rChips.innerHTML=mkVarChips(['{first_name}','{username}','{chat_title}','{user_id}']);
+      rSec.appendChild(rTa);rSec.appendChild(rChips);bindVarChips(rChips,rTa);
+
+      const dSec=mkSec('Description (menu Telegram)');
+      const dI=document.createElement('input');dI.type='text';dI.className='form-control';dI.value=block.data.command_desc||'';dI.placeholder='Afficher les commandes disponibles';
+      dI.addEventListener('input',()=>{block.data.command_desc=dI.value;});
+      const dH=document.createElement('div');dH.className='form-hint';dH.textContent='Description visible dans le menu de commandes Telegram.';
+      dSec.appendChild(dI);dSec.appendChild(dH);
+
+      const pmSec=mkSec('Format de réponse');
+      const pmSel=document.createElement('select');pmSel.className='form-control';
+      [{v:'HTML',l:'HTML (gras, liens, code…)'},{v:'Markdown',l:'Markdown'},{v:'',l:'Texte brut'}].forEach(o=>{const op=document.createElement('option');op.value=o.v;op.textContent=o.l;if((block.data.command_parse_mode||'HTML')===o.v)op.selected=true;pmSel.appendChild(op);});
+      pmSel.addEventListener('change',()=>{block.data.command_parse_mode=pmSel.value;});
+      pmSec.appendChild(pmSel);
+
+      const btSec=mkSec('Boutons inline (optionnel)');
+      if (!block.data._cmdBtns) block.data._cmdBtns = [];
+      const cmdBtnsWrap=document.createElement('div');cmdBtnsWrap.style.cssText='display:flex;flex-direction:column;gap:.3rem;';btSec.appendChild(cmdBtnsWrap);
+      const addCmdBtn=document.createElement('button');addCmdBtn.className='btn btn-ghost btn-sm';addCmdBtn.style.marginTop='.3rem';addCmdBtn.textContent='+ Bouton';
+      function syncCmdBtns(){block.data.command_buttons=block.data._cmdBtns.length?JSON.stringify([block.data._cmdBtns.map(b=>({text:b.text,type:b.type,value:b.value}))]):''}
+      function renderCmdBtns(){
+        cmdBtnsWrap.innerHTML='';
+        block.data._cmdBtns.forEach((btn,i)=>{
+          const r=document.createElement('div');r.style.cssText='display:flex;gap:.3rem;align-items:center;';
+          const tI=document.createElement('input');tI.className='form-control';tI.placeholder='Texte';tI.value=btn.text||'';tI.style.flex='1';
+          const tSel=document.createElement('select');tSel.className='method-select';tSel.style.width='68px';
+          [{v:'url',l:'URL'},{v:'callback',l:'CB'}].forEach(o=>{const op=document.createElement('option');op.value=o.v;op.textContent=o.l;if(btn.type===o.v)op.selected=true;tSel.appendChild(op);});
+          const vI=document.createElement('input');vI.className='form-control code-area';vI.placeholder=btn.type==='url'?'https://...':'callback';vI.value=btn.value||'';vI.style.flex='1.5';
+          const del=document.createElement('button');del.className='kv-del';del.textContent='✕';
+          tI.addEventListener('input',()=>{block.data._cmdBtns[i].text=tI.value;syncCmdBtns();});
+          tSel.addEventListener('change',()=>{block.data._cmdBtns[i].type=tSel.value;syncCmdBtns();});
+          vI.addEventListener('input',()=>{block.data._cmdBtns[i].value=vI.value;syncCmdBtns();});
+          del.addEventListener('click',()=>{block.data._cmdBtns.splice(i,1);renderCmdBtns();syncCmdBtns();});
+          r.appendChild(tI);r.appendChild(tSel);r.appendChild(vI);r.appendChild(del);cmdBtnsWrap.appendChild(r);
+        });
+      }
+      addCmdBtn.addEventListener('click',()=>{block.data._cmdBtns.push({text:'Lien',type:'url',value:'https://'});renderCmdBtns();syncCmdBtns();});
+      renderCmdBtns();btSec.appendChild(addCmdBtn);
+      break;
+    }
+
+    case 'poll': {
+      const aTogWrap=document.createElement('div');aTogWrap.className='toggle-wrap';aTogWrap.style.marginBottom='.5rem';
+      const aTog=document.createElement('div');aTog.className='toggle'+(block.data.poll_allowAnonymous?' active':'');
+      aTog.addEventListener('click',()=>{block.data.poll_allowAnonymous=!block.data.poll_allowAnonymous;aTog.classList.toggle('active');});
+      const aLbl=document.createElement('label');aLbl.className='toggle-label';aLbl.textContent='Sondages anonymes';
+      aTogWrap.appendChild(aTog);aTogWrap.appendChild(aLbl);body.appendChild(aTogWrap);
+
+      const hSec=mkSec("Message d'aide (/help)");
+      const hTa=document.createElement('textarea');hTa.className='form-control';hTa.rows=2;hTa.value=block.data.poll_helpMessage||'';
+      hTa.placeholder='Utilisez /poll Question | Option1 | Option2 | …';
+      hTa.addEventListener('input',()=>{block.data.poll_helpMessage=hTa.value;});hSec.appendChild(hTa);
+      break;
+    }
+
+    case 'reminder': {
+      const tzSec=mkSec('Fuseau horaire');
+      const tzI=document.createElement('input');tzI.type='text';tzI.className='form-control';tzI.value=block.data.reminder_timezone||'';tzI.placeholder='Europe/Paris, Africa/Nairobi, America/New_York…';
+      tzI.addEventListener('input',()=>{block.data.reminder_timezone=tzI.value;});
+      const tzH=document.createElement('div');tzH.className='form-hint';tzH.innerHTML='Fuseau IANA. Vide = UTC. <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" target="_blank" style="color:var(--cyan);">Liste complète</a>';
+      tzSec.appendChild(tzI);tzSec.appendChild(tzH);
+
+      const hSec=mkSec("Message d'aide");
+      const hTa=document.createElement('textarea');hTa.className='form-control';hTa.rows=2;hTa.value=block.data.reminder_helpMessage||'';
+      hTa.placeholder='Utilisez /remind 30min Mon rappel ou /remind 14:00 Réunion';
+      hTa.addEventListener('input',()=>{block.data.reminder_helpMessage=hTa.value;});hSec.appendChild(hTa);
+      break;
+    }
+
+    case 'translate': {
+      const lSec=mkSec('Langue cible par défaut');
+      const lSel=document.createElement('select');lSel.className='form-control';
+      [{v:'en',l:'🇬🇧 Anglais'},{v:'fr',l:'🇫🇷 Français'},{v:'es',l:'🇪🇸 Espagnol'},{v:'de',l:'🇩🇪 Allemand'},{v:'it',l:'🇮🇹 Italien'},{v:'ar',l:'🇸🇦 Arabe'},{v:'ru',l:'🇷🇺 Russe'},{v:'zh',l:'🇨🇳 Chinois'},{v:'pt',l:'🇵🇹 Portugais'},{v:'ja',l:'🇯🇵 Japonais'}].forEach(o=>{const op=document.createElement('option');op.value=o.v;op.textContent=o.l;if((block.data.translate_defaultLang||'en')===o.v)op.selected=true;lSel.appendChild(op);});
+      lSel.addEventListener('change',()=>{block.data.translate_defaultLang=lSel.value;});lSec.appendChild(lSel);
+
+      const wSec=mkSec('Message de bienvenue');
+      const wI=document.createElement('input');wI.type='text';wI.className='form-control';wI.value=block.data.translate_welcomeMessage||'';wI.placeholder='🌍 Envoyez /translate <texte> pour traduire';
+      wI.addEventListener('input',()=>{block.data.translate_welcomeMessage=wI.value;});wSec.appendChild(wI);
+      break;
+    }
+
+    case 'stats': {
+      const rtWrap=document.createElement('div');rtWrap.className='toggle-wrap';rtWrap.style.marginBottom='.4rem';
+      const rtTog=document.createElement('div');rtTog.className='toggle'+(block.data.stats_resetWeekly?' active':'');
+      rtTog.addEventListener('click',()=>{block.data.stats_resetWeekly=!block.data.stats_resetWeekly;rtTog.classList.toggle('active');});
+      const rtLbl=document.createElement('label');rtLbl.className='toggle-label';rtLbl.textContent='Reset automatique hebdomadaire';
+      rtWrap.appendChild(rtTog);rtWrap.appendChild(rtLbl);body.appendChild(rtWrap);
+
+      const tmWrap=document.createElement('div');tmWrap.className='toggle-wrap';
+      const tmTog=document.createElement('div');tmTog.className='toggle'+(block.data.stats_trackMedia?' active':'');
+      tmTog.addEventListener('click',()=>{block.data.stats_trackMedia=!block.data.stats_trackMedia;tmTog.classList.toggle('active');});
+      const tmLbl=document.createElement('label');tmLbl.className='toggle-label';tmLbl.textContent='Compter aussi les photos/vidéos';
+      tmWrap.appendChild(tmTog);tmWrap.appendChild(tmLbl);body.appendChild(tmWrap);
+      break;
+    }
+  }
+}
+
+function updateSummary(block) {
+  const el = document.querySelector(`.canvas-block[data-id="${block.id}"] .b-summary`);
+  if (el) el.textContent = bSummary(block);
+}
+
+// ── API test via backend proxy (fix CSP) ──────────────────────────────────
+async function testApiCall(block, pathInputEl) {
+  const d = block.data;
+  const q = document.getElementById(`tq-${block.id}`)?.value?.trim() || 'test';
+  const resultEl = document.getElementById(`tr-${block.id}`);
+  if (!d.api_url) { resultEl.innerHTML = '<div class="form-error">⚠️ Entrez une URL d\'abord</div>'; return; }
+
+  const interp = s => String(s||'').replace(/{query}/g, encodeURIComponent(q)).replace(/{raw_query}/g,q).replace(/{user_id}/g,'12345').replace(/{first_name}/g,'Test');
+  const url = interp(d.api_url);
+  const method = d.api_method || 'GET';
+  const headers = {'Content-Type':'application/json'};
+  (d._headerRows||[]).forEach(r => { if(r.key) headers[r.key]=r.val; });
+  const payload = {url, method, headers};
+  if (['POST','PUT','PATCH'].includes(method) && d.api_body) payload.body = interp(d.api_body);
+
+  resultEl.innerHTML = '<span style="color:var(--text-muted);font-size:.78rem;">⏳ Appel via le serveur...</span>';
+
+  const resp = await api('/bots/proxy-test', { method:'POST', body:JSON.stringify(payload) });
+  if (!resp?.success) { resultEl.innerHTML = `<div class="form-error">❌ ${resp?.error||'Erreur proxy'}</div>`; return; }
+
+  let parsed; try { parsed = JSON.parse(resp.body); } catch(_) { parsed = resp.body; }
+
+  // Apply path extraction
+  const path = d.api_response_path?.trim() || '';
+  let extracted = parsed;
+  if (path && typeof parsed === 'object') {
+    extracted = path.split('.').reduce((a,k)=>a?.[k], parsed);
+  }
+
+  // Format extracted value
+  const formatVal = (v) => {
+    if (v === undefined || v === null) return '(vide)';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+    if (Array.isArray(v)) {
+      if (v.every(x=>typeof x==='string'||typeof x==='number')) return v.map(x=>`• ${x}`).join('\n');
+      const textKeys=['name','title','text','content','description','value','fact','joke','quote','message'];
+      return v.slice(0,5).map(item=>{
+        if(typeof item!=='object') return String(item);
+        for(const k of textKeys){if(typeof item[k]==='string') return item[k];}
+        return JSON.stringify(item);
+      }).join('\n\n');
+    }
+    if (typeof v === 'object') {
+      const textKeys=['name','title','text','content','description','message','fact','joke','quote','result','answer'];
+      for(const k of textKeys){if(typeof v[k]==='string') return v[k]; if(Array.isArray(v[k])) return formatVal(v[k]);}
+      return JSON.stringify(v, null, 2).substring(0,600);
+    }
+    return String(v);
+  };
+
+  const formatted = formatVal(extracted !== undefined ? extracted : parsed);
+  const template = d.api_response_template || '🔗 {result}';
+  const previewMsg = template.replace(/{result}/g, formatted).replace(/{query}/g,q).replace(/{first_name}/g,'Test');
+
+  resultEl.innerHTML = `
+    <div class="api-test-success">
+      <div class="api-test-status">HTTP ${resp.status} ${resp.ok?'✅':'⚠️'}</div>
+      <div style="font-size:.72rem;color:var(--text-muted);margin-bottom:.3rem;">📱 Aperçu Telegram :</div>
+      <div class="api-test-message">${previewMsg.substring(0,400)}</div>
+      <details style="margin-top:.4rem;font-size:.7rem;color:var(--text-muted);">
+        <summary>🔍 JSON complet (pour trouver le chemin)</summary>
+        <pre style="overflow:auto;max-height:120px;margin-top:.25rem;font-size:.68rem;">${JSON.stringify(parsed,null,2).substring(0,1200)}</pre>
+      </details>
+    </div>`;
+}
+
+function validateStep3() {
+  const name = document.getElementById('bot-name')?.value?.trim();
+  if (!name) { Toast.error('Le nom du bot est requis'); return; }
+  buildLaunchSummary(); goTo(4);
+}
+
+function buildLaunchSummary() {
+  const TNAMES = {blank:'⬜ Vide',echo:'🔁 Echo',welcome:'👋 Bienvenue',poll:'🗳️ Sondages',reminder:'⏰ Rappels',translate:'🌍 Traducteur',stats:'📊 Stats',ai:'🤖 Bot IA',api:'⚡ Bot API'};
+  const name = document.getElementById('bot-name')?.value || '—';
+  const token = document.getElementById('bot-token')?.value;
+  const masked = token ? token.split(':')[0]+':****'+token.slice(-4) : '***';
+  const tpl = TNAMES[selectedTemplate] || selectedTemplate;
+  document.getElementById('launch-summary').innerHTML = `<div class="launch-summary-card"><div class="launch-summary-avatar">${tpl?.split(' ')?.[0]||'🤖'}</div><div><div class="launch-summary-name">${name}</div><div class="launch-summary-template">${tpl} · ${canvasBlocks.length} module(s)</div><div class="launch-summary-token mono">${masked}</div></div></div>`;
+  ['chk-token','chk-webhook','chk-db'].forEach(id => { const el=document.getElementById(id); if(el){el.querySelector('.check-icon').textContent='⏳';el.className='check-item';} });
+}
+
+function effectiveTemplate() {
+  if (selectedTemplate && selectedTemplate !== 'blank') return selectedTemplate;
+  if (canvasBlocks.find(b=>b.type==='api_endpoint')) return 'api';
+  if (canvasBlocks.find(b=>b.type==='ai_llm'))       return 'ai';
+  if (canvasBlocks.find(b=>b.type==='welcome_msg'))  return 'welcome';
+  if (canvasBlocks.find(b=>b.type==='poll'))         return 'poll';
+  if (canvasBlocks.find(b=>b.type==='reminder'))     return 'reminder';
+  if (canvasBlocks.find(b=>b.type==='translate'))    return 'translate';
+  if (canvasBlocks.find(b=>b.type==='stats'))        return 'stats';
+  return 'echo';
+}
+
 function collectConfig() {
   const config = {};
-  const tpl = TEMPLATES[selectedTemplate];
+  const api_block = canvasBlocks.find(b=>b.type==='api_endpoint');
+  const key_block = canvasBlocks.find(b=>b.type==='api_key');
+  const ai_block  = canvasBlocks.find(b=>b.type==='ai_llm');
+  const txt_block = canvasBlocks.find(b=>b.type==='text_reply');
+  const wel_block = canvasBlocks.find(b=>b.type==='welcome_msg');
+  const cmd_blocks= canvasBlocks.filter(b=>b.type==='command');
+  const poll_block= canvasBlocks.find(b=>b.type==='poll');
+  const rem_block = canvasBlocks.find(b=>b.type==='reminder');
+  const tr_block  = canvasBlocks.find(b=>b.type==='translate');
+  const st_block  = canvasBlocks.find(b=>b.type==='stats');
 
-  if (selectedTemplate === 'api') {
-    config.api_method   = document.getElementById('cfg-api_method')?.value || 'GET';
-    config.api_url      = document.getElementById('cfg-api_url')?.value?.trim() || '';
-    config.api_triggers = document.getElementById('cfg-api_triggers')?.value?.trim() || '';
-    config.api_body     = document.getElementById('cfg-api_body')?.value?.trim() || '';
-    config.api_response_path     = document.getElementById('cfg-api_response_path')?.value?.trim() || '';
-    config.api_response_template = document.getElementById('cfg-api_response_template')?.value?.trim() || '{result}';
-    config.api_fallback_message  = document.getElementById('cfg-api_fallback_message')?.value?.trim() || '';
-    config.api_cooldown_ms       = document.getElementById('cfg-api_cooldown_ms')?.value?.trim() || '2000';
+  if (api_block) {
+    const d=api_block.data;
+    config.api_method=d.api_method||'GET';
+    config.api_url=d.api_url||'';
+    config.api_triggers=d.api_triggers||'';
+    config.api_body=d.api_body||'';
+    config.api_response_path=d.api_response_path||'';
+    config.api_response_template=d.api_response_template||'🔗 {result}';
+    config.api_fallback_message=d.api_fallback||'❌ Impossible de récupérer les données.';
+    config.api_headers=d.api_headers||'';
+    config.api_cooldown_ms=d.api_cooldown||'2000';
+    config.api_welcome_message=d.api_welcome_message||'';
+    if (d.api_buttons) config.api_buttons=d.api_buttons;
+  }
 
-    // Build headers string
-    const hdrs = headerRows.filter(r => r.key).map(r => `${r.key}: ${r.val}`).join('\n');
-    config.api_headers = hdrs;
+  if (key_block) {
+    config.ai_apiKey=key_block.data.key_value||'';
+  }
 
-    // Build buttons JSON
-    if (apiBtnRows.length > 0) {
-      config.api_buttons = JSON.stringify(apiBtnRows);
+  if (ai_block) {
+    const d=ai_block.data;
+    config.ai_provider=d.ai_provider||'openai';
+    config.ai_model=d.ai_model||'';
+    config.ai_endpoint=d.ai_endpoint||'';
+    config.ai_system_prompt=d.ai_system_prompt||'';
+    config.ai_persona_name=d.ai_persona_name||'';
+    config.ai_persona_emoji=d.ai_persona_emoji||'🤖';
+    config.ai_welcome_message=d.ai_welcome_message||'';
+    config.ai_temperature=d.ai_temperature||'0.7';
+    config.ai_enabled=true;
+    if (!config.ai_apiKey && key_block) config.ai_apiKey=key_block.data.key_value||'';
+  }
+
+  if (txt_block) {
+    config.echo_welcomeMessage=txt_block.data.message||'';
+    config.echo_prefix=txt_block.data.echo_prefix||'';
+    config.api_triggers=txt_block.data.triggers||'';
+  }
+
+  if (wel_block) {
+    config.welcome_joinMessage=wel_block.data.welcome_joinMessage||'👋 Bienvenue {first_name} dans le groupe !';
+    config.welcome_leaveMessage=wel_block.data.welcome_leaveMessage||'👋 Au revoir {first_name} !';
+    config.welcome_include_username=wel_block.data.include_username||false;
+  }
+
+  if (cmd_blocks.length > 0) {
+    config.custom_commands = JSON.stringify(cmd_blocks.map(b=>({
+      name: b.data.command_name||'',
+      reply: b.data.reply_text||'',
+      desc: b.data.command_desc||'',
+      parse_mode: b.data.command_parse_mode||'HTML',
+      buttons: b.data.command_buttons||'',
+    })));
+    // Premier command block = command principal
+    if (cmd_blocks[0].data.command_name) {
+      config.command_name=cmd_blocks[0].data.command_name;
+      config.command_reply=cmd_blocks[0].data.reply_text||'';
     }
-  } else {
-    // Standard fields
-    tpl?.configFields?.forEach(field => {
-      const el = document.getElementById('config-' + field.key);
-      if (!el) return;
-      config[field.key] = field.type === 'toggle' ? el.classList.contains('active') : el.value;
-    });
+  }
 
-    // Rich blocks
-    if (blocks.length > 0) {
-      config.msg_start_blocks = JSON.stringify(blocks);
-    }
+  if (poll_block) {
+    config.poll_allowAnonymous=poll_block.data.poll_allowAnonymous||false;
+    config.poll_helpMessage=poll_block.data.poll_helpMessage||'';
+  }
+
+  if (rem_block) {
+    config.reminder_timezone=rem_block.data.reminder_timezone||'Europe/Paris';
+    config.reminder_helpMessage=rem_block.data.reminder_helpMessage||'';
+  }
+
+  if (tr_block) {
+    config.translate_defaultLang=tr_block.data.translate_defaultLang||'en';
+    config.translate_welcomeMessage=tr_block.data.translate_welcomeMessage||'';
+  }
+
+  if (st_block) {
+    config.stats_resetWeekly=st_block.data.stats_resetWeekly||false;
+    config.stats_trackMedia=st_block.data.stats_trackMedia||false;
   }
 
   return config;
 }
 
-// ── Create the bot ────────────────────────────────────────────────────────────
 async function createBot() {
-  const token  = document.getElementById('bot-token')?.value?.trim();
-  const name   = document.getElementById('bot-name')?.value?.trim();
-  const btn    = document.getElementById('create-btn');
-  const errDiv = document.getElementById('launch-error');
-
-  if (!token || !name || !selectedTemplate) return;
-
-  btn.classList.add('btn-loading');
-  btn.disabled = true;
-  errDiv.style.display = 'none';
-
-  // Animate checklist
-  const setCheck = (id, state) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const icons = { ok: '✅', err: '❌', loading: '⏳' };
-    el.querySelector('.check-icon').textContent = icons[state] || '⏳';
-    el.className = 'check-item ' + (state === 'ok' ? 'done' : state === 'err' ? 'error' : '');
-  };
-
-  setCheck('chk-token', 'ok');
-  await new Promise(r => setTimeout(r, 200));
-
-  const config = collectConfig();
-
-  const data = await api('/bots', {
-    method: 'POST',
-    body: JSON.stringify({ token, name, template: selectedTemplate, config }),
-  });
-
+  const token = document.getElementById('bot-token')?.value?.trim();
+  const name  = document.getElementById('bot-name')?.value?.trim();
+  const btn   = document.getElementById('create-btn');
+  const errDiv= document.getElementById('launch-error');
+  if (!token || !name) return;
+  btn.classList.add('btn-loading'); btn.disabled = true; errDiv.style.display='none';
+  const setCheck = (id, state) => { const el=document.getElementById(id); if(!el) return; el.querySelector('.check-icon').textContent={ok:'✅',err:'❌',loading:'⏳'}[state]||'⏳'; el.className='check-item '+(state==='ok'?'done':state==='err'?'error':''); };
+  setCheck('chk-token','ok');
+  await new Promise(r=>setTimeout(r,200));
+  const template = effectiveTemplate();
+  const config   = collectConfig();
+  const data = await api('/bots', { method:'POST', body:JSON.stringify({token,name,template,config}) });
   btn.classList.remove('btn-loading');
-
   if (!data?.success) {
-    btn.disabled = false;
-    setCheck('chk-webhook', 'err');
-    setCheck('chk-db', 'err');
-    const msg = data?.errors ? data.errors.map(e => e.msg).join('<br>') : (data?.error || 'Erreur serveur');
-    errDiv.style.display = 'block';
-    errDiv.innerHTML = `<div class="alert alert-error">⚠️ ${msg}</div>`;
-    return;
+    btn.disabled = false; setCheck('chk-webhook','err'); setCheck('chk-db','err');
+    const msg = data?.errors ? data.errors.map(e=>e.msg).join('<br>') : (data?.error||'Erreur serveur');
+    errDiv.style.display='block'; errDiv.innerHTML=`<div class="alert alert-error">⚠️ ${msg}</div>`; return;
   }
-
-  setCheck('chk-webhook', 'ok');
-  await new Promise(r => setTimeout(r, 200));
-  setCheck('chk-db', 'ok');
-
-  // Save AI key if present
-  const aiKey = document.getElementById('ai-api-key-input')?.value?.trim();
-  if (selectedTemplate === 'ai' && aiKey && data.bot?._id) {
-    await api('/bots/' + data.bot._id + '/ai-key', {
-      method: 'PUT',
-      body: JSON.stringify({ apiKey: aiKey }),
-    });
-  }
-
+  setCheck('chk-webhook','ok'); await new Promise(r=>setTimeout(r,200)); setCheck('chk-db','ok');
+  const keyBlock = canvasBlocks.find(b=>b.type==='api_key');
+  const aiKey = keyBlock?.data?.key_value?.trim();
+  if (aiKey && data.bot?._id) await api('/bots/'+data.bot._id+'/ai-key', { method:'PUT', body:JSON.stringify({apiKey:aiKey}) });
   Toast.success('🎉 Bot déployé avec succès !');
-  await new Promise(r => setTimeout(r, 800));
+  await new Promise(r=>setTimeout(r,800));
   window.location.href = `/bot-detail.html?id=${data.bot._id}`;
 }
 </script>
