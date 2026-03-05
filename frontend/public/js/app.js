@@ -1,5 +1,5 @@
 // js/app.js - Utilitaires partagés pour toutes les pages dashboard
-const API = 'http://localhost:3000/api';
+const API = 'https://botforger.vercel.app/api';
 
 // ============================================================
 // Auth helpers
