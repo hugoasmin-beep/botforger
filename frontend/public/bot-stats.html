@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Statistiques avancées — BotForge</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --accent: #7C66FF;
+      --accent-d: rgba(124,102,255,.12);
+      --cyan: #00d4ff;
+      --cyan-d: rgba(0,212,255,.1);
+      --green: #00ff88;
+      --green-d: rgba(0,255,136,.1);
+      --red: #ff4757;
+      --amber: #ffd32a;
+      --surface: #0e0e18;
+      --card: #13131e;
+      --card-2: #18182a;
+      --input: #0b0b15;
+      --border: rgba(255,255,255,.07);
+      --border-h: rgba(124,102,255,.4);
+      --text: #eeeaff;
+      --text-2: #7070a0;
+      --text-3: #2e2e50;
+      --ff-disp: 'Syne', sans-serif;
+      --ff-body: 'Nunito', sans-serif;
+      --ff-mono: 'JetBrains Mono', monospace;
+      --r: 10px; --r-lg: 16px;
+    }
+
+    body {
+      font-family: var(--ff-body);
+      background: #080810;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: radial-gradient(rgba(124,102,255,.035) 1px, transparent 1px);
+      background-size: 24px 24px; pointer-events: none; z-index: 0;
+    }
+
+    .stats-page { position: relative; z-index: 1; }
+
+    /* ─── Header ─── */
+    .stats-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex; align-items: center; gap: 1.25rem;
+    }
+    .stats-back {
+      background: var(--card-2); border: 1px solid var(--border);
+      border-radius: 8px; padding: .4rem .75rem;
+      font-size: .8rem; color: var(--text-2);
+      text-decoration: none; transition: all .18s;
+    }
+    .stats-back:hover { border-color: var(--border-h); color: var(--text); }
+    .stats-bot-info { display: flex; align-items: center; gap: .75rem; }
+    .stats-bot-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--accent-d); border: 1px solid rgba(124,102,255,.25);
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .stats-bot-name { font-family: var(--ff-disp); font-size: .95rem; font-weight: 700; }
+    .stats-bot-meta { font-size: .73rem; color: var(--text-2); margin-top: .05rem; }
+
+    .stats-header-right { margin-left: auto; display: flex; align-items: center; gap: .75rem; }
+
+    /* ─── Period selector ─── */
+    .period-tabs {
+      display: flex; background: var(--input);
+      border: 1px solid var(--border); border-radius: 8px; padding: 2px; gap: 2px;
+    }
+    .period-tab {
+      padding: .28rem .7rem; border-radius: 6px;
+      font-size: .76rem; font-weight: 700; cursor: pointer;
+      color: var(--text-2); transition: all .18s; border: none; background: none;
+    }
+    .period-tab.active { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(124,102,255,.3); }
+    .period-tab:hover:not(.active) { color: var(--text); }
+
+    /* ─── Main layout ─── */
+    .stats-body { padding: 1.5rem 2rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+    /* ─── KPI row ─── */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.1rem 1.25rem;
+      transition: border-color .18s;
+      position: relative; overflow: hidden;
+    }
+    .kpi-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: var(--kpi-color, var(--accent));
+    }
+    .kpi-card:hover { border-color: var(--border-h); }
+    .kpi-label { font-size: .72rem; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .5rem; }
+    .kpi-value { font-family: var(--ff-disp); font-size: 1.9rem; font-weight: 800; line-height: 1; margin-bottom: .3rem; }
+    .kpi-delta {
+      display: inline-flex; align-items: center; gap: .25rem;
+      font-size: .73rem; font-weight: 700; padding: .1rem .45rem;
+      border-radius: 99px;
+    }
+    .kpi-delta.up   { background: rgba(0,255,136,.1); color: var(--green); }
+    .kpi-delta.down { background: rgba(255,71,87,.1);  color: var(--red); }
+    .kpi-delta.flat { background: rgba(255,255,255,.05); color: var(--text-2); }
+    .kpi-sub { font-size: .72rem; color: var(--text-2); margin-top: .25rem; }
+
+    /* ─── Charts grid ─── */
+    .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; }
+    .chart-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.25rem;
+      display: flex; flex-direction: column; gap: .85rem;
+    }
+    .chart-card-header { display: flex; align-items: center; justify-content: space-between; }
+    .chart-title { font-family: var(--ff-disp); font-size: .9rem; font-weight: 700; }
+    .chart-sub   { font-size: .72rem; color: var(--text-2); margin-top: .15rem; }
+    .chart-actions { display: flex; gap: .4rem; }
+    .chart-legend {
+      display: flex; gap: .85rem; flex-wrap: wrap;
+    }
+    .legend-item { display: flex; align-items: center; gap: .35rem; font-size: .73rem; color: var(--text-2); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .chart-wrap { position: relative; min-height: 200px; }
+
+    /* ─── Second row ─── */
+    .charts-row2 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
+
+    /* ─── Top users table ─── */
+    .top-users-table { width: 100%; border-collapse: collapse; }
+    .top-users-table th {
+      font-size: .65rem; font-weight: 800; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: .07em;
+      padding: .4rem .75rem; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .top-users-table td { padding: .55rem .75rem; font-size: .82rem; border-bottom: 1px solid rgba(255,255,255,.03); }
+    .top-users-table tr:hover td { background: rgba(255,255,255,.02); }
+    .user-rank { font-family: var(--ff-mono); font-weight: 700; color: var(--text-2); font-size: .75rem; }
+    .user-rank.gold   { color: #ffd32a; }
+    .user-rank.silver { color: #c0c0d0; }
+    .user-rank.bronze { color: #cd7f32; }
+    .user-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent-d); display: inline-flex; align-items: center;
+      justify-content: center; font-size: .72rem; margin-right: .5rem;
+      vertical-align: middle;
+    }
+    .user-bar-wrap { display: flex; align-items: center; gap: .5rem; }
+    .user-bar-bg { flex: 1; height: 4px; background: rgba(255,255,255,.06); border-radius: 99px; }
+    .user-bar-fill { height: 100%; border-radius: 99px; background: var(--accent); }
+    .msg-count { font-family: var(--ff-mono); font-size: .78rem; color: var(--text-2); }
+
+    /* ─── Commands table ─── */
+    .cmd-list { display: flex; flex-direction: column; gap: .4rem; }
+    .cmd-row {
+      display: flex; align-items: center; gap: .65rem;
+      padding: .5rem .65rem; border-radius: 8px;
+      background: var(--card-2); border: 1px solid var(--border);
+      font-size: .8rem;
+    }
+    .cmd-name { font-family: var(--ff-mono); color: var(--cyan); font-size: .78rem; flex-shrink: 0; width: 90px; }
+    .cmd-bar-bg { flex: 1; height: 5px; background: rgba(255,255,255,.05); border-radius: 99px; }
+    .cmd-bar-fill { height: 100%; border-radius: 99px; }
+    .cmd-count { font-size: .76rem; color: var(--text-2); font-family: var(--ff-mono); flex-shrink: 0; }
+
+    /* ─── Activity heatmap ─── */
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(24, 1fr);
+      grid-template-rows: repeat(7, 1fr);
+      gap: 3px;
+    }
+    .heatmap-cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      background: rgba(124,102,255,.06);
+      transition: all .15s;
+      cursor: default;
+      position: relative;
+    }
+    .heatmap-cell:hover { transform: scale(1.15); z-index: 2; }
+    .heatmap-cell[data-v="1"] { background: rgba(124,102,255,.2); }
+    .heatmap-cell[data-v="2"] { background: rgba(124,102,255,.38); }
+    .heatmap-cell[data-v="3"] { background: rgba(124,102,255,.6); }
+    .heatmap-cell[data-v="4"] { background: rgba(124,102,255,.85); }
+    .heatmap-labels-h { display: flex; gap: 3px; margin-bottom: 3px; padding-left: 0; }
+    .heatmap-labels-h span { flex: 1; font-size: .58rem; color: var(--text-3); text-align: center; }
+    .heatmap-labels-v { display: grid; grid-template-rows: repeat(7, 1fr); gap: 3px; margin-right: 6px; }
+    .heatmap-labels-v span { font-size: .6rem; color: var(--text-3); display: flex; align-items: center; }
+
+    /* ─── Export button ─── */
+    .btn-export {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .4rem .85rem; border-radius: 7px;
+      background: var(--card-2); border: 1px solid var(--border);
+      font-size: .77rem; font-weight: 700; cursor: pointer;
+      color: var(--text-2); transition: all .18s;
+    }
+    .btn-export:hover { border-color: var(--border-h); color: var(--text); }
+
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 2rem; gap: .5rem;
+      color: var(--text-2); font-size: .82rem; text-align: center;
+    }
+    .empty-state-icon { font-size: 1.5rem; opacity: .3; }
+
+    @media (max-width: 1100px) { .kpi-row { grid-template-columns: 1fr 1fr; } .charts-grid { grid-template-columns: 1fr; } .charts-row2 { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 700px)  { .stats-body { padding: 1rem; } .charts-row2 { grid-template-columns: 1fr; } .kpi-row { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+<div class="stats-page">
+
+  <!-- Header -->
+  <div class="stats-header">
+    <a href="/bot-detail.html" id="back-link" class="stats-back">← Retour</a>
+    <div class="stats-bot-info">
+      <div class="stats-bot-avatar" id="bot-avatar">🤖</div>
+      <div>
+        <div class="stats-bot-name" id="bot-name-display">Bot</div>
+        <div class="stats-bot-meta" id="bot-meta">Statistiques avancées</div>
+      </div>
+    </div>
+    <div class="stats-header-right">
+      <div class="period-tabs" id="period-tabs">
+        <button class="period-tab" data-days="7">7j</button>
+        <button class="period-tab active" data-days="30">30j</button>
+        <button class="period-tab" data-days="90">90j</button>
+        <button class="period-tab" data-days="365">1an</button>
+      </div>
+      <button class="btn-export" id="export-csv-btn">📊 Export CSV</button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="stats-body">
+
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi-card" style="--kpi-color: var(--accent);">
+        <div class="kpi-label">Messages reçus</div>
+        <div class="kpi-value" id="kpi-messages">—</div>
+        <div><span class="kpi-delta" id="kpi-messages-delta">—</span></div>
+        <div class="kpi-sub" id="kpi-messages-sub">sur la période</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color: var(--cyan);">
+        <div class="kpi-label">Utilisateurs actifs</div>
+        <div class="kpi-value" id="kpi-users">—</div>
+        <div><span class="kpi-delta" id="kpi-users-delta">—</span></div>
+        <div class="kpi-sub">utilisateurs uniques</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color: var(--green);">
+        <div class="kpi-label">Commandes exécutées</div>
+        <div class="kpi-value" id="kpi-commands">—</div>
+        <div><span class="kpi-delta" id="kpi-commands-delta">—</span></div>
+        <div class="kpi-sub">toutes commandes</div>
+      </div>
+      <div class="kpi-card" style="--kpi-color: var(--amber);">
+        <div class="kpi-label">Taux d'engagement</div>
+        <div class="kpi-value" id="kpi-engagement">—</div>
+        <div><span class="kpi-delta" id="kpi-engagement-delta">—</span></div>
+        <div class="kpi-sub">messages / utilisateur</div>
+      </div>
+    </div>
+
+    <!-- Main charts -->
+    <div class="charts-grid">
+      <!-- Activity timeline -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-title">Activité dans le temps</div>
+            <div class="chart-sub">Messages et utilisateurs actifs / jour</div>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Messages</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div>Utilisateurs</div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-timeline"></canvas></div>
+      </div>
+
+      <!-- Donut: message types -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-title">Types de messages</div>
+            <div class="chart-sub">Répartition</div>
+          </div>
+        </div>
+        <div class="chart-wrap" style="display:flex;align-items:center;justify-content:center;min-height:170px;">
+          <canvas id="chart-types" style="max-height:200px;"></canvas>
+        </div>
+        <div class="chart-legend" id="types-legend" style="flex-direction:column;gap:.3rem;"></div>
+      </div>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="charts-row2">
+      <!-- Top users -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-title">🏆 Top utilisateurs</div>
+            <div class="chart-sub">Par nombre de messages</div>
+          </div>
+        </div>
+        <div id="top-users-wrap">
+          <div class="empty-state"><div class="empty-state-icon">👤</div>Chargement…</div>
+        </div>
+      </div>
+
+      <!-- Top commands -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-title">⌨️ Commandes populaires</div>
+            <div class="chart-sub">Utilisation par commande</div>
+          </div>
+        </div>
+        <div id="top-commands-wrap">
+          <div class="empty-state"><div class="empty-state-icon">⌨️</div>Chargement…</div>
+        </div>
+      </div>
+
+      <!-- Heatmap: hours/days -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-title">🗓 Heatmap d'activité</div>
+            <div class="chart-sub">Heure × Jour de la semaine</div>
+          </div>
+        </div>
+        <div id="heatmap-wrap" style="padding-top:.25rem;">
+          <div class="empty-state"><div class="empty-state-icon">🗓</div>Chargement…</div>
+        </div>
+        <div id="heatmap-legend" style="display:flex;align-items:center;gap:.4rem;font-size:.7rem;color:var(--text-3);margin-top:.5rem;">
+          <span>Moins</span>
+          <div style="width:12px;height:12px;border-radius:3px;background:rgba(124,102,255,.06)"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:rgba(124,102,255,.2)"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:rgba(124,102,255,.45)"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:rgba(124,102,255,.85)"></div>
+          <span>Plus</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+/* ════════════════════════════════════════
+   STATS PAGE
+════════════════════════════════════════ */
+let botId = null;
+let currentDays = 30;
+let charts = {};
+
+const CHART_DEFAULTS = {
+  responsive: true,
+  maintainAspectRatio: true,
+  plugins: { legend: { display: false }, tooltip: { backgroundColor:'#13131e', borderColor:'rgba(255,255,255,.1)', borderWidth:1, titleColor:'#eeeaff', bodyColor:'#7070a0', padding: 10 } },
+  scales: { x: { grid: { color:'rgba(255,255,255,.04)' }, ticks: { color:'#4a4a70', font:{ size:11 } } }, y: { grid: { color:'rgba(255,255,255,.04)' }, ticks: { color:'#4a4a70', font:{ size:11 } } } }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const sidebar = document.getElementById('sidebar-container');
+  if (sidebar) sidebar.style.display = 'none';
+  if (!Auth.requireAuth()) return;
+
+  const params = new URLSearchParams(window.location.search);
+  botId = params.get('id');
+  if (!botId) { window.location.href = '/bots.html'; return; }
+
+  document.getElementById('back-link').href = `/bot-detail.html?id=${botId}`;
+
+  // Period tabs
+  document.querySelectorAll('.period-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentDays = parseInt(tab.dataset.days);
+      loadStats();
+    });
+  });
+
+  document.getElementById('export-csv-btn').addEventListener('click', exportCSV);
+
+  loadBotInfo();
+  loadStats();
+});
+
+async function loadBotInfo() {
+  const data = await api(`/bots/${botId}`);
+  if (!data?.bot) return;
+  const bot = data.bot;
+  document.getElementById('bot-name-display').textContent = bot.name || 'Bot';
+  document.getElementById('bot-meta').textContent = `@${bot.username || '—'} · Template: ${bot.template || '—'}`;
+  document.getElementById('bot-avatar').textContent = bot.name?.[0] || '🤖';
+  document.title = `Stats — ${bot.name} · BotForge`;
+}
+
+async function loadStats() {
+  const data = await api(`/bots/${botId}/stats?days=${currentDays}`);
+  if (!data) { renderMockStats(); return; }
+  renderStats(data);
+}
+
+/* ── Render real or mock stats ─── */
+function renderStats(data) {
+  setKPI('kpi-messages',   data.totalMessages  || 0, data.messagesDelta  || 0, 'vs période précédente');
+  setKPI('kpi-users',      data.activeUsers    || 0, data.usersDelta     || 0, 'utilisateurs uniques');
+  setKPI('kpi-commands',   data.totalCommands  || 0, data.commandsDelta  || 0, 'toutes commandes');
+  const eng = data.activeUsers ? (data.totalMessages / data.activeUsers).toFixed(1) : '—';
+  setKPI('kpi-engagement', eng, data.engagementDelta || 0, 'messages / utilisateur');
+
+  renderTimeline(data.timeline || generateMockTimeline(currentDays));
+  renderTypeDonut(data.messageTypes || { text:60, command:25, media:10, other:5 });
+  renderTopUsers(data.topUsers || generateMockUsers());
+  renderTopCommands(data.topCommands || generateMockCommands());
+  renderHeatmap(data.heatmap || generateMockHeatmap());
+}
+
+function renderMockStats() {
+  // No API — show demo data
+  setKPI('kpi-messages',   2847,  12.4, 'vs période précédente');
+  setKPI('kpi-users',      143,    8.1, 'utilisateurs uniques');
+  setKPI('kpi-commands',   918,   -3.2, 'toutes commandes');
+  setKPI('kpi-engagement', '19.9', 3.8, 'messages / utilisateur');
+
+  renderTimeline(generateMockTimeline(currentDays));
+  renderTypeDonut({ text:58, command:28, media:9, other:5 });
+  renderTopUsers(generateMockUsers());
+  renderTopCommands(generateMockCommands());
+  renderHeatmap(generateMockHeatmap());
+}
+
+function setKPI(id, value, delta, sub) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = typeof value === 'number' ? value.toLocaleString('fr-FR') : value;
+  const deltaEl = document.getElementById(id + '-delta');
+  if (deltaEl) {
+    const pct = Math.abs(delta).toFixed(1) + '%';
+    if (delta > 0) { deltaEl.textContent = '▲ ' + pct; deltaEl.className = 'kpi-delta up'; }
+    else if (delta < 0) { deltaEl.textContent = '▼ ' + pct; deltaEl.className = 'kpi-delta down'; }
+    else { deltaEl.textContent = '→ stable'; deltaEl.className = 'kpi-delta flat'; }
+  }
+  const subEl = document.getElementById(id + '-sub');
+  if (subEl && sub) subEl.textContent = sub;
+}
+
+function renderTimeline(timeline) {
+  const ctx = document.getElementById('chart-timeline');
+  if (!ctx) return;
+  if (charts.timeline) charts.timeline.destroy();
+
+  const labels = timeline.map(d => {
+    const dt = new Date(d.date);
+    return dt.toLocaleDateString('fr-FR', { month:'short', day:'numeric' });
+  });
+
+  charts.timeline = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'Messages', data: timeline.map(d => d.messages), borderColor:'#7C66FF', backgroundColor:'rgba(124,102,255,.08)', fill:true, tension:.4, pointRadius:3, pointHoverRadius:5, borderWidth:2 },
+        { label:'Utilisateurs', data: timeline.map(d => d.users), borderColor:'#00d4ff', backgroundColor:'rgba(0,212,255,.05)', fill:true, tension:.4, pointRadius:3, pointHoverRadius:5, borderWidth:2 }
+      ]
+    },
+    options: { ...CHART_DEFAULTS, interaction: { mode:'index', intersect:false } }
+  });
+}
+
+function renderTypeDonut(types) {
+  const ctx = document.getElementById('chart-types');
+  if (!ctx) return;
+  if (charts.types) charts.types.destroy();
+
+  const colors = ['#7C66FF','#00d4ff','#00ff88','#ff9f43'];
+  const labels = Object.keys(types);
+  const labelMap = { text:'Texte', command:'Commandes', media:'Médias', other:'Autre' };
+  const values = Object.values(types);
+
+  charts.types = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: '#13131e', borderWidth: 3, hoverOffset: 8 }] },
+    options: { responsive:true, maintainAspectRatio:true, cutout:'65%', plugins: { legend:{ display:false }, tooltip: CHART_DEFAULTS.plugins.tooltip } }
+  });
+
+  const legendEl = document.getElementById('types-legend');
+  if (legendEl) {
+    const total = values.reduce((a,b) => a+b, 0);
+    legendEl.innerHTML = labels.map((l,i) => `
+      <div class="legend-item" style="justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:.4rem;">
+          <div class="legend-dot" style="background:${colors[i]}"></div>
+          ${labelMap[l] || l}
+        </div>
+        <span style="font-family:var(--ff-mono);font-size:.75rem;">${((values[i]/total)*100).toFixed(1)}%</span>
+      </div>`
+    ).join('');
+  }
+}
+
+function renderTopUsers(users) {
+  const wrap = document.getElementById('top-users-wrap');
+  if (!wrap || !users.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👤</div>Pas de données</div>'; return; }
+  const maxMsgs = users[0].messages;
+  const rankClass = ['gold','silver','bronze'];
+  wrap.innerHTML = `<table class="top-users-table">
+    <thead><tr><th>#</th><th>Utilisateur</th><th>Messages</th><th>Activité</th></tr></thead>
+    <tbody>${users.map((u,i) => `<tr>
+      <td><span class="user-rank ${rankClass[i]||''}">${i < 3 ? ['🥇','🥈','🥉'][i] : '#'+(i+1)}</span></td>
+      <td><span class="user-avatar">${u.name?.[0]||'?'}</span>${u.name || 'Anonyme'}</td>
+      <td class="msg-count">${u.messages.toLocaleString('fr-FR')}</td>
+      <td style="min-width:80px;"><div class="user-bar-wrap"><div class="user-bar-bg"><div class="user-bar-fill" style="width:${Math.round((u.messages/maxMsgs)*100)}%;background:${i===0?'#ffd32a':i===1?'#c0c0d0':i===2?'#cd7f32':'var(--accent)'}"></div></div></div></td>
+    </tr>`).join('')}
+    </tbody></table>`;
+}
+
+function renderTopCommands(commands) {
+  const wrap = document.getElementById('top-commands-wrap');
+  if (!wrap || !commands.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⌨️</div>Pas de données</div>'; return; }
+  const colors = ['#7C66FF','#00d4ff','#00ff88','#ff9f43','#ff6b9d'];
+  const maxUses = commands[0].uses;
+  wrap.innerHTML = `<div class="cmd-list">${commands.map((c,i) => `
+    <div class="cmd-row">
+      <span class="cmd-name">/${c.command}</span>
+      <div class="cmd-bar-bg"><div class="cmd-bar-fill" style="width:${Math.round((c.uses/maxUses)*100)}%;background:${colors[i%colors.length]}"></div></div>
+      <span class="cmd-count">${c.uses.toLocaleString('fr-FR')}</span>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderHeatmap(heatmap) {
+  const wrap = document.getElementById('heatmap-wrap');
+  if (!wrap) return;
+  const days = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const max  = Math.max(...heatmap.flat());
+
+  const getLevel = (val) => {
+    if (val === 0) return 0;
+    const pct = val / max;
+    if (pct < .25) return 1;
+    if (pct < .5)  return 2;
+    if (pct < .75) return 3;
+    return 4;
+  };
+
+  let html = `<div style="display:flex;">
+    <div class="heatmap-labels-v">${days.map(d => `<span>${d}</span>`).join('')}</div>
+    <div style="flex:1;">
+      <div class="heatmap-labels-h">${Array.from({length:24},(_,i)=>i).map(h=>`<span>${h%6===0?h+'h':''}</span>`).join('')}</div>
+      <div class="heatmap-grid">`;
+
+  for (let day = 0; day < 7; day++) {
+    for (let hour = 0; hour < 24; hour++) {
+      const val = heatmap[day]?.[hour] || 0;
+      const level = getLevel(val);
+      html += `<div class="heatmap-cell" data-v="${level}" title="${days[day]} ${hour}h — ${val} messages"></div>`;
+    }
+  }
+  html += '</div></div></div>';
+  wrap.innerHTML = html;
+}
+
+/* ── CSV Export ──────────────────────── */
+function exportCSV() {
+  const timeline = generateMockTimeline(currentDays);
+  const csv = ['Date,Messages,Utilisateurs', ...timeline.map(d => `${d.date},${d.messages},${d.users}`)].join('\n');
+  const blob = new Blob([csv], { type:'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `bot_stats_${currentDays}j.csv`; a.click();
+  URL.revokeObjectURL(a.href);
+  if (typeof Toast !== 'undefined') Toast.success('📊 Export CSV téléchargé');
+}
+
+/* ── Mock data generators ────────────── */
+function generateMockTimeline(days) {
+  const data = []; const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    const base = 60 + Math.sin(i / 5) * 20 + Math.random() * 40;
+    data.push({ date: d.toISOString().split('T')[0], messages: Math.round(base + (days - i) * .8), users: Math.round(base * .15 + Math.random() * 8) });
+  }
+  return data;
+}
+
+function generateMockUsers() {
+  return [
+    { name:'Alice Martin', messages: 487 }, { name:'Bob Dupont', messages: 312 },
+    { name:'Carla G.', messages: 245 },     { name:'David K.', messages: 198 },
+    { name:'Emma L.', messages: 156 },      { name:'François P.', messages: 134 },
+    { name:'Gabi S.', messages: 97 },       { name:'Hugo V.', messages: 84 }
+  ];
+}
+
+function generateMockCommands() {
+  return [
+    { command:'start', uses:542 }, { command:'help', uses:318 }, { command:'stats', uses:287 },
+    { command:'remind', uses:156 }, { command:'poll', uses:112 }
+  ];
+}
+
+function generateMockHeatmap() {
+  const h = [];
+  for (let day = 0; day < 7; day++) {
+    const row = [];
+    for (let hour = 0; hour < 24; hour++) {
+      const isWeekend = day >= 5;
+      const isBusy = (hour >= 9 && hour <= 12) || (hour >= 18 && hour <= 22);
+      const base = isBusy ? (isWeekend ? 30 : 50) : (hour >= 0 && hour <= 6 ? 2 : 15);
+      row.push(Math.round(Math.max(0, base + (Math.random() * 20 - 10))));
+    }
+    h.push(row);
+  }
+  return h;
+}
+</script>
+</body>
+</html>
