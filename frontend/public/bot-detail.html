@@ -21,12 +21,13 @@
         </div>
         <p class="page-subtitle" id="page-bot-username"></p>
       </div>
-      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
         <button class="btn btn-secondary btn-sm" id="toggle-bot-btn">⏸ Désactiver</button>
         <a href="/bots.html" class="btn btn-ghost btn-sm">← Mes bots</a>
       </div>
     </div>
 
+    <!-- Stat cards -->
     <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem;">
       <div class="stat-card">
         <span class="stat-icon">💬</span>
@@ -35,7 +36,7 @@
       </div>
       <div class="stat-card">
         <span class="stat-icon">👥</span>
-        <div class="stat-label">Utilisateurs actifs</div>
+        <div class="stat-label">Utilisateurs</div>
         <div class="stat-value" id="stat-active-users">—</div>
       </div>
       <div class="stat-card">
@@ -50,20 +51,23 @@
       </div>
     </div>
 
+    <!-- Tabs -->
     <div class="tabs">
       <button class="tab-btn active" data-tab="config">⚙️ Configuration</button>
       <button class="tab-btn" data-tab="logs">📋 Logs</button>
       <button class="tab-btn" data-tab="test">🧪 Test</button>
-      <button class="tab-btn" data-tab="danger">⚠️ Danger</button>
+      <button class="tab-btn" data-tab="danger" style="color:var(--red);">⚠️ Danger</button>
     </div>
 
+    <!-- Tab: CONFIG -->
     <div class="tab-content active" id="tab-config">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Personnalisation</h3>
+          <h3 class="card-title">Paramètres généraux</h3>
           <button class="btn btn-primary btn-sm" id="save-config-btn">💾 Sauvegarder</button>
         </div>
         <div id="alert-config"></div>
+
         <div class="form-group">
           <label class="form-label">Nom dans le dashboard</label>
           <input type="text" class="form-control" id="cfg-name" />
@@ -77,10 +81,44 @@
           <label class="form-label">Template</label>
           <input type="text" class="form-control" id="cfg-template" disabled style="color:var(--text-muted);" />
         </div>
+
+        <!-- Champs spécifiques au template -->
         <div id="template-specific-config" style="margin-top:1rem;"></div>
+      </div>
+
+      <!-- Section IA (affichée seulement pour template ai) -->
+      <div id="ai-config-card" class="card" style="display:none;margin-top:1rem;border-color:rgba(168,85,247,0.3);">
+        <div class="card-header" style="border-color:rgba(168,85,247,0.2);">
+          <h3 class="card-title">✨ Configuration IA</h3>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <span id="ai-status-badge" style="font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:999px;background:var(--red-dim);color:var(--red);">Non configuré</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">🔑 Clé API <span style="color:var(--text-muted);font-size:0.8rem;">(chiffrement en transit)</span></label>
+          <div style="display:flex;gap:0.5rem;">
+            <input type="password" class="form-control mono" id="ai-key-input"
+              placeholder="Saisir une nouvelle clé pour la mettre à jour"
+              autocomplete="new-password" style="flex:1;" />
+            <button class="btn btn-ghost btn-sm" id="toggle-ai-key-btn" style="white-space:nowrap;">👁 Voir</button>
+            <button class="btn btn-primary btn-sm" id="save-ai-key-btn" style="white-space:nowrap;">💾 Enregistrer</button>
+          </div>
+          <div id="ai-key-status" style="margin-top:0.4rem;font-size:0.8rem;color:var(--text-secondary);font-family:var(--font-mono);"></div>
+          <div class="form-hint" style="color:var(--yellow);">
+            ⚠️ La clé est masquée dès qu'elle est sauvegardée et ne s'affiche jamais en clair.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tester la connexion IA</label>
+          <button class="btn btn-secondary btn-sm" id="test-ai-btn">🧪 Tester l'API</button>
+          <div id="ai-test-result" style="margin-top:0.5rem;"></div>
+        </div>
       </div>
     </div>
 
+    <!-- Tab: LOGS -->
     <div class="tab-content" id="tab-logs">
       <div class="card">
         <div class="card-header">
@@ -100,6 +138,7 @@
           <div style="color:var(--text-muted);padding:1rem;text-align:center;">Cliquez sur Actualiser</div>
         </div>
       </div>
+
       <div class="card" style="margin-top:1rem;border-color:rgba(0,212,255,0.2);">
         <div class="card-header">
           <h3 class="card-title">🔍 Diagnostic webhook</h3>
@@ -111,6 +150,7 @@
       </div>
     </div>
 
+    <!-- Tab: TEST -->
     <div class="tab-content" id="tab-test">
       <div class="card">
         <div class="card-header"><h3 class="card-title">Envoyer un message de test</h3></div>
@@ -125,19 +165,31 @@
         </div>
         <button class="btn btn-primary" id="send-test-btn">🧪 Envoyer le message de test</button>
       </div>
+
       <div class="card" style="margin-top:1rem;">
         <h3 class="card-title" style="margin-bottom:1rem;">Informations webhook</h3>
         <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:1rem;">
           <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.3rem;font-family:var(--font-mono);">WEBHOOK URL</div>
-          <div class="mono" id="webhook-url" style="font-size:0.82rem;word-break:break-all;color:var(--cyan);"></div>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <div class="mono" id="webhook-url" style="font-size:0.82rem;word-break:break-all;color:var(--cyan);flex:1;"></div>
+            <button class="btn btn-ghost btn-sm" id="copy-webhook-btn" style="white-space:nowrap;flex-shrink:0;">📋 Copier</button>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Tab: DANGER -->
     <div class="tab-content" id="tab-danger">
       <div class="card" style="border-color:rgba(255,71,87,0.3);">
         <h3 class="card-title" style="color:var(--red);margin-bottom:0.5rem;">⚠️ Zone de danger</h3>
         <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1.5rem;">Ces actions sont irréversibles.</p>
+
+        <div style="background:var(--red-dim);border:1px solid rgba(255,71,87,0.3);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
+          <h4 style="margin-bottom:0.3rem;">Régénérer le webhook</h4>
+          <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">Génère un nouveau secret webhook. L'ancien ne fonctionnera plus.</p>
+          <button class="btn btn-secondary btn-sm" id="reset-webhook-btn">🔄 Régénérer le webhook</button>
+        </div>
+
         <div style="background:var(--red-dim);border:1px solid rgba(255,71,87,0.3);border-radius:12px;padding:1.5rem;">
           <h4 style="margin-bottom:0.3rem;">Supprimer ce bot</h4>
           <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">Supprime définitivement le bot, sa configuration, ses logs et son webhook Telegram.</p>
@@ -175,41 +227,51 @@
     if (!initLayout()) return;
     bindButtons();
     await loadBot();
-    // Rafraîchir les stats toutes les 20s automatiquement
+    // Rafraîchir les stats toutes les 20s
     statsRefreshInterval = setInterval(refreshStats, 20000);
   });
 
+  // ─── Binding des boutons ──────────────────────────────────────────────────
   function bindButtons() {
-    // Tabs
-    document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
-      btn.addEventListener('click', () => switchTab(btn.dataset.tab, btn));
-    });
-    // Header
+    document.querySelectorAll('.tab-btn[data-tab]').forEach(btn =>
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab, btn))
+    );
     document.getElementById('toggle-bot-btn').addEventListener('click', toggleBot);
-    // Config
     document.getElementById('save-config-btn').addEventListener('click', saveConfig);
-    // Logs
     document.getElementById('refresh-logs-btn').addEventListener('click', loadLogs);
     document.getElementById('toggle-auto-refresh-btn').addEventListener('click', toggleAutoRefresh);
     document.getElementById('clear-logs-btn').addEventListener('click', () => {
-      document.getElementById('logs-container').innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:1rem;">Affichage vidé</div>';
+      document.getElementById('logs-container').innerHTML =
+        '<div style="color:var(--text-muted);text-align:center;padding:1rem;">Affichage vidé</div>';
       document.getElementById('log-count').textContent = '';
     });
     document.getElementById('check-webhook-btn').addEventListener('click', checkWebhookStatus);
-    // Test
     document.getElementById('send-test-btn').addEventListener('click', sendTestMessage);
-    // Danger
+    document.getElementById('copy-webhook-btn').addEventListener('click', copyWebhookUrl);
     document.getElementById('delete-bot-btn').addEventListener('click', confirmDeleteBot);
+    document.getElementById('reset-webhook-btn').addEventListener('click', resetWebhook);
+
+    // IA
+    document.getElementById('toggle-ai-key-btn').addEventListener('click', () => {
+      const input = document.getElementById('ai-key-input');
+      const btn   = document.getElementById('toggle-ai-key-btn');
+      if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈 Masquer'; }
+      else { input.type = 'password'; btn.textContent = '👁 Voir'; }
+    });
+    document.getElementById('save-ai-key-btn').addEventListener('click', saveAiKey);
+    document.getElementById('test-ai-btn').addEventListener('click', testAiConnection);
   }
 
+  // ─── Tabs ─────────────────────────────────────────────────────────────────
   function switchTab(tabName, btn) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + tabName).classList.add('active');
+    document.getElementById('tab-' + tabName)?.classList.add('active');
     if (btn) btn.classList.add('active');
     if (tabName === 'logs') loadLogs();
   }
 
+  // ─── loadBot ──────────────────────────────────────────────────────────────
   async function loadBot() {
     const data = await api('/bots/' + botId);
     if (!data?.success) {
@@ -222,85 +284,199 @@
   }
 
   function renderBot(bot) {
-    const tpl = TEMPLATES[bot.template] || { emoji: '🤖', name: bot.template };
+    const tpl      = TEMPLATES[bot.template] || { emoji: '🤖', name: bot.template };
     const isActive = bot.isActive;
 
     document.getElementById('page-bot-name').textContent = bot.name;
     document.getElementById('page-bot-username').textContent =
-      bot.telegramUsername ? '@' + bot.telegramUsername + ' · ' + tpl.emoji + ' ' + tpl.name : tpl.emoji + ' ' + tpl.name;
+      bot.telegramUsername ? `@${bot.telegramUsername} · ${tpl.emoji} ${tpl.name}` : `${tpl.emoji} ${tpl.name}`;
     document.getElementById('header-status-dot').className = 'status-dot ' + (isActive ? 'active' : 'inactive');
 
     const toggleBtn = document.getElementById('toggle-bot-btn');
     toggleBtn.textContent = isActive ? '⏸ Désactiver' : '▶️ Activer';
-    toggleBtn.className = 'btn btn-sm ' + (isActive ? 'btn-secondary' : 'btn-success');
+    toggleBtn.className   = 'btn btn-sm ' + (isActive ? 'btn-secondary' : 'btn-success');
 
-    document.getElementById('stat-messages').textContent = formatNumber(bot.stats?.totalMessages || 0);
+    document.getElementById('stat-messages').textContent     = formatNumber(bot.stats?.totalMessages || 0);
     document.getElementById('stat-active-users').textContent = formatNumber(bot.stats?.activeUsers || 0);
-    document.getElementById('stat-created').textContent = formatDate(bot.createdAt);
+    document.getElementById('stat-created').textContent      = formatDate(bot.createdAt);
     document.getElementById('stat-last-activity').textContent = bot.stats?.lastActivity ? formatDate(bot.stats.lastActivity) : 'Jamais';
-    document.getElementById('cfg-name').value = bot.name;
-    document.getElementById('cfg-token-masked').value = bot.tokenMasked || '***';
-    document.getElementById('cfg-template').value = tpl.emoji + ' ' + tpl.name;
-    document.getElementById('webhook-url').textContent = window.location.origin + '/api/webhooks/' + bot.webhookSecret;
 
+    document.getElementById('cfg-name').value         = bot.name;
+    document.getElementById('cfg-token-masked').value = bot.tokenMasked || '***';
+    document.getElementById('cfg-template').value     = `${tpl.emoji} ${tpl.name}`;
+    document.getElementById('webhook-url').textContent = `${window.location.origin}/api/webhooks/${bot.webhookSecret}`;
+
+    // Lien Telegram
+    const existingLink = document.getElementById('tg-link-btn');
+    if (existingLink) existingLink.remove();
     if (bot.telegramUsername) {
       const link = document.createElement('a');
+      link.id = 'tg-link-btn';
       link.href = 'https://t.me/' + bot.telegramUsername;
       link.target = '_blank';
       link.className = 'btn btn-ghost btn-sm';
       link.textContent = '↗ Telegram';
-      toggleBtn.insertAdjacentElement('afterend', link);
+      document.getElementById('toggle-bot-btn').insertAdjacentElement('afterend', link);
     }
 
     renderTemplateConfig(bot);
+
+    // Section IA
+    const isAi = bot.template === 'ai';
+    document.getElementById('ai-config-card').style.display = isAi ? 'block' : 'none';
+    if (isAi) renderAiConfig(bot);
   }
 
+  // ─── Config spécifique au template ───────────────────────────────────────
   function renderTemplateConfig(bot) {
     const tpl = TEMPLATES[bot.template];
     if (!tpl) return;
+
     const container = document.getElementById('template-specific-config');
     let html = '<hr style="border-color:var(--border);margin:1.5rem 0;" />';
-    html += '<div class="config-section-title">⚙️ Options — ' + tpl.emoji + ' ' + tpl.name + '</div>';
+    html += `<div class="config-section-title">⚙️ Options — ${tpl.emoji} ${tpl.name}</div>`;
 
     tpl.configFields.forEach(field => {
       const val = bot.config?.[field.key];
-      html += '<div class="form-group"><label class="form-label">' + field.label + '</label>';
+      html += `<div class="form-group"><label class="form-label">${field.label}</label>`;
 
       if (field.type === 'textarea') {
-        html += '<textarea class="form-control" id="cfg-' + field.key + '" rows="2">' + (val || field.placeholder || '') + '</textarea>';
+        html += `<textarea class="form-control" id="cfg-${field.key}" rows="2">${val !== undefined ? val : (field.placeholder || '')}</textarea>`;
         if (field.variables) html += VARIABLES_DOC;
       } else if (field.type === 'toggle') {
         const on = val === true || val === 'true';
-        html += '<div class="toggle-wrap"><div class="toggle ' + (on ? 'active' : '') + '" id="cfg-' + field.key + '" data-toggle></div>'
-              + '<label class="toggle-label" data-for="cfg-' + field.key + '">' + field.label + '</label></div>';
+        html += `<div class="toggle-wrap">
+          <div class="toggle ${on ? 'active' : ''}" id="cfg-${field.key}" data-toggle></div>
+          <label class="toggle-label" data-for="cfg-${field.key}">${field.label}</label>
+        </div>`;
       } else if (field.type === 'select') {
-        html += '<select class="form-control" id="cfg-' + field.key + '">';
-        field.options.forEach(o => { html += '<option value="' + o.value + '"' + (o.value === val ? ' selected' : '') + '>' + o.label + '</option>'; });
-        html += '</select>';
+        html += `<select class="form-control" id="cfg-${field.key}">`;
+        field.options.forEach(o => {
+          html += `<option value="${o.value}"${o.value === val ? ' selected' : ''}>${o.label}</option>`;
+        });
+        html += `</select>`;
       } else {
-        html += '<input type="text" class="form-control" id="cfg-' + field.key + '" value="' + (val || '') + '" placeholder="' + (field.placeholder || '') + '" />';
+        html += `<input type="text" class="form-control" id="cfg-${field.key}" value="${val !== undefined ? val : ''}" placeholder="${field.placeholder || ''}" />`;
       }
 
-      if (field.hint) html += '<div class="form-hint">' + field.hint + '</div>';
-      html += '</div>';
+      if (field.hint) html += `<div class="form-hint">${field.hint}</div>`;
+      html += `</div>`;
     });
 
     container.innerHTML = html;
 
-    container.querySelectorAll('[data-toggle]').forEach(el => el.addEventListener('click', () => el.classList.toggle('active')));
-    container.querySelectorAll('[data-for]').forEach(lbl => lbl.addEventListener('click', () => { const t = document.getElementById(lbl.dataset.for); if(t) t.classList.toggle('active'); }));
-    container.querySelectorAll('.variable-tag[data-var]').forEach(t => t.addEventListener('click', () => insertVar(t.dataset.var)));
-    container.querySelectorAll('textarea, input[type=text]').forEach(el => el.addEventListener('focus', () => { lastFocused = el; }));
+    container.querySelectorAll('[data-toggle]').forEach(el =>
+      el.addEventListener('click', () => el.classList.toggle('active'))
+    );
+    container.querySelectorAll('[data-for]').forEach(lbl =>
+      lbl.addEventListener('click', () => {
+        const t = document.getElementById(lbl.dataset.for);
+        if (t) t.classList.toggle('active');
+      })
+    );
+    container.querySelectorAll('[data-var]').forEach(t =>
+      t.addEventListener('click', () => {
+        if (!lastFocused) return;
+        const pos = lastFocused.selectionStart, val = lastFocused.value, v = t.dataset.var;
+        lastFocused.value = val.slice(0, pos) + v + val.slice(pos);
+        lastFocused.focus();
+        lastFocused.setSelectionRange(pos + v.length, pos + v.length);
+      })
+    );
+    container.querySelectorAll('textarea, input[type=text]').forEach(el =>
+      el.addEventListener('focus', () => { lastFocused = el; })
+    );
   }
 
-  function insertVar(v) {
-    if (!lastFocused) return;
-    const pos = lastFocused.selectionStart, val = lastFocused.value;
-    lastFocused.value = val.slice(0, pos) + v + val.slice(pos);
-    lastFocused.focus();
-    lastFocused.setSelectionRange(pos + v.length, pos + v.length);
+  // ─── Config IA ────────────────────────────────────────────────────────────
+  function renderAiConfig(bot) {
+    const hasKey = bot.config?.ai_apiKey && bot.config.ai_apiKey.length > 0;
+    const badge  = document.getElementById('ai-status-badge');
+    const status = document.getElementById('ai-key-status');
+
+    if (hasKey) {
+      badge.style.background = 'var(--green-dim)';
+      badge.style.color      = 'var(--green)';
+      badge.textContent      = '✅ Clé configurée';
+      status.textContent     = 'Clé actuelle : ' + bot.config.ai_apiKey;
+    } else {
+      badge.style.background = 'var(--red-dim)';
+      badge.style.color      = 'var(--red)';
+      badge.textContent      = '❌ Clé manquante';
+      status.textContent     = 'Aucune clé API enregistrée';
+    }
   }
 
+  async function saveAiKey() {
+    const apiKey = document.getElementById('ai-key-input').value.trim();
+    const btn    = document.getElementById('save-ai-key-btn');
+    if (!apiKey) { Toast.error('Entrez une clé API'); return; }
+
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+
+    const data = await api('/bots/' + botId + '/ai-key', {
+      method: 'PUT',
+      body: JSON.stringify({ apiKey }),
+    });
+
+    btn.classList.remove('btn-loading');
+    btn.disabled = false;
+
+    if (data?.success) {
+      Toast.success('Clé API IA sauvegardée !');
+      document.getElementById('ai-key-input').value = '';
+      document.getElementById('ai-key-input').type  = 'password';
+      document.getElementById('toggle-ai-key-btn').textContent = '👁 Voir';
+
+      const badge  = document.getElementById('ai-status-badge');
+      badge.style.background = 'var(--green-dim)';
+      badge.style.color      = 'var(--green)';
+      badge.textContent      = '✅ Clé configurée';
+      document.getElementById('ai-key-status').textContent = 'Clé actuelle : ' + (data.maskedKey || '***');
+
+      // Activer le bot IA automatiquement
+      const idx = currentBot?.config ? null : null;
+      await loadBot();
+    } else {
+      Toast.error(data?.error || 'Erreur lors de la sauvegarde');
+    }
+  }
+
+  async function testAiConnection() {
+    const btn    = document.getElementById('test-ai-btn');
+    const result = document.getElementById('ai-test-result');
+
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    result.innerHTML = '<span style="color:var(--text-muted);">⏳ Test en cours...</span>';
+
+    // On envoie un message de test via le webhook de test
+    const testData = await api('/bots/' + botId + '/test', {
+      method: 'POST',
+      body: JSON.stringify({ chatId: 'ai_test', aiTest: true }),
+    });
+
+    // Fallback: juste vérifier que la config est là
+    const botData = await api('/bots/' + botId);
+    const hasKey  = botData?.bot?.config?.ai_apiKey?.length > 0;
+    const provider = botData?.bot?.config?.ai_provider || 'openai';
+    const model    = botData?.bot?.config?.ai_model || '(auto)';
+
+    btn.classList.remove('btn-loading');
+    btn.disabled = false;
+
+    if (hasKey) {
+      result.innerHTML = `<div class="alert alert-success">
+        ✅ Configuration IA valide<br>
+        <span style="font-size:0.8rem;opacity:0.8;">Provider: <b>${provider}</b> · Modèle: <b>${model}</b></span>
+      </div>`;
+    } else {
+      result.innerHTML = '<div class="alert alert-error">❌ Aucune clé API configurée — ajoutez-en une ci-dessus</div>';
+    }
+  }
+
+  // ─── Save config ──────────────────────────────────────────────────────────
   function getConfigFromFields() {
     const tpl = TEMPLATES[currentBot.template];
     if (!tpl) return {};
@@ -314,79 +490,122 @@
   }
 
   async function saveConfig() {
-    const name = document.getElementById('cfg-name').value.trim();
+    const name  = document.getElementById('cfg-name').value.trim();
     if (!name) { Toast.error('Le nom ne peut pas être vide'); return; }
+
+    const btn    = document.getElementById('save-config-btn');
     const alertEl = document.getElementById('alert-config');
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
     alertEl.innerHTML = '';
-    const data = await api('/bots/' + botId, { method: 'PUT', body: JSON.stringify({ name, config: getConfigFromFields() }) });
+
+    const data = await api('/bots/' + botId, {
+      method: 'PUT',
+      body: JSON.stringify({ name, config: getConfigFromFields() }),
+    });
+
+    btn.classList.remove('btn-loading');
+    btn.disabled = false;
+
     if (data?.success) {
       Toast.success('Configuration sauvegardée !');
       currentBot = data.bot;
       document.getElementById('page-bot-name').textContent = data.bot.name;
     } else {
-      alertEl.innerHTML = '<div class="alert alert-error">⚠️ ' + (data?.error || 'Erreur') + '</div>';
+      alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${data?.error || 'Erreur'}</div>`;
     }
   }
 
+  // ─── Toggle bot ───────────────────────────────────────────────────────────
   async function toggleBot() {
+    const btn = document.getElementById('toggle-bot-btn');
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+
     const data = await api('/bots/' + botId + '/toggle', { method: 'PUT' });
+
+    btn.classList.remove('btn-loading');
+    btn.disabled = false;
+
     if (data?.success) { Toast.success(data.message); await loadBot(); }
     else Toast.error(data?.error || 'Erreur');
   }
 
+  // ─── Copy webhook URL ─────────────────────────────────────────────────────
+  function copyWebhookUrl() {
+    const url = document.getElementById('webhook-url').textContent;
+    navigator.clipboard.writeText(url).then(() => {
+      Toast.success('URL copiée !');
+      const btn = document.getElementById('copy-webhook-btn');
+      btn.textContent = '✅ Copié';
+      setTimeout(() => { btn.textContent = '📋 Copier'; }, 2000);
+    }).catch(() => Toast.error('Copie impossible'));
+  }
+
+  // ─── Reset webhook ────────────────────────────────────────────────────────
+  async function resetWebhook() {
+    if (!confirm('Régénérer le secret webhook ? L\'ancien ne fonctionnera plus.')) return;
+    // TODO: endpoint backend /api/bots/:id/reset-webhook
+    Toast.info('Fonctionnalité bientôt disponible');
+  }
+
+  // ─── Auto-refresh logs ────────────────────────────────────────────────────
   function toggleAutoRefresh() {
     const badge = document.getElementById('auto-refresh-badge');
-    const btn = document.getElementById('toggle-auto-refresh-btn');
+    const btn   = document.getElementById('toggle-auto-refresh-btn');
     if (autoRefreshInterval) {
-      clearInterval(autoRefreshInterval); autoRefreshInterval = null;
-      badge.style.display = 'none'; btn.textContent = '⏱ Auto'; btn.className = 'btn btn-ghost btn-sm';
+      clearInterval(autoRefreshInterval);
+      autoRefreshInterval = null;
+      badge.style.display = 'none';
+      btn.textContent = '⏱ Auto';
+      btn.className   = 'btn btn-ghost btn-sm';
     } else {
-      loadLogs(); autoRefreshInterval = setInterval(loadLogs, 5000);
-      badge.style.display = 'inline'; btn.textContent = '⏹ Stop'; btn.className = 'btn btn-success btn-sm';
+      loadLogs();
+      autoRefreshInterval = setInterval(loadLogs, 5000);
+      badge.style.display = 'inline';
+      btn.textContent = '⏹ Stop';
+      btn.className   = 'btn btn-success btn-sm';
     }
   }
 
-  function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function escapeHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
 
   async function loadLogs() {
     const container = document.getElementById('logs-container');
-    const countEl = document.getElementById('log-count');
-    const diagEl = document.getElementById('bot-diagnostic');
-    const data = await api('/bots/' + botId + '/logs');
+    const countEl   = document.getElementById('log-count');
+    const diagEl    = document.getElementById('bot-diagnostic');
+    const data      = await api('/bots/' + botId + '/logs');
+
     if (!data) { container.innerHTML = '<div class="alert alert-error">❌ Impossible de contacter l\'API</div>'; return; }
-    if (!data.success) { container.innerHTML = '<div class="alert alert-error">❌ ' + data.error + '</div>'; return; }
+    if (!data.success) { container.innerHTML = `<div class="alert alert-error">❌ ${data.error}</div>`; return; }
+
     const logs = data.logs || [];
-    countEl.textContent = logs.length + ' log(s) — ' + new Date().toLocaleTimeString('fr-FR');
+    countEl.textContent = `${logs.length} log(s) — ${new Date().toLocaleTimeString('fr-FR')}`;
+
     if (logs.length === 0) {
       diagEl.innerHTML = '<div class="alert alert-info">ℹ️ Aucun log — Envoyez /start à votre bot sur Telegram puis actualisez.</div>';
       container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:2rem;">📭 Aucun log</div>';
       return;
     }
+
     const errors = logs.filter(l => l.type === 'error');
     diagEl.innerHTML = errors.length > 0
-      ? '<div class="alert alert-error">❌ ' + errors.length + ' erreur(s) — ' + escapeHtml(errors[0].message) + '</div>'
-      : '<div class="alert alert-success">✅ ' + escapeHtml(logs[0].message) + '</div>';
+      ? `<div class="alert alert-error">❌ ${errors.length} erreur(s) — ${escapeHtml(errors[0].message)}</div>`
+      : `<div class="alert alert-success">✅ ${escapeHtml(logs[0].message)}</div>`;
+
     const colors = { info: 'var(--cyan)', error: 'var(--red)', warning: 'var(--yellow)' };
     container.innerHTML = logs.map(l =>
-      '<div class="log-entry">'
-      + '<span class="log-time">' + new Date(l.timestamp).toLocaleString('fr-FR') + '</span>'
-      + '<span class="log-type ' + l.type + '" style="color:' + (colors[l.type]||'#fff') + '">[' + l.type.toUpperCase() + ']</span>'
-      + '<span class="log-message">' + escapeHtml(l.message) + '</span>'
-      + '</div>'
+      `<div class="log-entry">
+        <span class="log-time">${new Date(l.timestamp).toLocaleString('fr-FR')}</span>
+        <span class="log-type ${l.type}" style="color:${colors[l.type]||'#fff'}">[${l.type.toUpperCase()}]</span>
+        <span class="log-message">${escapeHtml(l.message)}</span>
+      </div>`
     ).join('');
   }
 
-  // Rafraîchit silencieusement les cartes de stats (toutes les 20s)
-  async function refreshStats() {
-    if (!botId) return;
-    const data = await api('/bots/' + botId);
-    if (!data?.success) return;
-    const bot = data.bot;
-    document.getElementById('stat-messages').textContent = formatNumber(bot.stats?.totalMessages || 0);
-    document.getElementById('stat-active-users').textContent = formatNumber(bot.stats?.activeUsers || 0);
-    document.getElementById('stat-last-activity').textContent = bot.stats?.lastActivity ? formatDate(bot.stats.lastActivity) : 'Jamais';
-  }
-
+  // ─── Webhook diagnostic ───────────────────────────────────────────────────
   async function checkWebhookStatus() {
     const diagEl = document.getElementById('webhook-diagnostic');
     diagEl.innerHTML = '<span style="color:var(--cyan);">⏳ Vérification en cours...</span>';
@@ -397,43 +616,81 @@
 
       const webhookOk = data.webhookUrl && data.webhookUrl.includes(currentBot?.webhookSecret);
       const rows = [
-        ['Nom',               data.name],
-        ['Template',          data.template],
-        ['Statut',            data.isActive ? '✅ Actif' : '❌ Désactivé — activez-le !'],
-        ['Token',             data.tokenMasked],
-        ['Messages trackés',  data.totalMessages ?? 0],
+        ['Nom',                 data.name],
+        ['Template',            data.template],
+        ['Statut',              data.isActive ? '✅ Actif' : '❌ Désactivé'],
+        ['Token',               data.tokenMasked],
+        ['Messages trackés',    data.totalMessages ?? 0],
         ['Utilisateurs actifs', data.activeUsers ?? 0],
-        ['Dernière activité', data.lastActivity ? new Date(data.lastActivity).toLocaleString('fr-FR') : 'Jamais'],
-        ['Webhook Telegram',  webhookOk ? '✅ Configuré' : (data.webhookUrl ? '⚠️ URL différente' : '❌ Non configuré')],
-        ['Mises à jour en attente', data.webhookPending !== null ? data.webhookPending : '—'],
+        ['Dernière activité',   data.lastActivity ? new Date(data.lastActivity).toLocaleString('fr-FR') : 'Jamais'],
+        ['Webhook Telegram',    webhookOk ? '✅ Configuré' : (data.webhookUrl ? '⚠️ URL différente' : '❌ Non configuré')],
+        ['En attente',          data.webhookPending !== null ? data.webhookPending : '—'],
+        ...(data.template === 'ai' ? [['IA configurée', data.aiEnabled ? '✅ Oui' : '❌ Non']] : []),
       ];
-      diagEl.innerHTML = '<table style="width:100%;border-collapse:collapse;">'
-        + rows.map(([k, v]) => `<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem 0.75rem 0.4rem 0;color:var(--text-muted);white-space:nowrap;">${k}</td><td style="padding:0.4rem 0;">${v}</td></tr>`).join('')
-        + '</table>'
+
+      diagEl.innerHTML = `<table style="width:100%;border-collapse:collapse;">`
+        + rows.map(([k, v]) =>
+          `<tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:0.4rem 0.75rem 0.4rem 0;color:var(--text-muted);white-space:nowrap;">${k}</td>
+            <td style="padding:0.4rem 0;">${v}</td>
+          </tr>`
+        ).join('')
+        + `</table>`
         + (data.lastLogs?.length
           ? '<div style="margin-top:0.75rem;font-size:0.75rem;color:var(--text-muted);">Derniers logs :</div>'
             + data.lastLogs.map(l => `<div style="color:var(--text-secondary);margin-top:0.25rem;">&gt; ${escapeHtml(l.message)}</div>`).join('')
           : '');
-    } catch (err) {
+    } catch (_) {
       diagEl.innerHTML = '<div class="alert alert-error">❌ Impossible de contacter le serveur</div>';
     }
   }
 
+  // ─── Test message ─────────────────────────────────────────────────────────
   async function sendTestMessage() {
-    const chatId = document.getElementById('test-chat-id').value.trim();
+    const chatId  = document.getElementById('test-chat-id').value.trim();
     const alertEl = document.getElementById('alert-test');
+    const btn     = document.getElementById('send-test-btn');
+
     if (!chatId) { alertEl.innerHTML = '<div class="alert alert-error">Entrez votre Chat ID</div>'; return; }
+
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+
     const data = await api('/bots/' + botId + '/test', { method: 'POST', body: JSON.stringify({ chatId }) });
+
+    btn.classList.remove('btn-loading');
+    btn.disabled = false;
+
     alertEl.innerHTML = data?.success
       ? '<div class="alert alert-success">✅ Message de test envoyé !</div>'
-      : '<div class="alert alert-error">⚠️ ' + (data?.error || 'Erreur') + '</div>';
+      : `<div class="alert alert-error">⚠️ ${data?.error || 'Erreur'}</div>`;
   }
 
+  // ─── Refresh stats silencieux ─────────────────────────────────────────────
+  async function refreshStats() {
+    const data = await api('/bots/' + botId);
+    if (!data?.success) return;
+    const bot = data.bot;
+    document.getElementById('stat-messages').textContent     = formatNumber(bot.stats?.totalMessages || 0);
+    document.getElementById('stat-active-users').textContent = formatNumber(bot.stats?.activeUsers || 0);
+    document.getElementById('stat-last-activity').textContent = bot.stats?.lastActivity ? formatDate(bot.stats.lastActivity) : 'Jamais';
+  }
+
+  // ─── Supprimer le bot ─────────────────────────────────────────────────────
   async function confirmDeleteBot() {
-    if (!confirm('Supprimer définitivement "' + currentBot.name + '" ?')) return;
+    if (!confirm(`Supprimer définitivement "${currentBot.name}" ?`)) return;
+
+    const btn = document.getElementById('delete-bot-btn');
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+
     const data = await api('/bots/' + botId, { method: 'DELETE' });
     if (data?.success) { Toast.success('Bot supprimé'); setTimeout(() => window.location.href = '/bots.html', 1000); }
-    else Toast.error(data?.error || 'Erreur');
+    else {
+      btn.classList.remove('btn-loading');
+      btn.disabled = false;
+      Toast.error(data?.error || 'Erreur');
+    }
   }
 </script>
 </body>

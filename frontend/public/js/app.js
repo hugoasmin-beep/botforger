@@ -147,6 +147,28 @@ const TEMPLATES = {
       { key: 'stats_trackMedia', label: 'Tracker aussi les médias', type: 'toggle' },
     ],
   },
+  ai: {
+    emoji: '✨',
+    name: 'Bot IA',
+    desc: 'Chatbot intelligent avec votre propre clé API',
+    badge: 'NEW',
+    configFields: [
+      { key: 'ai_persona_name',    label: 'Nom du bot (persona)', type: 'text', placeholder: 'Mon Assistant IA' },
+      { key: 'ai_persona_emoji',   label: 'Emoji avatar', type: 'text', placeholder: '🤖' },
+      { key: 'ai_welcome_message', label: 'Message de bienvenue', type: 'textarea', placeholder: 'Bonjour {first_name} ! Comment puis-je vous aider ?', variables: true },
+      { key: 'ai_system_prompt',   label: 'Prompt système (personnalité)', type: 'textarea', placeholder: 'Tu es un assistant IA utile et amical. Réponds en français.', hint: 'Définit le comportement et la personnalité du bot' },
+      { key: 'ai_provider', label: 'Fournisseur IA', type: 'select', options: [
+        { value: 'openai',  label: '🟢 OpenAI (ChatGPT)' },
+        { value: 'mistral', label: '🟠 Mistral AI' },
+        { value: 'groq',    label: '🔵 Groq (ultra rapide)' },
+        { value: 'custom',  label: '⚙️ Endpoint personnalisé' },
+      ]},
+      { key: 'ai_model',    label: 'Modèle (laisser vide = auto)', type: 'text', placeholder: 'gpt-4o-mini / mistral-small / llama3-8b-8192', hint: 'Exemples: gpt-4o-mini, gpt-4o, mistral-large-latest' },
+      { key: 'ai_endpoint', label: 'Endpoint API (optionnel, custom uniquement)', type: 'text', placeholder: 'https://api.openai.com/v1/chat/completions', hint: 'Laisser vide sauf pour un endpoint custom compatible OpenAI' },
+      { key: 'ai_temperature', label: 'Créativité (0 = précis, 1 = créatif)', type: 'text', placeholder: '0.7' },
+      // La clé API est gérée séparément via un champ sécurisé
+    ],
+  },
 };
 
 // ============================================================

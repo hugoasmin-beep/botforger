@@ -1600,3 +1600,113 @@ select.form-control {
   .mobile-topbar { display: flex; }
   .main-content { padding-top: 5rem; }
 }
+
+/* ============================================================
+   Améliorations UI — BotForge v2
+   ============================================================ */
+
+/* Step cards (create-bot) */
+.step-card { margin-bottom: 1.5rem; }
+.step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.step-number {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--cyan);
+  background: var(--cyan-dim);
+  border: 1px solid rgba(0,212,255,0.3);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+.step-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.2rem;
+}
+.step-desc {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Template option — AI badge */
+.template-option { position: relative; }
+.template-option-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, var(--purple), #7c3aed);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.template-option-ai { border-color: rgba(168,85,247,0.3); }
+.template-option-ai:hover { border-color: rgba(168,85,247,0.6); background: rgba(168,85,247,0.08); }
+.template-option-ai.selected {
+  border-color: var(--purple);
+  background: rgba(168,85,247,0.12);
+  box-shadow: 0 0 0 3px rgba(168,85,247,0.2);
+}
+.template-option-ai.selected::after {
+  background: var(--purple);
+}
+
+/* AI config card */
+#ai-config-card .card-header {
+  border-bottom-color: rgba(168,85,247,0.2);
+}
+
+/* Btn success */
+.btn-success {
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(0,255,136,0.4);
+}
+.btn-success:hover {
+  background: rgba(0,255,136,0.2);
+  border-color: rgba(0,255,136,0.6);
+}
+
+/* Improved form-error */
+.form-error {
+  color: var(--red);
+  font-size: 0.82rem;
+  margin-top: 0.4rem;
+}
+
+/* Token validation alert inline */
+#token-status .alert {
+  margin: 0;
+  padding: 0.75rem 1rem;
+}
+
+/* Logs container scrollbar */
+.logs-container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.logs-container::-webkit-scrollbar { width: 4px; }
+.logs-container::-webkit-scrollbar-track { background: transparent; }
+.logs-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Danger zone cards spacing */
+#tab-danger .card > div + div { margin-top: 1rem; }
+
+/* AI status badge */
+#ai-status-badge {
+  transition: background var(--transition), color var(--transition);
+}
+
+/* Copy button flash */
+#copy-webhook-btn { transition: all var(--transition); }
