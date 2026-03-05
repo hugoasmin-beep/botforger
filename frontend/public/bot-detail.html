@@ -13,7 +13,6 @@
 <div class="app-layout">
   <div class="main-content" style="max-width:900px;">
 
-    <!-- Header -->
     <div class="page-header">
       <div>
         <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.3rem;">
@@ -23,106 +22,71 @@
         <p class="page-subtitle" id="page-bot-username"></p>
       </div>
       <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
-        <button class="btn btn-secondary btn-sm" id="toggle-bot-btn" onclick="toggleBot()">⏸ Désactiver</button>
+        <button class="btn btn-secondary btn-sm" id="toggle-bot-btn">⏸ Désactiver</button>
         <a href="/bots.html" class="btn btn-ghost btn-sm">← Mes bots</a>
       </div>
     </div>
 
-    <!-- Stats rapides -->
     <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem;">
-      <div class="stat-card">
-        <span class="stat-icon">💬</span>
-        <div class="stat-label">Messages</div>
-        <div class="stat-value" id="stat-messages">—</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-icon">📅</span>
-        <div class="stat-label">Créé le</div>
-        <div class="stat-value" id="stat-created" style="font-size:0.9rem;">—</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-icon">🕐</span>
-        <div class="stat-label">Dernière activité</div>
-        <div class="stat-value" id="stat-last-activity" style="font-size:0.85rem;">—</div>
-      </div>
+      <div class="stat-card"><span class="stat-icon">💬</span><div class="stat-label">Messages</div><div class="stat-value" id="stat-messages">—</div></div>
+      <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-label">Créé le</div><div class="stat-value" id="stat-created" style="font-size:0.9rem;">—</div></div>
+      <div class="stat-card"><span class="stat-icon">🕐</span><div class="stat-label">Dernière activité</div><div class="stat-value" id="stat-last-activity" style="font-size:0.85rem;">—</div></div>
     </div>
 
-    <!-- Tabs -->
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('config', this)">⚙️ Configuration</button>
-      <button class="tab-btn" onclick="switchTab('logs', this)">📋 Logs</button>
-      <button class="tab-btn" onclick="switchTab('test', this)">🧪 Test</button>
-      <button class="tab-btn" onclick="switchTab('danger', this)">⚠️ Danger</button>
+      <button class="tab-btn active" data-tab="config">⚙️ Configuration</button>
+      <button class="tab-btn" data-tab="logs">📋 Logs</button>
+      <button class="tab-btn" data-tab="test">🧪 Test</button>
+      <button class="tab-btn" data-tab="danger">⚠️ Danger</button>
     </div>
 
-    <!-- Tab: Config -->
     <div class="tab-content active" id="tab-config">
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">Personnalisation</h3>
-          <button class="btn btn-primary btn-sm" onclick="saveConfig()">💾 Sauvegarder</button>
+          <button class="btn btn-primary btn-sm" id="save-config-btn">💾 Sauvegarder</button>
         </div>
-
         <div id="alert-config"></div>
-
         <div class="form-group">
           <label class="form-label">Nom dans le dashboard</label>
           <input type="text" class="form-control" id="cfg-name" />
         </div>
-
         <div class="form-group">
           <label class="form-label">Token Telegram</label>
-          <input type="text" class="form-control mono" id="cfg-token-masked" disabled
-            style="color:var(--text-muted);" />
+          <input type="text" class="form-control mono" id="cfg-token-masked" disabled style="color:var(--text-muted);" />
           <div class="form-hint">Le token est masqué par sécurité</div>
         </div>
-
         <div class="form-group">
           <label class="form-label">Template</label>
-          <input type="text" class="form-control" id="cfg-template" disabled
-            style="color:var(--text-muted);" />
+          <input type="text" class="form-control" id="cfg-template" disabled style="color:var(--text-muted);" />
         </div>
-
-        <!-- Config spécifique au template -->
         <div id="template-specific-config" style="margin-top:1rem;"></div>
       </div>
     </div>
 
-    <!-- Tab: Logs -->
     <div class="tab-content" id="tab-logs">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">📋 Logs d'activité du bot</h3>
+          <h3 class="card-title">📋 Logs d'activité</h3>
           <div style="display:flex;gap:0.5rem;align-items:center;">
-            <span id="auto-refresh-badge" style="font-size:0.72rem;font-family:var(--font-mono);color:var(--green);display:none;">
-              ● AUTO
-            </span>
-            <button class="btn btn-ghost btn-sm" id="toggle-auto-refresh" onclick="toggleAutoRefresh()">
-              ⏱ Auto
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="loadLogs()">🔄 Actualiser</button>
+            <span id="auto-refresh-badge" style="font-size:0.72rem;font-family:var(--font-mono);color:var(--green);display:none;">● AUTO</span>
+            <button class="btn btn-ghost btn-sm" id="toggle-auto-refresh-btn">⏱ Auto</button>
+            <button class="btn btn-secondary btn-sm" id="refresh-logs-btn">🔄 Actualiser</button>
           </div>
         </div>
-
-        <!-- Diagnostic rapide -->
         <div id="bot-diagnostic" style="margin-bottom:1rem;"></div>
-
-        <!-- Compteur -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
           <span id="log-count" style="font-size:0.8rem;color:var(--text-muted);"></span>
-          <button class="btn btn-ghost btn-sm" onclick="clearLogsDisplay()" style="font-size:0.75rem;">✕ Vider affichage</button>
+          <button class="btn btn-ghost btn-sm" id="clear-logs-btn" style="font-size:0.75rem;">✕ Vider</button>
         </div>
-
         <div class="logs-container" id="logs-container" style="min-height:200px;">
-          <div style="color:var(--text-muted);padding:1rem;text-align:center;">Cliquez sur Actualiser ou activez l'auto-refresh</div>
+          <div style="color:var(--text-muted);padding:1rem;text-align:center;">Cliquez sur Actualiser</div>
         </div>
       </div>
-
-      <!-- Card diagnostic webhook -->
       <div class="card" style="margin-top:1rem;border-color:rgba(0,212,255,0.2);">
         <div class="card-header">
-          <h3 class="card-title">🔍 Diagnostic webhook Telegram</h3>
-          <button class="btn btn-secondary btn-sm" onclick="checkWebhookStatus()">Vérifier</button>
+          <h3 class="card-title">🔍 Diagnostic webhook</h3>
+          <button class="btn btn-secondary btn-sm" id="check-webhook-btn">Vérifier</button>
         </div>
         <div id="webhook-diagnostic" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-secondary);">
           Cliquez sur Vérifier pour tester la connexion Telegram → Serveur
@@ -130,31 +94,20 @@
       </div>
     </div>
 
-    <!-- Tab: Test -->
     <div class="tab-content" id="tab-test">
       <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Envoyer un message de test</h3>
-        </div>
+        <div class="card-header"><h3 class="card-title">Envoyer un message de test</h3></div>
         <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1.5rem;">
-          Entrez votre Chat ID Telegram pour recevoir un message de test de votre bot.
-          Vous pouvez obtenir votre Chat ID en écrivant à <strong>@userinfobot</strong>.
+          Entrez votre Chat ID Telegram. Obtenez-le en écrivant à <strong>@userinfobot</strong>.
         </p>
-
         <div id="alert-test"></div>
-
         <div class="form-group">
           <label class="form-label">Votre Chat ID Telegram</label>
-          <input type="text" class="form-control mono" id="test-chat-id"
-            placeholder="Ex: 123456789" />
+          <input type="text" class="form-control mono" id="test-chat-id" placeholder="Ex: 123456789" />
           <div class="form-hint">Envoyez /start à @userinfobot pour obtenir votre ID</div>
         </div>
-
-        <button class="btn btn-primary" onclick="sendTestMessage()">
-          🧪 Envoyer le message de test
-        </button>
+        <button class="btn btn-primary" id="send-test-btn">🧪 Envoyer le message de test</button>
       </div>
-
       <div class="card" style="margin-top:1rem;">
         <h3 class="card-title" style="margin-bottom:1rem;">Informations webhook</h3>
         <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:1rem;">
@@ -164,20 +117,14 @@
       </div>
     </div>
 
-    <!-- Tab: Danger -->
     <div class="tab-content" id="tab-danger">
       <div class="card" style="border-color:rgba(255,71,87,0.3);">
         <h3 class="card-title" style="color:var(--red);margin-bottom:0.5rem;">⚠️ Zone de danger</h3>
-        <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1.5rem;">
-          Ces actions sont irréversibles. Procédez avec prudence.
-        </p>
-
+        <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1.5rem;">Ces actions sont irréversibles.</p>
         <div style="background:var(--red-dim);border:1px solid rgba(255,71,87,0.3);border-radius:12px;padding:1.5rem;">
           <h4 style="margin-bottom:0.3rem;">Supprimer ce bot</h4>
-          <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
-            Supprime définitivement le bot, sa configuration, ses logs et son webhook Telegram.
-          </p>
-          <button class="btn btn-danger" onclick="confirmDeleteBot()">🗑️ Supprimer définitivement</button>
+          <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">Supprime définitivement le bot, sa configuration, ses logs et son webhook Telegram.</p>
+          <button class="btn btn-danger" id="delete-bot-btn">🗑️ Supprimer définitivement</button>
         </div>
       </div>
     </div>
@@ -185,52 +132,71 @@
   </div>
 </div>
 
-<!-- Toast container -->
 <div class="toast-container" id="toast-container"></div>
-
 <script src="/js/app.js"></script>
 <script>
   let currentBot = null;
   let lastFocused = null;
+  let autoRefreshInterval = null;
 
   const botId = new URLSearchParams(window.location.search).get('id');
-
   if (!botId) window.location.href = '/bots.html';
 
   const VARIABLES_DOC = `
     <div class="variables-help">
       <div class="variables-help-title">Variables disponibles :</div>
       <div class="variables-list">
-        <span class="variable-tag" onclick="insertVar('{first_name}')">{first_name}</span>
-        <span class="variable-tag" onclick="insertVar('{last_name}')">{last_name}</span>
-        <span class="variable-tag" onclick="insertVar('{username}')">{username}</span>
-        <span class="variable-tag" onclick="insertVar('{chat_title}')">{chat_title}</span>
+        <span class="variable-tag" data-var="{first_name}">{first_name}</span>
+        <span class="variable-tag" data-var="{last_name}">{last_name}</span>
+        <span class="variable-tag" data-var="{username}">{username}</span>
+        <span class="variable-tag" data-var="{chat_title}">{chat_title}</span>
       </div>
     </div>`;
 
-  function insertVar(v) {
-    if (lastFocused) {
-      const pos = lastFocused.selectionStart;
-      const val = lastFocused.value;
-      lastFocused.value = val.slice(0, pos) + v + val.slice(pos);
-      lastFocused.focus();
-      lastFocused.setSelectionRange(pos + v.length, pos + v.length);
-    }
-  }
-
   document.addEventListener('DOMContentLoaded', async () => {
     if (!initLayout()) return;
+    bindButtons();
     await loadBot();
   });
 
+  function bindButtons() {
+    // Tabs
+    document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab, btn));
+    });
+    // Header
+    document.getElementById('toggle-bot-btn').addEventListener('click', toggleBot);
+    // Config
+    document.getElementById('save-config-btn').addEventListener('click', saveConfig);
+    // Logs
+    document.getElementById('refresh-logs-btn').addEventListener('click', loadLogs);
+    document.getElementById('toggle-auto-refresh-btn').addEventListener('click', toggleAutoRefresh);
+    document.getElementById('clear-logs-btn').addEventListener('click', () => {
+      document.getElementById('logs-container').innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:1rem;">Affichage vidé</div>';
+      document.getElementById('log-count').textContent = '';
+    });
+    document.getElementById('check-webhook-btn').addEventListener('click', checkWebhookStatus);
+    // Test
+    document.getElementById('send-test-btn').addEventListener('click', sendTestMessage);
+    // Danger
+    document.getElementById('delete-bot-btn').addEventListener('click', confirmDeleteBot);
+  }
+
+  function switchTab(tabName, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tabName).classList.add('active');
+    if (btn) btn.classList.add('active');
+    if (tabName === 'logs') loadLogs();
+  }
+
   async function loadBot() {
-    const data = await api(`/bots/${botId}`);
+    const data = await api('/bots/' + botId);
     if (!data?.success) {
       Toast.error('Bot introuvable');
       setTimeout(() => window.location.href = '/bots.html', 2000);
       return;
     }
-
     currentBot = data.bot;
     renderBot(currentBot);
   }
@@ -239,89 +205,79 @@
     const tpl = TEMPLATES[bot.template] || { emoji: '🤖', name: bot.template };
     const isActive = bot.isActive;
 
-    // Header
     document.getElementById('page-bot-name').textContent = bot.name;
     document.getElementById('page-bot-username').textContent =
-      bot.telegramUsername ? `@${bot.telegramUsername} · ${tpl.emoji} ${tpl.name}` : `${tpl.emoji} ${tpl.name}`;
-
-    const statusDot = document.getElementById('header-status-dot');
-    statusDot.className = `status-dot ${isActive ? 'active' : 'inactive'}`;
+      bot.telegramUsername ? '@' + bot.telegramUsername + ' · ' + tpl.emoji + ' ' + tpl.name : tpl.emoji + ' ' + tpl.name;
+    document.getElementById('header-status-dot').className = 'status-dot ' + (isActive ? 'active' : 'inactive');
 
     const toggleBtn = document.getElementById('toggle-bot-btn');
     toggleBtn.textContent = isActive ? '⏸ Désactiver' : '▶️ Activer';
-    toggleBtn.className = `btn btn-sm ${isActive ? 'btn-secondary' : 'btn-success'}`;
+    toggleBtn.className = 'btn btn-sm ' + (isActive ? 'btn-secondary' : 'btn-success');
 
-    // Stats
     document.getElementById('stat-messages').textContent = formatNumber(bot.stats?.totalMessages || 0);
     document.getElementById('stat-created').textContent = formatDate(bot.createdAt);
-    document.getElementById('stat-last-activity').textContent =
-      bot.stats?.lastActivity ? formatDate(bot.stats.lastActivity) : 'Jamais';
-
-    // Config fields
+    document.getElementById('stat-last-activity').textContent = bot.stats?.lastActivity ? formatDate(bot.stats.lastActivity) : 'Jamais';
     document.getElementById('cfg-name').value = bot.name;
     document.getElementById('cfg-token-masked').value = bot.tokenMasked || '***';
-    document.getElementById('cfg-template').value = `${tpl.emoji} ${tpl.name}`;
+    document.getElementById('cfg-template').value = tpl.emoji + ' ' + tpl.name;
+    document.getElementById('webhook-url').textContent = window.location.origin + '/api/webhooks/' + bot.webhookSecret;
 
-    // Webhook URL
-    const siteUrl = window.location.origin;
-    document.getElementById('webhook-url').textContent =
-      `${siteUrl}/api/webhooks/${bot.webhookSecret}`;
-
-    // Telegram link button
     if (bot.telegramUsername) {
-      document.getElementById('toggle-bot-btn').insertAdjacentHTML('afterend',
-        `<a href="https://t.me/${bot.telegramUsername}" target="_blank" class="btn btn-ghost btn-sm">↗ Voir sur Telegram</a>`
-      );
+      const link = document.createElement('a');
+      link.href = 'https://t.me/' + bot.telegramUsername;
+      link.target = '_blank';
+      link.className = 'btn btn-ghost btn-sm';
+      link.textContent = '↗ Telegram';
+      toggleBtn.insertAdjacentElement('afterend', link);
     }
 
-    // Config spécifique au template
     renderTemplateConfig(bot);
   }
 
   function renderTemplateConfig(bot) {
     const tpl = TEMPLATES[bot.template];
     if (!tpl) return;
-
     const container = document.getElementById('template-specific-config');
     let html = '<hr style="border-color:var(--border);margin:1.5rem 0;" />';
-    html += `<div class="config-section-title">⚙️ Options — ${tpl.emoji} ${tpl.name}</div>`;
+    html += '<div class="config-section-title">⚙️ Options — ' + tpl.emoji + ' ' + tpl.name + '</div>';
 
     tpl.configFields.forEach(field => {
-      const currentValue = bot.config?.[field.key];
-      html += `<div class="form-group">`;
-      html += `<label class="form-label">${field.label}</label>`;
+      const val = bot.config?.[field.key];
+      html += '<div class="form-group"><label class="form-label">' + field.label + '</label>';
 
       if (field.type === 'textarea') {
-        html += `<textarea class="form-control" id="cfg-${field.key}" rows="2"
-          onfocus="lastFocused=this">${currentValue || field.placeholder || ''}</textarea>`;
+        html += '<textarea class="form-control" id="cfg-' + field.key + '" rows="2">' + (val || field.placeholder || '') + '</textarea>';
         if (field.variables) html += VARIABLES_DOC;
       } else if (field.type === 'toggle') {
-        const isOn = currentValue === true || currentValue === 'true';
-        html += `
-          <div class="toggle-wrap">
-            <div class="toggle ${isOn ? 'active' : ''}" id="cfg-${field.key}"
-              onclick="this.classList.toggle('active')"></div>
-            <label class="toggle-label" onclick="document.getElementById('cfg-${field.key}').classList.toggle('active')">
-              ${field.label}
-            </label>
-          </div>`;
+        const on = val === true || val === 'true';
+        html += '<div class="toggle-wrap"><div class="toggle ' + (on ? 'active' : '') + '" id="cfg-' + field.key + '" data-toggle></div>'
+              + '<label class="toggle-label" data-for="cfg-' + field.key + '">' + field.label + '</label></div>';
       } else if (field.type === 'select') {
-        html += `<select class="form-control" id="cfg-${field.key}">`;
-        field.options.forEach(opt => {
-          const selected = opt.value === currentValue ? 'selected' : '';
-          html += `<option value="${opt.value}" ${selected}>${opt.label}</option>`;
-        });
-        html += `</select>`;
+        html += '<select class="form-control" id="cfg-' + field.key + '">';
+        field.options.forEach(o => { html += '<option value="' + o.value + '"' + (o.value === val ? ' selected' : '') + '>' + o.label + '</option>'; });
+        html += '</select>';
       } else {
-        html += `<input type="text" class="form-control" id="cfg-${field.key}"
-          value="${currentValue || ''}" placeholder="${field.placeholder || ''}" onfocus="lastFocused=this" />`;
+        html += '<input type="text" class="form-control" id="cfg-' + field.key + '" value="' + (val || '') + '" placeholder="' + (field.placeholder || '') + '" />';
       }
 
-      if (field.hint) html += `<div class="form-hint">${field.hint}</div>`;
-      html += `</div>`;
+      if (field.hint) html += '<div class="form-hint">' + field.hint + '</div>';
+      html += '</div>';
     });
 
     container.innerHTML = html;
+
+    container.querySelectorAll('[data-toggle]').forEach(el => el.addEventListener('click', () => el.classList.toggle('active')));
+    container.querySelectorAll('[data-for]').forEach(lbl => lbl.addEventListener('click', () => { const t = document.getElementById(lbl.dataset.for); if(t) t.classList.toggle('active'); }));
+    container.querySelectorAll('.variable-tag[data-var]').forEach(t => t.addEventListener('click', () => insertVar(t.dataset.var)));
+    container.querySelectorAll('textarea, input[type=text]').forEach(el => el.addEventListener('focus', () => { lastFocused = el; }));
+  }
+
+  function insertVar(v) {
+    if (!lastFocused) return;
+    const pos = lastFocused.selectionStart, val = lastFocused.value;
+    lastFocused.value = val.slice(0, pos) + v + val.slice(pos);
+    lastFocused.focus();
+    lastFocused.setSelectionRange(pos + v.length, pos + v.length);
   }
 
   function getConfigFromFields() {
@@ -329,13 +285,9 @@
     if (!tpl) return {};
     const config = {};
     tpl.configFields.forEach(field => {
-      const el = document.getElementById(`cfg-${field.key}`);
+      const el = document.getElementById('cfg-' + field.key);
       if (!el) return;
-      if (field.type === 'toggle') {
-        config[field.key] = el.classList.contains('active');
-      } else {
-        config[field.key] = el.value;
-      }
+      config[field.key] = field.type === 'toggle' ? el.classList.contains('active') : el.value;
     });
     return config;
   }
@@ -343,96 +295,100 @@
   async function saveConfig() {
     const name = document.getElementById('cfg-name').value.trim();
     if (!name) { Toast.error('Le nom ne peut pas être vide'); return; }
-
-    const config = getConfigFromFields();
     const alertEl = document.getElementById('alert-config');
     alertEl.innerHTML = '';
-
-    const data = await api(`/bots/${botId}`, {
-      method: 'PUT',
-      body: JSON.stringify({ name, config }),
-    });
-
+    const data = await api('/bots/' + botId, { method: 'PUT', body: JSON.stringify({ name, config: getConfigFromFields() }) });
     if (data?.success) {
       Toast.success('Configuration sauvegardée !');
       currentBot = data.bot;
       document.getElementById('page-bot-name').textContent = data.bot.name;
     } else {
-      alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${data?.error || 'Erreur'}</div>`;
+      alertEl.innerHTML = '<div class="alert alert-error">⚠️ ' + (data?.error || 'Erreur') + '</div>';
     }
   }
 
   async function toggleBot() {
-    const data = await api(`/bots/${botId}/toggle`, { method: 'PUT' });
-    if (data?.success) {
-      Toast.success(data.message);
-      await loadBot();
+    const data = await api('/bots/' + botId + '/toggle', { method: 'PUT' });
+    if (data?.success) { Toast.success(data.message); await loadBot(); }
+    else Toast.error(data?.error || 'Erreur');
+  }
+
+  function toggleAutoRefresh() {
+    const badge = document.getElementById('auto-refresh-badge');
+    const btn = document.getElementById('toggle-auto-refresh-btn');
+    if (autoRefreshInterval) {
+      clearInterval(autoRefreshInterval); autoRefreshInterval = null;
+      badge.style.display = 'none'; btn.textContent = '⏱ Auto'; btn.className = 'btn btn-ghost btn-sm';
     } else {
-      Toast.error(data?.error || 'Erreur');
+      loadLogs(); autoRefreshInterval = setInterval(loadLogs, 5000);
+      badge.style.display = 'inline'; btn.textContent = '⏹ Stop'; btn.className = 'btn btn-success btn-sm';
     }
   }
 
+  function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
   async function loadLogs() {
     const container = document.getElementById('logs-container');
-    container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:1rem;">Chargement...</div>';
-
-    const data = await api(`/bots/${botId}/logs`);
-
-    if (!data?.success || data.logs.length === 0) {
-      container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:2rem;">Aucun log disponible</div>';
+    const countEl = document.getElementById('log-count');
+    const diagEl = document.getElementById('bot-diagnostic');
+    const data = await api('/bots/' + botId + '/logs');
+    if (!data) { container.innerHTML = '<div class="alert alert-error">❌ Impossible de contacter l\'API</div>'; return; }
+    if (!data.success) { container.innerHTML = '<div class="alert alert-error">❌ ' + data.error + '</div>'; return; }
+    const logs = data.logs || [];
+    countEl.textContent = logs.length + ' log(s) — ' + new Date().toLocaleTimeString('fr-FR');
+    if (logs.length === 0) {
+      diagEl.innerHTML = '<div class="alert alert-info">ℹ️ Aucun log — Envoyez /start à votre bot sur Telegram puis actualisez.</div>';
+      container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:2rem;">📭 Aucun log</div>';
       return;
     }
+    const errors = logs.filter(l => l.type === 'error');
+    diagEl.innerHTML = errors.length > 0
+      ? '<div class="alert alert-error">❌ ' + errors.length + ' erreur(s) — ' + escapeHtml(errors[0].message) + '</div>'
+      : '<div class="alert alert-success">✅ ' + escapeHtml(logs[0].message) + '</div>';
+    const colors = { info: 'var(--cyan)', error: 'var(--red)', warning: 'var(--yellow)' };
+    container.innerHTML = logs.map(l =>
+      '<div class="log-entry">'
+      + '<span class="log-time">' + new Date(l.timestamp).toLocaleString('fr-FR') + '</span>'
+      + '<span class="log-type ' + l.type + '" style="color:' + (colors[l.type]||'#fff') + '">[' + l.type.toUpperCase() + ']</span>'
+      + '<span class="log-message">' + escapeHtml(l.message) + '</span>'
+      + '</div>'
+    ).join('');
+  }
 
-    container.innerHTML = data.logs.map(log => `
-      <div class="log-entry">
-        <span class="log-time">${new Date(log.timestamp).toLocaleString('fr-FR')}</span>
-        <span class="log-type ${log.type}">[${log.type.toUpperCase()}]</span>
-        <span class="log-message">${log.message}</span>
-      </div>`).join('');
+  async function checkWebhookStatus() {
+    const diagEl = document.getElementById('webhook-diagnostic');
+    diagEl.innerHTML = '<span style="color:var(--cyan);">⏳ Vérification...</span>';
+    const res = await fetch('/api/webhooks/debug/' + currentBot?.webhookSecret);
+    const data = await res.json();
+    if (!data.found) { diagEl.innerHTML = '<div class="alert alert-error">❌ Bot introuvable en DB</div>'; return; }
+    const rows = [
+      ['Nom', data.name], ['Template', data.template],
+      ['Actif', data.isActive ? '✅ Oui' : '❌ Non — activez-le !'],
+      ['Token', data.tokenMasked], ['Messages', data.totalMessages ?? 0],
+      ['Dernière activité', data.lastActivity ? new Date(data.lastActivity).toLocaleString('fr-FR') : 'Jamais'],
+    ];
+    diagEl.innerHTML = '<table style="width:100%;border-collapse:collapse;">'
+      + rows.map(([k,v]) => '<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem 0.75rem 0.4rem 0;color:var(--text-muted);white-space:nowrap;">' + k + '</td><td style="padding:0.4rem 0;">' + v + '</td></tr>').join('')
+      + '</table>'
+      + (data.lastLogs?.length ? '<div style="margin-top:0.75rem;font-size:0.75rem;color:var(--text-muted);">Derniers logs:</div>'
+        + data.lastLogs.map(l => '<div style="color:var(--text-secondary);margin-top:0.2rem;">&gt; ' + escapeHtml(l.message) + '</div>').join('') : '');
   }
 
   async function sendTestMessage() {
     const chatId = document.getElementById('test-chat-id').value.trim();
     const alertEl = document.getElementById('alert-test');
-
-    if (!chatId) {
-      alertEl.innerHTML = '<div class="alert alert-error">Entrez votre Chat ID</div>';
-      return;
-    }
-
-    const data = await api(`/bots/${botId}/test`, {
-      method: 'POST',
-      body: JSON.stringify({ chatId }),
-    });
-
-    if (data?.success) {
-      alertEl.innerHTML = '<div class="alert alert-success">✅ Message de test envoyé !</div>';
-    } else {
-      alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${data?.error || 'Erreur'}</div>`;
-    }
+    if (!chatId) { alertEl.innerHTML = '<div class="alert alert-error">Entrez votre Chat ID</div>'; return; }
+    const data = await api('/bots/' + botId + '/test', { method: 'POST', body: JSON.stringify({ chatId }) });
+    alertEl.innerHTML = data?.success
+      ? '<div class="alert alert-success">✅ Message de test envoyé !</div>'
+      : '<div class="alert alert-error">⚠️ ' + (data?.error || 'Erreur') + '</div>';
   }
 
   async function confirmDeleteBot() {
-    if (!confirm(`Supprimer définitivement "${currentBot.name}" ? Cette action est irréversible.`)) return;
-
-    const data = await api(`/bots/${botId}`, { method: 'DELETE' });
-
-    if (data?.success) {
-      Toast.success('Bot supprimé');
-      setTimeout(() => window.location.href = '/bots.html', 1000);
-    } else {
-      Toast.error(data?.error || 'Erreur lors de la suppression');
-    }
-  }
-
-  function switchTab(tabName, btn) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-    if (btn) btn.classList.add('active');
-
-    if (tabName === 'logs') loadLogs();
+    if (!confirm('Supprimer définitivement "' + currentBot.name + '" ?')) return;
+    const data = await api('/bots/' + botId, { method: 'DELETE' });
+    if (data?.success) { Toast.success('Bot supprimé'); setTimeout(() => window.location.href = '/bots.html', 1000); }
+    else Toast.error(data?.error || 'Erreur');
   }
 </script>
 </body>
