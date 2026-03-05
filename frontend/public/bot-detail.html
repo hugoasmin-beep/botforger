@@ -92,11 +92,40 @@
     <div class="tab-content" id="tab-logs">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Logs d'activité</h3>
-          <button class="btn btn-secondary btn-sm" onclick="loadLogs()">🔄 Actualiser</button>
+          <h3 class="card-title">📋 Logs d'activité du bot</h3>
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <span id="auto-refresh-badge" style="font-size:0.72rem;font-family:var(--font-mono);color:var(--green);display:none;">
+              ● AUTO
+            </span>
+            <button class="btn btn-ghost btn-sm" id="toggle-auto-refresh" onclick="toggleAutoRefresh()">
+              ⏱ Auto
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="loadLogs()">🔄 Actualiser</button>
+          </div>
         </div>
-        <div class="logs-container" id="logs-container">
-          <div style="color:var(--text-muted);padding:1rem;text-align:center;">Chargement des logs...</div>
+
+        <!-- Diagnostic rapide -->
+        <div id="bot-diagnostic" style="margin-bottom:1rem;"></div>
+
+        <!-- Compteur -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+          <span id="log-count" style="font-size:0.8rem;color:var(--text-muted);"></span>
+          <button class="btn btn-ghost btn-sm" onclick="clearLogsDisplay()" style="font-size:0.75rem;">✕ Vider affichage</button>
+        </div>
+
+        <div class="logs-container" id="logs-container" style="min-height:200px;">
+          <div style="color:var(--text-muted);padding:1rem;text-align:center;">Cliquez sur Actualiser ou activez l'auto-refresh</div>
+        </div>
+      </div>
+
+      <!-- Card diagnostic webhook -->
+      <div class="card" style="margin-top:1rem;border-color:rgba(0,212,255,0.2);">
+        <div class="card-header">
+          <h3 class="card-title">🔍 Diagnostic webhook Telegram</h3>
+          <button class="btn btn-secondary btn-sm" onclick="checkWebhookStatus()">Vérifier</button>
+        </div>
+        <div id="webhook-diagnostic" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-secondary);">
+          Cliquez sur Vérifier pour tester la connexion Telegram → Serveur
         </div>
       </div>
     </div>
