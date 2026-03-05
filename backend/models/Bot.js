@@ -9,59 +9,76 @@ const LogSchema = new mongoose.Schema({
 
 const BotSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  name:  { type: String, required: [true, 'Nom du bot requis'], trim: true, maxlength: [50, 'Nom trop long'] },
-  token: { type: String, required: [true, 'Token Telegram requis'] },
+  name:  { type: String, required: true, trim: true, maxlength: 50 },
+  token: { type: String, required: true },
   webhookSecret: { type: String, default: () => uuidv4() },
   template: {
     type: String,
     required: true,
-    enum: ['echo', 'welcome', 'poll', 'reminder', 'translate', 'stats', 'ai'],
+    enum: ['echo', 'welcome', 'poll', 'reminder', 'translate', 'stats', 'ai', 'api'],
   },
-  isActive: { type: Boolean, default: true },
-  telegramUsername: { type: String, default: null },
+  isActive:         { type: Boolean, default: true },
+  telegramUsername: { type: String,  default: null },
 
   config: {
-    // — Echo
+    // ─ Echo ─
     echo_welcomeMessage: { type: String, default: '👋 Bonjour ! Je suis un bot echo.' },
     echo_prefix:         { type: String, default: '' },
-    // — Welcome
+    // ─ Welcome ─
     welcome_joinMessage:  { type: String, default: '👋 Bienvenue {first_name} dans le groupe !' },
     welcome_leaveMessage: { type: String, default: '👋 Au revoir {first_name} !' },
     welcome_enabled:      { type: Boolean, default: true },
-    // — Poll
+    // ─ Poll ─
     poll_allowAnonymous: { type: Boolean, default: false },
-    // — Reminder
+    // ─ Reminder ─
     reminder_timezone: { type: String, default: 'Europe/Paris' },
-    // — Translate
+    // ─ Translate ─
     translate_defaultLang:    { type: String, default: 'en' },
     translate_welcomeMessage: { type: String, default: '🌍 Bonjour ! Envoyez /translate <texte> pour traduire.' },
-    // — Stats
+    // ─ Stats ─
     stats_resetWeekly: { type: Boolean, default: false },
     stats_trackMedia:  { type: Boolean, default: true },
-    // — AI Bot
-    ai_enabled:          { type: Boolean,  default: false },
-    ai_provider:         { type: String,   default: 'openai' },   // openai | mistral | groq | custom
-    ai_apiKey:           { type: String,   default: '' },          // chiffré idéalement
-    ai_endpoint:         { type: String,   default: '' },          // laisser vide = auto selon provider
-    ai_model:            { type: String,   default: '' },          // laisser vide = auto
-    ai_system_prompt:    { type: String,   default: '' },          // prompt système personnalisé
-    ai_persona_name:     { type: String,   default: 'Assistant IA' },
-    ai_persona_emoji:    { type: String,   default: '🤖' },
-    ai_welcome_message:  { type: String,   default: 'Bonjour {first_name} ! Comment puis-je vous aider ?' },
-    ai_temperature:      { type: String,   default: '0.7' },
+    // ─ AI Bot ─
+    ai_enabled:         { type: Boolean, default: false },
+    ai_provider:        { type: String,  default: 'openai' },
+    ai_apiKey:          { type: String,  default: '' },
+    ai_endpoint:        { type: String,  default: '' },
+    ai_model:           { type: String,  default: '' },
+    ai_system_prompt:   { type: String,  default: '' },
+    ai_persona_name:    { type: String,  default: 'Assistant IA' },
+    ai_persona_emoji:   { type: String,  default: '🤖' },
+    ai_welcome_message: { type: String,  default: 'Bonjour {first_name} ! Comment puis-je vous aider ?' },
+    ai_temperature:     { type: String,  default: '0.7' },
+    // ─ API Endpoint Bot ─
+    api_url:               { type: String, default: '' },
+    api_method:            { type: String, default: 'GET' },
+    api_headers:           { type: String, default: '' },     // "Key: Value\nKey2: Value2"
+    api_body:              { type: String, default: '' },     // JSON body template
+    api_triggers:          { type: String, default: '' },     // "weather,meteo,forecast" CSV
+    api_response_path:     { type: String, default: '' },     // JSON path "data.temp"
+    api_response_template: { type: String, default: '🔗 Résultat :\n\n{result}' },
+    api_fallback_message:  { type: String, default: '❌ Impossible de récupérer les données.' },
+    api_welcome_message:   { type: String, default: '🔗 Bot API prêt ! Envoyez un mot-clé pour déclencher l\'appel.' },
+    api_buttons:           { type: String, default: '' },     // JSON inline buttons
+    api_cooldown_ms:       { type: String, default: '2000' },
+    // ─ Rich message builder (partagé entre templates) ─
+    // JSON stringifié : [{type:'text'|'image'|'gif'|'buttons', ...}]
+    msg_start_blocks:  { type: String, default: '' },
+    msg_help_blocks:   { type: String, default: '' },
+    msg_custom_blocks: { type: String, default: '' },
   },
 
   stats: {
-    totalMessages: { type: Number, default: 0 },
-    activeUsers:   { type: Number, default: 0 },
+    totalMessages: { type: Number,   default: 0 },
+    activeUsers:   { type: Number,   default: 0 },
     seenUserIds:   { type: [String], default: [], select: false },
-    lastActivity:  { type: Date, default: null },
+    lastActivity:  { type: Date,     default: null },
   },
 
   logs: { type: [LogSchema], default: [] },
 }, { timestamps: true });
 
-// ─── ATOMIC incrementStats ────────────────────────────────────────────────
+// ─── Atomic ops ────────────────────────────────────────────────────────────
 BotSchema.methods.incrementStats = async function (userId) {
   const update = {
     $inc: { 'stats.totalMessages': 1 },
@@ -77,7 +94,6 @@ BotSchema.methods.incrementStats = async function (userId) {
   await Bot.findByIdAndUpdate(this._id, update);
 };
 
-// ─── ATOMIC addLog ────────────────────────────────────────────────────────
 BotSchema.methods.addLog = async function (type, message) {
   await Bot.findByIdAndUpdate(this._id, {
     $push: { logs: { $each: [{ type, message, timestamp: new Date() }], $slice: -100 } },
@@ -91,7 +107,6 @@ BotSchema.methods.getMaskedToken = function () {
   return `${parts[0]}:${parts[1].substring(0, 4)}${'*'.repeat(parts[1].length - 4)}`;
 };
 
-// Masquer la clé API dans les réponses publiques
 BotSchema.methods.getMaskedApiKey = function () {
   const key = this.config?.ai_apiKey;
   if (!key || key.length < 8) return key ? '***' : '';
@@ -100,3 +115,4 @@ BotSchema.methods.getMaskedApiKey = function () {
 
 const Bot = mongoose.model('Bot', BotSchema);
 module.exports = Bot;
+// Note: Bot.js is already defined above — this file exports the Bot model.

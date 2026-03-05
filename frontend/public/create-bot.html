@@ -5,377 +5,1008 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Créer un bot — BotForge</title>
   <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/create-bot.css" />
 </head>
-<body>
+<body class="create-bot-page">
 
-<div id="sidebar-container"></div>
+<div class="wizard-shell">
 
-<div class="app-layout">
-  <div class="main-content" style="max-width:820px;">
+  <!-- ── Sidebar steps ──────────────────────────────────────────── -->
+  <aside class="wizard-sidebar">
+    <a href="/dashboard.html" class="wizard-logo">
+      <span>🤖</span> BotForge
+    </a>
 
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Créer un nouveau bot</h1>
-        <p class="page-subtitle">Configurez votre bot en quelques étapes</p>
+    <nav class="wizard-steps">
+      <div class="wizard-step active" data-step="1">
+        <div class="ws-dot"><span>1</span></div>
+        <div class="ws-info">
+          <div class="ws-label">Token Telegram</div>
+          <div class="ws-sub">Vérification du bot</div>
+        </div>
       </div>
-      <a href="/bots.html" class="btn btn-secondary btn-sm">← Mes bots</a>
+      <div class="wizard-step-line"></div>
+      <div class="wizard-step" data-step="2">
+        <div class="ws-dot"><span>2</span></div>
+        <div class="ws-info">
+          <div class="ws-label">Template</div>
+          <div class="ws-sub">Type de bot</div>
+        </div>
+      </div>
+      <div class="wizard-step-line"></div>
+      <div class="wizard-step" data-step="3">
+        <div class="ws-dot"><span>3</span></div>
+        <div class="ws-info">
+          <div class="ws-label">Configuration</div>
+          <div class="ws-sub">Messages & options</div>
+        </div>
+      </div>
+      <div class="wizard-step-line"></div>
+      <div class="wizard-step" data-step="4">
+        <div class="ws-dot"><span>4</span></div>
+        <div class="ws-info">
+          <div class="ws-label">Lancement</div>
+          <div class="ws-sub">Déploiement</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Preview panel -->
+    <div class="wizard-preview" id="wizard-preview">
+      <div class="preview-phone">
+        <div class="preview-phone-header">
+          <div class="preview-bot-avatar" id="preview-avatar">🤖</div>
+          <div>
+            <div class="preview-bot-name" id="preview-name">Votre bot</div>
+            <div class="preview-bot-status">● En ligne</div>
+          </div>
+        </div>
+        <div class="preview-messages" id="preview-messages">
+          <div class="preview-bubble bot">
+            Bonjour ! Je suis prêt à vous aider 👋
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main content ────────────────────────────────────────────── -->
+  <main class="wizard-main">
+    <div class="wizard-header">
+      <div>
+        <h1 class="wizard-title" id="wizard-title">Créer un nouveau bot</h1>
+        <p class="wizard-subtitle" id="wizard-subtitle">Étape 1 sur 4 — Connexion Telegram</p>
+      </div>
+      <a href="/bots.html" class="btn btn-ghost btn-sm">✕ Annuler</a>
     </div>
 
-    <div id="alert-global"></div>
+    <div id="alert-global" style="margin-bottom:1rem;"></div>
 
-    <!-- Étape 1 : Token + Nom -->
-    <div class="card step-card" id="step-1">
-      <div class="step-header">
-        <span class="step-number">01</span>
-        <div>
-          <h3 class="step-title">Informations de base</h3>
-          <p class="step-desc">Entrez votre token Telegram et un nom pour identifier ce bot.</p>
+    <!-- ── STEP 1: Token ───────────────────────────────────────────── -->
+    <div class="wizard-panel active" id="panel-1">
+      <div class="token-hero">
+        <div class="token-hero-icon">🔑</div>
+        <h2>Connectez votre bot Telegram</h2>
+        <p>Obtenez votre token via <strong>@BotFather</strong> sur Telegram avec la commande <code>/newbot</code></p>
+      </div>
+
+      <div class="token-input-wrap">
+        <input type="text" class="token-input mono" id="bot-token"
+          placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"
+          autocomplete="off" />
+        <button class="btn btn-primary" id="validate-token-btn">
+          Vérifier →
+        </button>
+      </div>
+
+      <div id="token-status"></div>
+
+      <div class="token-hint-cards">
+        <div class="hint-card">
+          <div class="hint-icon">1️⃣</div>
+          <div>Ouvrez Telegram et cherchez <strong>@BotFather</strong></div>
+        </div>
+        <div class="hint-card">
+          <div class="hint-icon">2️⃣</div>
+          <div>Envoyez <code>/newbot</code> et suivez les instructions</div>
+        </div>
+        <div class="hint-card">
+          <div class="hint-icon">3️⃣</div>
+          <div>Copiez le token et collez-le ci-dessus</div>
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Token API Telegram <span style="color:var(--red)">*</span></label>
-        <div style="display:flex;gap:0.5rem;">
-          <input type="text" class="form-control mono" id="bot-token"
-            placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"
-            autocomplete="off" style="flex:1;" />
-          <button class="btn btn-secondary" id="validate-token-btn" style="white-space:nowrap;">
-            🔍 Vérifier
-          </button>
+      <div class="wizard-nav">
+        <span></span>
+        <button class="btn btn-primary btn-lg" id="step1-next" disabled>
+          Continuer →
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: Template ────────────────────────────────────────── -->
+    <div class="wizard-panel" id="panel-2">
+      <div class="template-grid" id="template-grid">
+
+        <div class="tpl-card" data-template="echo" data-color="#00d4ff">
+          <div class="tpl-card-glow" style="--glow:#00d4ff"></div>
+          <div class="tpl-card-inner">
+            <div class="tpl-icon">🔁</div>
+            <div class="tpl-name">Bot Echo</div>
+            <div class="tpl-desc">Répond en écho, idéal pour tester et prototyper</div>
+            <div class="tpl-tags"><span>Réponses</span><span>Messages</span></div>
+          </div>
+          <div class="tpl-check">✓</div>
         </div>
-        <div class="form-hint">
-          Obtenez votre token via <strong>@BotFather</strong> sur Telegram → /newbot
+
+        <div class="tpl-card" data-template="welcome" data-color="#00ff88">
+          <div class="tpl-card-glow" style="--glow:#00ff88"></div>
+          <div class="tpl-card-inner">
+            <div class="tpl-icon">👋</div>
+            <div class="tpl-name">Bienvenue</div>
+            <div class="tpl-desc">Accueille automatiquement les nouveaux membres de groupe</div>
+            <div class="tpl-tags"><span>Groupes</span><span>Auto</span></div>
+          </div>
+          <div class="tpl-check">✓</div>
         </div>
-        <div id="token-status" style="margin-top:0.5rem;"></div>
+
+        <div class="tpl-card" data-template="poll" data-color="#ffd32a">
+          <div class="tpl-card-glow" style="--glow:#ffd32a"></div>
+          <div class="tpl-card-inner">
+            <div class="tpl-icon">🗳️</div>
+            <div class="tpl-name">Sondages</div>
+            <div class="tpl-desc">Crée des sondages interactifs avec /poll</div>
+            <div class="tpl-tags"><span>Votes</span><span>Interaction</span></div>
+          </div>
+          <div class="tpl-check">✓</div>
+        </div>
+
+        <div class="tpl-card" data-template="reminder" data-color="#ff6b9d">
+          <div class="tpl-card-glow" style="--glow:#ff6b9d"></div>
+          <div class="tpl-card-inner">
+            <div class="tpl-icon">⏰</div>
+            <div class="tpl-name">Rappels</div>
+            <div class="tpl-desc">Programme des rappels automatiques avec /remind</div>
+            <div class="tpl-tags"><span>Scheduler</span><span>Automatique</span></div>
+          </div>
+          <div class="tpl-check">✓</div>
+        </div>
+
+        <div class="tpl-card" data-template="translate" data-color="#00e5ff">
+          <div class="tpl-card-glow" style="--glow:#00e5ff"></div>
+          <div class="tpl-card-inner">
+            <div class="tpl-icon">🌍</div>
+            <div class="tpl-name">Traducteur</div>
+            <div class="tpl-desc">Traduit en temps réel dans 14 langues</div>
+            <div class="tpl-tags"><span>14 langues</span><span>Temps réel</span></div>
+          </div>
+          <div class="tpl-check">✓</div>
+        </div>
+
+        <div class="tpl-card" data-template="stats" data-color="#ff9f43">
+          <div class="tpl-card-glow" style="--glow:#ff9f43"></div>
+          <div class="tpl-card-inner">
+            <div class="tpl-icon">📊</div>
+            <div class="tpl-name">Stats Groupe</div>
+            <div class="tpl-desc">Classement des membres par activité et messages</div>
+            <div class="tpl-tags"><span>Analytics</span><span>Classement</span></div>
+          </div>
+          <div class="tpl-check">✓</div>
+        </div>
+
+        <div class="tpl-card tpl-card-special" data-template="ai" data-color="#a855f7">
+          <div class="tpl-badge" style="background:linear-gradient(135deg,#a855f7,#7c3aed);">✨ NEW</div>
+          <div class="tpl-card-glow" style="--glow:#a855f7"></div>
+          <div class="tpl-card-inner">
+            <div class="tpl-icon">🤖</div>
+            <div class="tpl-name">Bot IA</div>
+            <div class="tpl-desc">Chatbot intelligent avec OpenAI, Mistral ou Groq</div>
+            <div class="tpl-tags"><span>OpenAI</span><span>Mistral</span><span>Groq</span></div>
+          </div>
+          <div class="tpl-check">✓</div>
+        </div>
+
+        <div class="tpl-card tpl-card-special" data-template="api" data-color="#00d4ff">
+          <div class="tpl-badge" style="background:linear-gradient(135deg,#00d4ff,#0088ff);">🔗 API</div>
+          <div class="tpl-card-glow" style="--glow:#00d4ff"></div>
+          <div class="tpl-card-inner">
+            <div class="tpl-icon">⚡</div>
+            <div class="tpl-name">Bot API</div>
+            <div class="tpl-desc">Connecte ton bot à n'importe quelle API REST externe</div>
+            <div class="tpl-tags"><span>GET/POST</span><span>JSON</span><span>Custom</span></div>
+          </div>
+          <div class="tpl-check">✓</div>
+        </div>
+
       </div>
 
-      <div class="form-group" id="bot-name-group" style="display:none;">
-        <label class="form-label">Nom du bot dans le dashboard <span style="color:var(--red)">*</span></label>
+      <div class="wizard-nav">
+        <button class="btn btn-ghost" id="step2-back">← Retour</button>
+        <button class="btn btn-primary btn-lg" id="step2-next" disabled>Configurer →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 3: Configuration ───────────────────────────────────── -->
+    <div class="wizard-panel" id="panel-3">
+
+      <!-- Name field (always shown) -->
+      <div class="cfg-section">
+        <div class="cfg-section-label">
+          <span class="cfg-section-icon">📝</span>
+          Nom du bot dans le dashboard
+        </div>
         <input type="text" class="form-control" id="bot-name"
           placeholder="Ex: Mon bot de bienvenue, Bot Stats Serveur"
           maxlength="50" />
-        <div class="form-hint">Pour vous aider à identifier ce bot (pas le username Telegram)</div>
-      </div>
-    </div>
-
-    <!-- Étape 2 : Template -->
-    <div class="card step-card" id="step-2" style="opacity:0.5;pointer-events:none;">
-      <div class="step-header">
-        <span class="step-number">02</span>
-        <div>
-          <h3 class="step-title">Choisir un template</h3>
-          <p class="step-desc">Sélectionnez le type de bot que vous souhaitez créer.</p>
-        </div>
+        <div class="form-hint">Ce nom n'est visible que dans votre dashboard</div>
       </div>
 
-      <div class="template-selector" id="template-selector">
-        <div class="template-option" data-template="echo">
-          <div class="template-option-emoji">🔁</div>
-          <div class="template-option-name">Bot Echo</div>
-          <p class="template-option-desc">Répond en écho à chaque message reçu</p>
-        </div>
-        <div class="template-option" data-template="welcome">
-          <div class="template-option-emoji">👋</div>
-          <div class="template-option-name">Bienvenue</div>
-          <p class="template-option-desc">Accueille les nouveaux membres de groupe</p>
-        </div>
-        <div class="template-option" data-template="poll">
-          <div class="template-option-emoji">🗳️</div>
-          <div class="template-option-name">Sondages</div>
-          <p class="template-option-desc">Crée des sondages avec /poll</p>
-        </div>
-        <div class="template-option" data-template="reminder">
-          <div class="template-option-emoji">⏰</div>
-          <div class="template-option-name">Rappels</div>
-          <p class="template-option-desc">Programme des rappels avec /remind</p>
-        </div>
-        <div class="template-option" data-template="translate">
-          <div class="template-option-emoji">🌍</div>
-          <div class="template-option-name">Traducteur</div>
-          <p class="template-option-desc">Traduit du texte dans 14 langues</p>
-        </div>
-        <div class="template-option" data-template="stats">
-          <div class="template-option-emoji">📊</div>
-          <div class="template-option-name">Stats Groupe</div>
-          <p class="template-option-desc">Classement des membres par messages</p>
-        </div>
-        <div class="template-option template-option-ai" data-template="ai">
-          <div class="template-option-badge">✨ NEW</div>
-          <div class="template-option-emoji">🤖</div>
-          <div class="template-option-name">Bot IA</div>
-          <p class="template-option-desc">Chatbot intelligent avec ta clé API</p>
-        </div>
-      </div>
-    </div>
+      <!-- Dynamic config fields -->
+      <div id="template-config-container"></div>
 
-    <!-- Étape 3 : Configuration -->
-    <div class="card step-card" id="step-3" style="opacity:0.5;pointer-events:none;">
-      <div class="step-header">
-        <span class="step-number">03</span>
-        <div>
-          <h3 class="step-title">Personnalisation</h3>
-          <p class="step-desc">Configurez les options de votre bot.</p>
-        </div>
-      </div>
-      <div id="template-config-fields">
-        <div style="text-align:center;padding:2rem;color:var(--text-muted);">
-          ← Sélectionnez un template ci-dessus
+      <!-- Rich message builder (pour echo, ai, api) -->
+      <div id="rich-media-builder" style="display:none;">
+        <div class="cfg-section">
+          <div class="cfg-section-label">
+            <span class="cfg-section-icon">✉️</span>
+            Message de bienvenue enrichi
+            <span class="cfg-section-hint">Ajoutez des boutons, images ou GIFs</span>
+          </div>
+          <div class="blocks-list" id="blocks-list"></div>
+          <div class="blocks-add-bar">
+            <button class="block-add-btn" data-type="text">＋ Texte</button>
+            <button class="block-add-btn" data-type="image">🖼 Image</button>
+            <button class="block-add-btn" data-type="gif">🎞 GIF</button>
+            <button class="block-add-btn" data-type="buttons">🔘 Boutons</button>
+          </div>
         </div>
       </div>
 
-      <!-- Champ API Key IA (affiché uniquement pour template ai) -->
-      <div id="ai-key-section" style="display:none;margin-top:1.5rem;">
-        <div style="height:1px;background:var(--border);margin-bottom:1.5rem;"></div>
-        <div class="form-group">
-          <label class="form-label">🔑 Clé API IA <span style="color:var(--red)">*</span></label>
+      <!-- API configurator (affiché seulement pour template=api) -->
+      <div id="api-configurator" style="display:none;">
+
+        <!-- Trigger keywords -->
+        <div class="cfg-section">
+          <div class="cfg-section-label"><span class="cfg-section-icon">⚡</span>Mots-clés déclencheurs</div>
+          <input type="text" class="form-control" id="cfg-api_triggers"
+            placeholder="météo, weather, forecast" />
+          <div class="form-hint">Mots-clés séparés par des virgules qui activent l'appel API. Laisser vide = tous les messages.</div>
+        </div>
+
+        <!-- Endpoint config -->
+        <div class="cfg-section">
+          <div class="cfg-section-label"><span class="cfg-section-icon">🔗</span>Endpoint API</div>
+          <div class="api-method-row">
+            <select class="method-select" id="cfg-api_method">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="PATCH">PATCH</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+            <input type="text" class="form-control" id="cfg-api_url"
+              placeholder="https://api.example.com/endpoint?q={query}" style="flex:1;" />
+          </div>
+          <div class="form-hint">
+            Variables disponibles : <code>{query}</code> (texte après le trigger), <code>{user_id}</code>, <code>{first_name}</code>
+          </div>
+        </div>
+
+        <!-- Headers -->
+        <div class="cfg-section">
+          <div class="cfg-section-label">
+            <span class="cfg-section-icon">📋</span>
+            Headers HTTP
+            <button class="cfg-section-action" id="add-header-btn">+ Ajouter</button>
+          </div>
+          <div id="headers-list" class="kv-list"></div>
+          <div class="form-hint">Ex: Authorization → Bearer mon-token-api</div>
+        </div>
+
+        <!-- Body (POST/PUT) -->
+        <div id="body-section" class="cfg-section" style="display:none;">
+          <div class="cfg-section-label"><span class="cfg-section-icon">📦</span>Corps de la requête (JSON)</div>
+          <textarea class="form-control code-textarea" id="cfg-api_body" rows="4"
+            placeholder='{"query": "{query}", "user": "{user_id}"}'></textarea>
+          <div class="form-hint">Template JSON. Utilisez <code>{query}</code>, <code>{user_id}</code>, <code>{first_name}</code></div>
+        </div>
+
+        <!-- Response parsing -->
+        <div class="cfg-section">
+          <div class="cfg-section-label"><span class="cfg-section-icon">📤</span>Réponse de l'API</div>
+          <div class="api-response-grid">
+            <div class="form-group">
+              <label class="form-label">Chemin JSON <span class="form-hint-inline">(ex: data.result.0.name)</span></label>
+              <input type="text" class="form-control mono" id="cfg-api_response_path"
+                placeholder="data.0.name" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Template de réponse</label>
+              <textarea class="form-control" id="cfg-api_response_template" rows="2"
+                placeholder="🌡️ Résultat : {result}"></textarea>
+            </div>
+          </div>
+          <div class="form-hint">
+            <code>{result}</code> = valeur extraite · <code>{query}</code> = mot-clé tapé · <code>{first_name}</code> = prénom
+          </div>
+
+          <!-- Test live -->
+          <div class="api-test-box">
+            <div class="api-test-title">🧪 Tester l'appel API</div>
+            <div style="display:flex;gap:0.5rem;">
+              <input type="text" class="form-control" id="api-test-query" placeholder="Valeur de {query}" style="flex:1;" />
+              <button class="btn btn-secondary btn-sm" id="api-test-btn">Tester</button>
+            </div>
+            <div id="api-test-result" style="margin-top:0.75rem;"></div>
+          </div>
+        </div>
+
+        <!-- Buttons builder -->
+        <div class="cfg-section">
+          <div class="cfg-section-label">
+            <span class="cfg-section-icon">🔘</span>
+            Boutons de réponse (optionnel)
+            <button class="cfg-section-action" id="add-api-btn-row">+ Ligne</button>
+          </div>
+          <div id="api-buttons-builder" class="btns-builder"></div>
+          <div class="form-hint">Chaque ligne = une rangée de boutons dans Telegram. Max 3 boutons par ligne.</div>
+        </div>
+
+        <!-- Fallback & misc -->
+        <div class="cfg-section">
+          <div class="cfg-section-label"><span class="cfg-section-icon">⚙️</span>Options avancées</div>
+          <div class="api-response-grid">
+            <div class="form-group">
+              <label class="form-label">Message d'erreur</label>
+              <input type="text" class="form-control" id="cfg-api_fallback_message"
+                placeholder="❌ Impossible de récupérer les données." />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cooldown entre appels (ms)</label>
+              <input type="text" class="form-control" id="cfg-api_cooldown_ms"
+                placeholder="2000" value="2000" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI key section -->
+      <div id="ai-key-section" style="display:none;">
+        <div class="cfg-section ai-key-cfg">
+          <div class="cfg-section-label"><span class="cfg-section-icon">🔑</span>Clé API IA <span style="color:var(--red)">*</span></div>
           <div style="display:flex;gap:0.5rem;">
             <input type="password" class="form-control mono" id="ai-api-key-input"
-              placeholder="sk-... / votre clé API"
-              autocomplete="new-password" style="flex:1;" />
-            <button class="btn btn-ghost btn-sm" id="toggle-api-key-btn" type="button" style="white-space:nowrap;">
-              👁 Voir
-            </button>
+              placeholder="sk-... / votre clé API" style="flex:1;" autocomplete="new-password" />
+            <button class="btn btn-ghost btn-sm" id="toggle-api-key-btn">👁</button>
           </div>
           <div class="form-hint" style="color:var(--yellow);">
-            ⚠️ La clé est stockée de façon sécurisée et masquée dans l'interface.
-            Elle ne transite que vers votre fournisseur IA lors des appels.
+            ⚠️ Stockée de façon sécurisée — jamais affichée en clair après sauvegarde.
           </div>
         </div>
       </div>
+
+      <div class="wizard-nav">
+        <button class="btn btn-ghost" id="step3-back">← Retour</button>
+        <button class="btn btn-primary btn-lg" id="step3-next">Vérifier →</button>
+      </div>
     </div>
 
-    <!-- Submit -->
-    <div style="display:flex;justify-content:flex-end;gap:1rem;margin-top:1rem;">
-      <a href="/bots.html" class="btn btn-secondary">Annuler</a>
-      <button class="btn btn-primary btn-lg" id="create-btn" disabled>
-        🚀 Créer le bot
-      </button>
+    <!-- ── STEP 4: Launch ──────────────────────────────────────────── -->
+    <div class="wizard-panel" id="panel-4">
+      <div class="launch-summary" id="launch-summary">
+        <!-- Filled dynamically -->
+      </div>
+
+      <div class="launch-checklist" id="launch-checklist">
+        <div class="check-item" id="chk-token">
+          <div class="check-icon">⏳</div>
+          <div>Token Telegram vérifié</div>
+        </div>
+        <div class="check-item" id="chk-webhook">
+          <div class="check-icon">⏳</div>
+          <div>Webhook Telegram configuré</div>
+        </div>
+        <div class="check-item" id="chk-db">
+          <div class="check-icon">⏳</div>
+          <div>Bot enregistré en base de données</div>
+        </div>
+      </div>
+
+      <div id="launch-error" style="display:none;margin-top:1rem;"></div>
+
+      <div class="wizard-nav">
+        <button class="btn btn-ghost" id="step4-back">← Modifier</button>
+        <button class="btn btn-primary btn-lg" id="create-btn">
+          🚀 Déployer le bot
+        </button>
+      </div>
     </div>
 
-  </div>
+  </main>
 </div>
 
 <script src="/js/app.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => { if (!initLayout()) return; });
+// ──────────────────────────────────────────────────────────────────────────
+// BotForge — Create Bot Wizard
+// ──────────────────────────────────────────────────────────────────────────
 
-  let selectedTemplate = null;
-  let tokenValidated   = false;
-  let lastFocused      = null;
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('sidebar-container');
+  if (container) container.style.display = 'none';
+  if (!Auth.requireAuth()) return;
+  bindAll();
+});
 
-  const VARIABLES_DOC = `
-    <div class="variables-help">
-      <div class="variables-help-title">Variables (cliquez pour insérer) :</div>
-      <div class="variables-list">
-        <span class="variable-tag" data-var="{first_name}">{first_name}</span>
-        <span class="variable-tag" data-var="{last_name}">{last_name}</span>
-        <span class="variable-tag" data-var="{username}">{username}</span>
-        <span class="variable-tag" data-var="{chat_title}">{chat_title}</span>
-        <span class="variable-tag" data-var="{full_name}">{full_name}</span>
+let currentStep = 1;
+let selectedTemplate = null;
+let tokenValidated   = false;
+let lastFocused      = null;
+let headerRows       = [];
+let apiBtnRows       = [];
+let blocks           = [];
+
+const VARS_DOC = `<div class="vars-inline">
+  <span onclick="insertVar('{first_name}')">{first_name}</span>
+  <span onclick="insertVar('{last_name}')">{last_name}</span>
+  <span onclick="insertVar('{username}')">{username}</span>
+  <span onclick="insertVar('{chat_title}')">{chat_title}</span>
+</div>`;
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function goTo(n) {
+  document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active', 'exit'));
+  document.querySelectorAll('.wizard-step').forEach(s => {
+    const sn = parseInt(s.dataset.step);
+    s.classList.toggle('active', sn === n);
+    s.classList.toggle('done',   sn < n);
+  });
+  const panel = document.getElementById('panel-' + n);
+  if (panel) panel.classList.add('active');
+  currentStep = n;
+
+  const subtitles = ['', 'Étape 1 sur 4 — Connexion Telegram', 'Étape 2 sur 4 — Choisissez un template', 'Étape 3 sur 4 — Configuration', 'Étape 4 sur 4 — Lancement'];
+  document.getElementById('wizard-subtitle').textContent = subtitles[n] || '';
+}
+
+// ── Bind all buttons ────────────────────────────────────────────────────────
+function bindAll() {
+  document.getElementById('validate-token-btn').addEventListener('click', validateToken);
+  document.getElementById('bot-token').addEventListener('keydown', e => { if (e.key === 'Enter') validateToken(); });
+  document.getElementById('step1-next').addEventListener('click', () => goTo(2));
+  document.getElementById('step2-back').addEventListener('click', () => goTo(1));
+  document.getElementById('step2-next').addEventListener('click', () => { buildConfigPanel(); goTo(3); });
+  document.getElementById('step3-back').addEventListener('click', () => goTo(2));
+  document.getElementById('step3-next').addEventListener('click', validateStep3);
+  document.getElementById('step4-back').addEventListener('click', () => goTo(3));
+  document.getElementById('create-btn').addEventListener('click', createBot);
+
+  // Template cards
+  document.querySelectorAll('.tpl-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedTemplate = card.dataset.template;
+      const color = card.dataset.color || '#00d4ff';
+      card.style.setProperty('--card-color', color);
+      document.getElementById('step2-next').disabled = false;
+      updatePreview();
+    });
+  });
+
+  // API method toggle (show/hide body)
+  document.getElementById('cfg-api_method')?.addEventListener('change', function() {
+    const show = ['POST','PUT','PATCH'].includes(this.value);
+    document.getElementById('body-section').style.display = show ? 'block' : 'none';
+  });
+
+  // Add header row
+  document.getElementById('add-header-btn')?.addEventListener('click', addHeaderRow);
+
+  // Add button row for API
+  document.getElementById('add-api-btn-row')?.addEventListener('click', addApiBtnRow);
+
+  // API live test
+  document.getElementById('api-test-btn')?.addEventListener('click', testApiCall);
+
+  // Block add buttons
+  document.querySelectorAll('.block-add-btn').forEach(btn => {
+    btn.addEventListener('click', () => addBlock(btn.dataset.type));
+  });
+
+  // AI key toggle
+  document.getElementById('toggle-api-key-btn')?.addEventListener('click', () => {
+    const inp = document.getElementById('ai-api-key-input');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  });
+}
+
+// ── Step 1: Validate Token ──────────────────────────────────────────────────
+async function validateToken() {
+  const token  = document.getElementById('bot-token').value.trim();
+  const btn    = document.getElementById('validate-token-btn');
+  const status = document.getElementById('token-status');
+
+  if (!token) { status.innerHTML = '<div class="form-error">⚠️ Entrez votre token d\'abord</div>'; return; }
+
+  btn.classList.add('btn-loading');
+  btn.disabled = true;
+  status.innerHTML = '<div class="token-loading">⏳ Connexion à Telegram...</div>';
+
+  const data = await api('/bots/validate-token', { method: 'POST', body: JSON.stringify({ token }) });
+
+  btn.classList.remove('btn-loading');
+  btn.disabled = false;
+
+  if (!data) {
+    status.innerHTML = '<div class="form-error">❌ Impossible de contacter le serveur</div>';
+    return;
+  }
+
+  if (data.success) {
+    tokenValidated = true;
+    const info = data.botInfo;
+    status.innerHTML = `
+      <div class="token-success-card">
+        <div class="token-success-avatar">${info.first_name?.[0] || '🤖'}</div>
+        <div class="token-success-info">
+          <div class="token-success-name">${info.first_name || 'Bot'}</div>
+          <div class="token-success-user">@${info.username} · ID: ${info.id}</div>
+        </div>
+        <div class="token-success-check">✅</div>
+      </div>`;
+    btn.textContent = '✅ Vérifié';
+    btn.className   = 'btn btn-success';
+
+    // Pré-remplir le nom
+    const nameInput = document.getElementById('bot-name');
+    if (nameInput && !nameInput.value) nameInput.value = info.first_name || '';
+
+    document.getElementById('step1-next').disabled = false;
+
+    // Update preview
+    document.getElementById('preview-name').textContent = '@' + info.username;
+    document.getElementById('preview-avatar').textContent = info.first_name?.[0] || '🤖';
+  } else {
+    tokenValidated = false;
+    status.innerHTML = `<div class="token-error-card">❌ ${data.error || 'Token invalide'}</div>`;
+  }
+}
+
+// ── Step 2: Template ────────────────────────────────────────────────────────
+function updatePreview() {
+  const tpl = TEMPLATES[selectedTemplate];
+  if (!tpl) return;
+  const botName = document.getElementById('bot-name')?.value || tpl.name;
+  document.getElementById('preview-avatar').textContent = tpl.emoji;
+
+  const msgs = {
+    echo:     '🔁 Bonjour ! Envoyez-moi un message, je vous l\'enverrai en écho.',
+    welcome:  '👋 Je surveille ce groupe et accueillerai les nouveaux membres !',
+    poll:     '🗳️ Créez un sondage avec /poll Question | Option1 | Option2',
+    reminder: '⏰ Dites-moi /remind 10min Mon rappel et je vous notifie !',
+    translate:'🌍 Envoyez /translate Bonjour pour traduire en anglais.',
+    stats:    '📊 Envoyez /stats pour voir le classement du groupe.',
+    ai:       '✨ Bonjour ! Je suis un assistant IA. Posez-moi une question !',
+    api:      '🔗 Je peux appeler n\'importe quelle API REST pour vous !',
+  };
+
+  const msgEl = document.getElementById('preview-messages');
+  msgEl.innerHTML = `<div class="preview-bubble bot">${msgs[selectedTemplate] || 'Bonjour !'}</div>`;
+}
+
+// ── Step 3: Build config panel ──────────────────────────────────────────────
+function buildConfigPanel() {
+  const tpl = TEMPLATES[selectedTemplate];
+  if (!tpl) return;
+
+  document.getElementById('wizard-title').textContent = `Configurer — ${tpl.emoji} ${tpl.name}`;
+
+  const container = document.getElementById('template-config-container');
+  container.innerHTML = '';
+
+  const isApi = selectedTemplate === 'api';
+  const isAi  = selectedTemplate === 'ai';
+
+  document.getElementById('api-configurator').style.display  = isApi ? 'block' : 'none';
+  document.getElementById('ai-key-section').style.display    = isAi  ? 'block' : 'none';
+  document.getElementById('rich-media-builder').style.display = (isApi || isAi) ? 'none' : 'block';
+
+  if (!isApi) {
+    // Render standard fields
+    tpl.configFields.forEach(field => {
+      const div = document.createElement('div');
+      div.className = 'cfg-section';
+      div.innerHTML = renderField(field);
+      container.appendChild(div);
+
+      // Bind toggles
+      div.querySelectorAll('[data-toggle]').forEach(el =>
+        el.addEventListener('click', () => el.classList.toggle('active'))
+      );
+      div.querySelectorAll('[data-for]').forEach(lbl =>
+        lbl.addEventListener('click', () => {
+          const t = document.getElementById(lbl.dataset.for);
+          if (t) t.classList.toggle('active');
+        })
+      );
+      div.querySelectorAll('[data-var]').forEach(t =>
+        t.addEventListener('click', () => insertVar(t.dataset.var))
+      );
+      div.querySelectorAll('textarea, input[type=text]').forEach(el =>
+        el.addEventListener('focus', () => { lastFocused = el; })
+      );
+    });
+  }
+
+  // Init rich blocks
+  if (!isApi && !isAi) {
+    blocks = [{ type: 'text', value: tpl.configFields?.[0]?.placeholder || 'Bonjour {first_name} ! 👋' }];
+    renderBlocks();
+  }
+
+  // Init API header rows
+  if (isApi) {
+    headerRows = [];
+    apiBtnRows = [];
+    renderHeaderRows();
+    renderApiBtnRows();
+  }
+}
+
+function renderField(field) {
+  let html = `<div class="cfg-section-label"><span class="cfg-section-icon">⚙️</span>${field.label}</div>`;
+  const idAttr = `id="config-${field.key}"`;
+
+  if (field.type === 'textarea') {
+    html += `<textarea class="form-control" ${idAttr} rows="2" placeholder="${field.placeholder || ''}">${field.default || ''}</textarea>`;
+    if (field.variables) html += `<div class="vars-row">${VARS_DOC}</div>`;
+  } else if (field.type === 'toggle') {
+    html += `<div class="toggle-wrap">
+      <div class="toggle ${field.default ? 'active' : ''}" ${idAttr} data-toggle></div>
+      <label class="toggle-label" data-for="config-${field.key}">${field.label}</label>
+    </div>`;
+  } else if (field.type === 'select') {
+    html += `<select class="form-control" ${idAttr}>${field.options.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}</select>`;
+  } else {
+    html += `<input type="text" class="form-control" ${idAttr} placeholder="${field.placeholder || ''}" value="${field.default || ''}" />`;
+  }
+  if (field.hint) html += `<div class="form-hint">${field.hint}</div>`;
+  return html;
+}
+
+function insertVar(v) {
+  if (!lastFocused) return;
+  const pos = lastFocused.selectionStart, val = lastFocused.value;
+  lastFocused.value = val.slice(0, pos) + v + val.slice(pos);
+  lastFocused.focus();
+  lastFocused.setSelectionRange(pos + v.length, pos + v.length);
+}
+
+// ── Rich message blocks ──────────────────────────────────────────────────────
+function addBlock(type) {
+  blocks.push({ type, value: '', alt: '' });
+  renderBlocks();
+}
+
+function renderBlocks() {
+  const list = document.getElementById('blocks-list');
+  if (!list) return;
+  list.innerHTML = blocks.map((b, i) => {
+    if (b.type === 'text') return `
+      <div class="block-item" data-idx="${i}">
+        <div class="block-handle">⠿</div>
+        <div class="block-body">
+          <div class="block-type-tag">✏️ Texte</div>
+          <textarea class="form-control block-text" rows="2" placeholder="Votre message..." oninput="blocks[${i}].value=this.value">${b.value}</textarea>
+          ${VARS_DOC}
+        </div>
+        <button class="block-del" onclick="removeBlock(${i})">✕</button>
+      </div>`;
+    if (b.type === 'image') return `
+      <div class="block-item" data-idx="${i}">
+        <div class="block-handle">⠿</div>
+        <div class="block-body">
+          <div class="block-type-tag">🖼 Image</div>
+          <input type="text" class="form-control" placeholder="https://example.com/image.jpg" value="${b.value}" oninput="blocks[${i}].value=this.value" />
+          <input type="text" class="form-control" placeholder="Légende (optionnel)" value="${b.alt}" oninput="blocks[${i}].alt=this.value" style="margin-top:0.4rem;" />
+          ${b.value ? `<div class="block-image-preview"><img src="${b.value}" onerror="this.style.display='none'" style="max-height:80px;border-radius:6px;margin-top:0.4rem;" /></div>` : ''}
+        </div>
+        <button class="block-del" onclick="removeBlock(${i})">✕</button>
+      </div>`;
+    if (b.type === 'gif') return `
+      <div class="block-item" data-idx="${i}">
+        <div class="block-handle">⠿</div>
+        <div class="block-body">
+          <div class="block-type-tag">🎞 GIF</div>
+          <input type="text" class="form-control" placeholder="https://example.com/anim.gif" value="${b.value}" oninput="blocks[${i}].value=this.value" />
+          ${b.value ? `<div style="margin-top:0.4rem;"><img src="${b.value}" onerror="this.style.display='none'" style="max-height:80px;border-radius:6px;" /></div>` : ''}
+        </div>
+        <button class="block-del" onclick="removeBlock(${i})">✕</button>
+      </div>`;
+    if (b.type === 'buttons') {
+      const rowBtns = b.buttons || [{ text: 'Cliquez ici', type: 'url', value: 'https://' }];
+      return `
+      <div class="block-item" data-idx="${i}">
+        <div class="block-handle">⠿</div>
+        <div class="block-body">
+          <div class="block-type-tag">🔘 Boutons</div>
+          <div id="btns-inline-${i}">
+            ${rowBtns.map((btn, j) => `
+              <div class="btn-row-item">
+                <input class="form-control" style="flex:1;" placeholder="Texte du bouton" value="${btn.text}" oninput="updateBlockBtn(${i},${j},'text',this.value)" />
+                <select class="form-control" style="max-width:100px;" onchange="updateBlockBtn(${i},${j},'type',this.value)">
+                  <option value="url" ${btn.type==='url'?'selected':''}>🔗 URL</option>
+                  <option value="callback" ${btn.type==='callback'?'selected':''}>📩 Callback</option>
+                </select>
+                <input class="form-control mono" style="flex:1;" placeholder="${btn.type==='url'?'https://...':'data_callback'}" value="${btn.value}" oninput="updateBlockBtn(${i},${j},'value',this.value)" />
+                <button class="block-del-sm" onclick="removeBlockBtn(${i},${j})">✕</button>
+              </div>`).join('')}
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="addBlockBtn(${i})" style="margin-top:0.4rem;">+ Bouton</button>
+        </div>
+        <button class="block-del" onclick="removeBlock(${i})">✕</button>
+      </div>`;
+    }
+    return '';
+  }).join('');
+}
+
+function removeBlock(i) { blocks.splice(i, 1); renderBlocks(); }
+function addBlockBtn(i) {
+  if (!blocks[i].buttons) blocks[i].buttons = [];
+  blocks[i].buttons.push({ text: 'Bouton', type: 'url', value: 'https://' });
+  renderBlocks();
+}
+function removeBlockBtn(i, j) { blocks[i].buttons.splice(j, 1); renderBlocks(); }
+function updateBlockBtn(i, j, key, val) {
+  if (!blocks[i].buttons) blocks[i].buttons = [];
+  blocks[i].buttons[j][key] = val;
+}
+
+// ── API headers key-value editor ─────────────────────────────────────────────
+function addHeaderRow(key = '', val = '') {
+  const id = Date.now();
+  headerRows.push({ id, key, val });
+  renderHeaderRows();
+}
+function renderHeaderRows() {
+  const list = document.getElementById('headers-list');
+  if (!list) return;
+  list.innerHTML = headerRows.map((row, i) => `
+    <div class="kv-row">
+      <input class="form-control" placeholder="Nom (ex: Authorization)" value="${row.key}"
+        oninput="headerRows[${i}].key=this.value" />
+      <div class="kv-sep">:</div>
+      <input class="form-control" placeholder="Valeur (ex: Bearer token)" value="${row.val}"
+        oninput="headerRows[${i}].val=this.value" />
+      <button class="kv-del" onclick="removeHeader(${i})">✕</button>
+    </div>`).join('');
+}
+function removeHeader(i) { headerRows.splice(i, 1); renderHeaderRows(); }
+
+// ── API buttons builder ──────────────────────────────────────────────────────
+function addApiBtnRow() {
+  apiBtnRows.push([{ text: 'Bouton', type: 'url', value: 'https://' }]);
+  renderApiBtnRows();
+}
+function renderApiBtnRows() {
+  const builder = document.getElementById('api-buttons-builder');
+  if (!builder) return;
+  builder.innerHTML = apiBtnRows.length === 0
+    ? '<div style="color:var(--text-muted);font-size:0.83rem;padding:0.5rem 0;">Aucun bouton — cliquez sur "+ Ligne" pour ajouter</div>'
+    : apiBtnRows.map((row, ri) => `
+      <div class="btns-row-wrap">
+        <div class="btns-row-label">Ligne ${ri + 1}</div>
+        <div class="btns-row-items" id="api-btn-row-${ri}">
+          ${row.map((btn, bi) => `
+            <div class="api-btn-item">
+              <input class="form-control" placeholder="Texte" value="${btn.text}" oninput="apiBtnRows[${ri}][${bi}].text=this.value" style="width:100%;margin-bottom:0.25rem;" />
+              <select class="form-control" onchange="apiBtnRows[${ri}][${bi}].type=this.value;renderApiBtnRows()">
+                <option value="url" ${btn.type==='url'?'selected':''}>🔗 URL</option>
+                <option value="callback" ${btn.type==='callback'?'selected':''}>📩 Callback</option>
+              </select>
+              <input class="form-control mono" placeholder="${btn.type==='url'?'https://...':'callback_data'}" value="${btn.value}" oninput="apiBtnRows[${ri}][${bi}].value=this.value" style="margin-top:0.25rem;" />
+              <button class="block-del-sm" onclick="removeApiBtnCell(${ri},${bi})">✕</button>
+            </div>`).join('')}
+          ${row.length < 3 ? `<button class="btn-add-cell" onclick="addApiBtnCell(${ri})">+</button>` : ''}
+        </div>
+        <button class="btns-row-del" onclick="removeApiBtnRow(${ri})">🗑 Supprimer la ligne</button>
+      </div>`).join('');
+}
+function addApiBtnCell(ri) {
+  if (apiBtnRows[ri].length >= 3) return;
+  apiBtnRows[ri].push({ text: 'Bouton', type: 'url', value: 'https://' });
+  renderApiBtnRows();
+}
+function removeApiBtnCell(ri, bi) { apiBtnRows[ri].splice(bi, 1); if (!apiBtnRows[ri].length) removeApiBtnRow(ri); else renderApiBtnRows(); }
+function removeApiBtnRow(ri) { apiBtnRows.splice(ri, 1); renderApiBtnRows(); }
+
+// ── API live test ────────────────────────────────────────────────────────────
+async function testApiCall() {
+  const method  = document.getElementById('cfg-api_method')?.value || 'GET';
+  const rawUrl  = document.getElementById('cfg-api_url')?.value?.trim() || '';
+  const query   = document.getElementById('api-test-query')?.value?.trim() || 'test';
+  const resultEl = document.getElementById('api-test-result');
+
+  if (!rawUrl) { resultEl.innerHTML = '<div class="form-error">⚠️ Entrez une URL d\'abord</div>'; return; }
+
+  const interp = (s) => s.replace(/{query}/g, encodeURIComponent(query)).replace(/{raw_query}/g, query).replace(/{user_id}/g, '12345').replace(/{first_name}/g, 'Test');
+  const url = interp(rawUrl);
+
+  resultEl.innerHTML = '<span style="color:var(--text-muted);font-size:0.82rem;">⏳ Appel en cours...</span>';
+
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    headerRows.forEach(r => { if (r.key) headers[r.key] = r.val; });
+
+    const bodyRaw = document.getElementById('cfg-api_body')?.value;
+    const fetchOpts = { method, headers };
+    if (['POST','PUT','PATCH'].includes(method) && bodyRaw) {
+      fetchOpts.body = interp(bodyRaw);
+    }
+
+    const res = await fetch(url, fetchOpts);
+    const text = await res.text();
+    let parsed;
+    try { parsed = JSON.parse(text); } catch (_) { parsed = text; }
+
+    const path = document.getElementById('cfg-api_response_path')?.value?.trim() || '';
+    let extracted = parsed;
+    if (path && typeof parsed === 'object') {
+      extracted = path.split('.').reduce((a, k) => a?.[k], parsed);
+    }
+
+    const template = document.getElementById('cfg-api_response_template')?.value || '{result}';
+    const message  = template.replace(/{result}/g, String(extracted !== undefined ? extracted : JSON.stringify(parsed).substring(0,200)));
+
+    resultEl.innerHTML = `
+      <div class="api-test-success">
+        <div class="api-test-status">HTTP ${res.status} ${res.ok ? '✅' : '⚠️'}</div>
+        <div class="api-test-message">${message.substring(0, 300)}</div>
+        <details style="margin-top:0.5rem;font-size:0.75rem;color:var(--text-muted);">
+          <summary>Réponse brute</summary>
+          <pre style="overflow:auto;max-height:120px;margin-top:0.3rem;">${JSON.stringify(parsed, null, 2).substring(0, 1000)}</pre>
+        </details>
+      </div>`;
+  } catch (err) {
+    resultEl.innerHTML = `<div class="form-error">❌ ${err.message}</div>`;
+  }
+}
+
+// ── Step 3 validation ────────────────────────────────────────────────────────
+function validateStep3() {
+  const name = document.getElementById('bot-name')?.value?.trim();
+  if (!name) { Toast.error('Le nom du bot est requis'); return; }
+  buildLaunchSummary();
+  goTo(4);
+}
+
+// ── Step 4 summary ───────────────────────────────────────────────────────────
+function buildLaunchSummary() {
+  const tpl    = TEMPLATES[selectedTemplate] || {};
+  const name   = document.getElementById('bot-name')?.value || '—';
+  const token  = document.getElementById('bot-token')?.value;
+  const masked = token ? token.split(':')[0] + ':****' + token.slice(-4) : '***';
+
+  document.getElementById('launch-summary').innerHTML = `
+    <div class="launch-summary-card">
+      <div class="launch-summary-avatar">${tpl.emoji || '🤖'}</div>
+      <div class="launch-summary-info">
+        <div class="launch-summary-name">${name}</div>
+        <div class="launch-summary-template">${tpl.emoji} ${tpl.name || selectedTemplate}</div>
+        <div class="launch-summary-token mono">${masked}</div>
       </div>
     </div>`;
 
-  // ─── Token validation (vraie validation API) ─────────────────────────────
-  document.getElementById('validate-token-btn').addEventListener('click', async () => {
-    const token  = document.getElementById('bot-token').value.trim();
-    const btn    = document.getElementById('validate-token-btn');
-    const status = document.getElementById('token-status');
+  // Reset checklist
+  ['chk-token','chk-webhook','chk-db'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.querySelector('.check-icon').textContent = '⏳'; el.className = 'check-item'; }
+  });
+}
 
-    if (!token) { status.innerHTML = '<div class="form-error">⚠️ Entrez votre token d\'abord</div>'; return; }
+// ── Collect all config ────────────────────────────────────────────────────────
+function collectConfig() {
+  const config = {};
+  const tpl = TEMPLATES[selectedTemplate];
 
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-    status.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">⏳ Vérification en cours...</div>';
+  if (selectedTemplate === 'api') {
+    config.api_method   = document.getElementById('cfg-api_method')?.value || 'GET';
+    config.api_url      = document.getElementById('cfg-api_url')?.value?.trim() || '';
+    config.api_triggers = document.getElementById('cfg-api_triggers')?.value?.trim() || '';
+    config.api_body     = document.getElementById('cfg-api_body')?.value?.trim() || '';
+    config.api_response_path     = document.getElementById('cfg-api_response_path')?.value?.trim() || '';
+    config.api_response_template = document.getElementById('cfg-api_response_template')?.value?.trim() || '{result}';
+    config.api_fallback_message  = document.getElementById('cfg-api_fallback_message')?.value?.trim() || '';
+    config.api_cooldown_ms       = document.getElementById('cfg-api_cooldown_ms')?.value?.trim() || '2000';
 
-    const data = await api('/bots/validate-token', { method: 'POST', body: JSON.stringify({ token }) });
+    // Build headers string
+    const hdrs = headerRows.filter(r => r.key).map(r => `${r.key}: ${r.val}`).join('\n');
+    config.api_headers = hdrs;
 
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-
-    if (!data) {
-      status.innerHTML = '<div class="form-error">❌ Impossible de contacter le serveur</div>';
-      return;
+    // Build buttons JSON
+    if (apiBtnRows.length > 0) {
+      config.api_buttons = JSON.stringify(apiBtnRows);
     }
-
-    if (data.success) {
-      tokenValidated = true;
-      const info = data.botInfo;
-      status.innerHTML = `
-        <div class="alert alert-success" style="display:flex;align-items:center;gap:0.75rem;margin-top:0;">
-          <span style="font-size:1.5rem;">🤖</span>
-          <div>
-            <div style="font-weight:700;">${info.first_name || 'Bot'}</div>
-            <div style="font-size:0.82rem;color:var(--text-secondary);">@${info.username} · ID: ${info.id}</div>
-          </div>
-          <span style="margin-left:auto;color:var(--green);font-weight:700;">✅ Valide</span>
-        </div>`;
-      btn.textContent = '✅ Vérifié';
-      btn.className   = 'btn btn-success';
-
-      // Pré-remplir le nom si vide
-      const nameInput = document.getElementById('bot-name');
-      if (!nameInput.value) nameInput.value = info.first_name || '';
-
-      // Afficher le champ nom et débloquer l'étape 2
-      document.getElementById('bot-name-group').style.display = 'block';
-      unlockStep(2);
-      updateCreateBtn();
-    } else {
-      tokenValidated = false;
-      status.innerHTML = `<div class="form-error">❌ ${data.error || 'Token invalide'}</div>`;
-    }
-  });
-
-  // ─── Sélection du template ────────────────────────────────────────────────
-  document.querySelectorAll('.template-option').forEach(opt => {
-    opt.addEventListener('click', () => {
-      document.querySelectorAll('.template-option').forEach(o => o.classList.remove('selected'));
-      opt.classList.add('selected');
-      selectedTemplate = opt.dataset.template;
-      renderConfigFields(selectedTemplate);
-      unlockStep(3);
-      updateCreateBtn();
-    });
-  });
-
-  function unlockStep(n) {
-    const el = document.getElementById('step-' + n);
-    if (el) { el.style.opacity = '1'; el.style.pointerEvents = 'auto'; }
-  }
-
-  function renderConfigFields(templateKey) {
-    const tpl = TEMPLATES[templateKey];
-    if (!tpl) return;
-
-    const container = document.getElementById('template-config-fields');
-    const isAi      = templateKey === 'ai';
-    document.getElementById('ai-key-section').style.display = isAi ? 'block' : 'none';
-
-    let html = `<div class="config-section-title">${tpl.emoji} ${tpl.name} — Options</div>`;
-
-    tpl.configFields.forEach(field => {
-      html += `<div class="form-group"><label class="form-label">${field.label}</label>`;
-      if (field.type === 'textarea') {
-        html += `<textarea class="form-control" id="config-${field.key}" placeholder="${field.placeholder || ''}" rows="2">${field.default || ''}</textarea>`;
-        if (field.variables) html += VARIABLES_DOC;
-      } else if (field.type === 'toggle') {
-        const on = field.default === true;
-        html += `<div class="toggle-wrap">
-          <div class="toggle ${on ? 'active' : ''}" id="config-${field.key}" data-toggle></div>
-          <label class="toggle-label" data-for="config-${field.key}">${field.label}</label>
-        </div>`;
-      } else if (field.type === 'select') {
-        html += `<select class="form-control" id="config-${field.key}">`;
-        field.options.forEach(o => { html += `<option value="${o.value}">${o.label}</option>`; });
-        html += `</select>`;
-      } else {
-        html += `<input type="text" class="form-control" id="config-${field.key}" placeholder="${field.placeholder || ''}" value="${field.default || ''}" />`;
-      }
-      if (field.hint) html += `<div class="form-hint">${field.hint}</div>`;
-      html += `</div>`;
-    });
-
-    container.innerHTML = html;
-
-    // Bind toggles
-    container.querySelectorAll('[data-toggle]').forEach(el =>
-      el.addEventListener('click', () => el.classList.toggle('active'))
-    );
-    container.querySelectorAll('[data-for]').forEach(lbl =>
-      lbl.addEventListener('click', () => {
-        const t = document.getElementById(lbl.dataset.for);
-        if (t) t.classList.toggle('active');
-      })
-    );
-    // Bind variable tags
-    container.querySelectorAll('[data-var]').forEach(t =>
-      t.addEventListener('click', () => {
-        if (lastFocused) {
-          const pos = lastFocused.selectionStart, val = lastFocused.value;
-          const v = t.dataset.var;
-          lastFocused.value = val.slice(0, pos) + v + val.slice(pos);
-          lastFocused.focus();
-          lastFocused.setSelectionRange(pos + v.length, pos + v.length);
-        }
-      })
-    );
-    container.querySelectorAll('textarea, input[type=text]').forEach(el =>
-      el.addEventListener('focus', () => { lastFocused = el; })
-    );
-  }
-
-  // Afficher/masquer la clé API
-  document.getElementById('toggle-api-key-btn').addEventListener('click', () => {
-    const input = document.getElementById('ai-api-key-input');
-    const btn   = document.getElementById('toggle-api-key-btn');
-    if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈 Masquer'; }
-    else { input.type = 'password'; btn.textContent = '👁 Voir'; }
-  });
-
-  function updateCreateBtn() {
-    const hasToken    = document.getElementById('bot-token').value.trim().length > 0;
-    const hasName     = document.getElementById('bot-name').value.trim().length > 0;
-    const hasTemplate = !!selectedTemplate;
-    document.getElementById('create-btn').disabled = !(hasToken && hasName && hasTemplate && tokenValidated);
-  }
-
-  document.getElementById('bot-name').addEventListener('input', updateCreateBtn);
-
-  function getConfig() {
-    const tpl = TEMPLATES[selectedTemplate];
-    if (!tpl) return {};
-    const config = {};
-    tpl.configFields.forEach(field => {
+  } else {
+    // Standard fields
+    tpl?.configFields?.forEach(field => {
       const el = document.getElementById('config-' + field.key);
       if (!el) return;
       config[field.key] = field.type === 'toggle' ? el.classList.contains('active') : el.value;
     });
-    return config;
+
+    // Rich blocks
+    if (blocks.length > 0) {
+      config.msg_start_blocks = JSON.stringify(blocks);
+    }
   }
 
-  // ─── Création du bot ─────────────────────────────────────────────────────
-  document.getElementById('create-btn').addEventListener('click', async () => {
-    const token     = document.getElementById('bot-token').value.trim();
-    const name      = document.getElementById('bot-name').value.trim();
-    const btn       = document.getElementById('create-btn');
-    const alertEl   = document.getElementById('alert-global');
+  return config;
+}
 
-    if (!token || !name || !selectedTemplate) return;
+// ── Create the bot ────────────────────────────────────────────────────────────
+async function createBot() {
+  const token  = document.getElementById('bot-token')?.value?.trim();
+  const name   = document.getElementById('bot-name')?.value?.trim();
+  const btn    = document.getElementById('create-btn');
+  const errDiv = document.getElementById('launch-error');
 
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-    alertEl.innerHTML = '';
+  if (!token || !name || !selectedTemplate) return;
 
-    const config = getConfig();
+  btn.classList.add('btn-loading');
+  btn.disabled = true;
+  errDiv.style.display = 'none';
 
-    const data = await api('/bots', {
-      method: 'POST',
-      body: JSON.stringify({ token, name, template: selectedTemplate, config }),
-    });
+  // Animate checklist
+  const setCheck = (id, state) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const icons = { ok: '✅', err: '❌', loading: '⏳' };
+    el.querySelector('.check-icon').textContent = icons[state] || '⏳';
+    el.className = 'check-item ' + (state === 'ok' ? 'done' : state === 'err' ? 'error' : '');
+  };
 
-    btn.classList.remove('btn-loading');
+  setCheck('chk-token', 'ok');
+  await new Promise(r => setTimeout(r, 200));
 
-    if (!data) { btn.disabled = false; return; }
+  const config = collectConfig();
 
-    if (data.success) {
-      // Sauvegarder la clé API IA si renseignée
-      const aiKey = document.getElementById('ai-api-key-input')?.value?.trim();
-      if (selectedTemplate === 'ai' && aiKey && data.bot?._id) {
-        await api('/bots/' + data.bot._id + '/ai-key', {
-          method: 'PUT',
-          body: JSON.stringify({ apiKey: aiKey }),
-        });
-      }
-
-      Toast.success('Bot créé avec succès ! 🎉');
-      setTimeout(() => { window.location.href = `/bot-detail.html?id=${data.bot._id}`; }, 800);
-    } else {
-      const msg = data.errors ? data.errors.map(e => e.msg).join('<br>') : data.error;
-      alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${msg}</div>`;
-      btn.disabled = false;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+  const data = await api('/bots', {
+    method: 'POST',
+    body: JSON.stringify({ token, name, template: selectedTemplate, config }),
   });
+
+  btn.classList.remove('btn-loading');
+
+  if (!data?.success) {
+    btn.disabled = false;
+    setCheck('chk-webhook', 'err');
+    setCheck('chk-db', 'err');
+    const msg = data?.errors ? data.errors.map(e => e.msg).join('<br>') : (data?.error || 'Erreur serveur');
+    errDiv.style.display = 'block';
+    errDiv.innerHTML = `<div class="alert alert-error">⚠️ ${msg}</div>`;
+    return;
+  }
+
+  setCheck('chk-webhook', 'ok');
+  await new Promise(r => setTimeout(r, 200));
+  setCheck('chk-db', 'ok');
+
+  // Save AI key if present
+  const aiKey = document.getElementById('ai-api-key-input')?.value?.trim();
+  if (selectedTemplate === 'ai' && aiKey && data.bot?._id) {
+    await api('/bots/' + data.bot._id + '/ai-key', {
+      method: 'PUT',
+      body: JSON.stringify({ apiKey: aiKey }),
+    });
+  }
+
+  Toast.success('🎉 Bot déployé avec succès !');
+  await new Promise(r => setTimeout(r, 800));
+  window.location.href = `/bot-detail.html?id=${data.bot._id}`;
+}
 </script>
 </body>
 </html>

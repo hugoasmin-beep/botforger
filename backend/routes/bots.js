@@ -7,7 +7,7 @@ const { protect } = require('../middleware/auth');
 const { validateToken, setWebhook, deleteWebhook, sendTestMessage } = require('../utils/telegramHelpers');
 
 const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
-const VALID_TEMPLATES = ['echo', 'welcome', 'poll', 'reminder', 'translate', 'stats', 'ai'];
+const VALID_TEMPLATES = ['echo', 'welcome', 'poll', 'reminder', 'translate', 'stats', 'ai', 'api'];
 
 // ─── GET /api/bots ────────────────────────────────────────────────────────
 router.get('/', protect, async (req, res) => {

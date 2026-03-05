@@ -10,6 +10,7 @@ const { createReminderBot  } = require('../bot-templates/reminderBot');
 const { createTranslateBot } = require('../bot-templates/translateBot');
 const { createStatsBot     } = require('../bot-templates/statsBot');
 const { createAiBot        } = require('../bot-templates/aiBot');
+const { createApiBot       } = require('../bot-templates/apiBot');
 
 const botInstanceCache = new Map();
 
@@ -27,6 +28,7 @@ const getBotHandler = (botDoc) => {
     case 'translate': handler = createTranslateBot(botDoc); break;
     case 'stats':     handler = createStatsBot(botDoc);     break;
     case 'ai':        handler = createAiBot(botDoc);        break;
+    case 'api':        handler = createApiBot(botDoc);       break;
     default: return null;
   }
 
