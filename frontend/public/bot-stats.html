@@ -414,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loadBotInfo() {
-  const data = await api(`/bots/${botId}`);
+  const data = await api(`/api/bots/${botId}`);
   if (!data?.bot) return;
   const bot = data.bot;
   document.getElementById('bot-name-display').textContent = bot.name || 'Bot';
@@ -424,7 +424,7 @@ async function loadBotInfo() {
 }
 
 async function loadStats() {
-  const data = await api(`/bots/${botId}/stats?days=${currentDays}`);
+  const data = await api(`/api/bots/${botId}/stats?days=${currentDays}`);
   if (!data) { renderMockStats(); return; }
   renderStats(data);
 }
