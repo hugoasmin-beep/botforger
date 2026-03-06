@@ -712,6 +712,18 @@
     ::-webkit-scrollbar-thumb:hover { background: rgba(124,102,255,.3); }
 
     /* ─── Responsive ─── */
+    /* ── Template category tabs ── */
+    .tpl-cat {
+      padding: .28rem .75rem; border-radius: 99px;
+      font-size: .74rem; font-weight: 700; cursor: pointer;
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text-2); transition: all .18s;
+    }
+    .tpl-cat:hover { border-color: var(--border-h); color: var(--text); }
+    .tpl-cat.active { background: var(--accent-d); border-color: rgba(124,102,255,.4); color: var(--accent); }
+    .tpl-card { transition: all .2s var(--ease); }
+    .tpl-card.tpl-hidden { display: none; }
+
     @media (max-width: 1050px) { .builder-shell { grid-template-columns: 160px 1fr 230px; } }
     @media (max-width: 900px)  { .wizard-sidebar { display: none; } .wizard-main { padding: 1.25rem; } }
     @media (max-width: 700px)  { .builder-shell { grid-template-columns: 1fr; } .builder-palette, .builder-inspector { display: none; } }
@@ -853,81 +865,107 @@
         <input type="file" id="import-file-input" accept=".json" style="display:none"/>
       </div>
 
+      <!-- Template category tabs -->
+      <div id="tpl-cat-tabs" style="display:flex;gap:.4rem;margin-bottom:.85rem;flex-wrap:wrap;">
+        <button class="tpl-cat active" data-cat="all">Tous</button>
+        <button class="tpl-cat" data-cat="ai">✨ IA</button>
+        <button class="tpl-cat" data-cat="community">👥 Communauté</button>
+        <button class="tpl-cat" data-cat="tools">⚙️ Outils</button>
+      </div>
+
       <div class="template-grid" id="template-grid">
-        <div class="tpl-card" data-template="blank" style="--cc:#4a5568; border-style:dashed;">
-          <div class="tpl-glow" style="--cc:#4a5568"></div>
-          <div class="tpl-check" style="background:#4a5568;">✓</div>
-          <span class="tpl-icon" style="opacity:.4;">＋</span>
-          <div class="tpl-name">Vide</div>
-          <div class="tpl-desc">Canvas libre, construisez bloc par bloc</div>
-          <div class="tpl-tags"><span>Libre</span></div>
-        </div>
-        <div class="tpl-card" data-template="echo" style="--cc:#00d4ff;">
-          <div class="tpl-glow" style="--cc:#00d4ff"></div>
-          <div class="tpl-check" style="background:#00d4ff;color:#000;">✓</div>
-          <span class="tpl-icon">🔁</span>
-          <div class="tpl-name">Bot Echo</div>
-          <div class="tpl-desc">Répond en écho à chaque message</div>
-          <div class="tpl-tags"><span>Réponses</span></div>
-        </div>
-        <div class="tpl-card" data-template="welcome" style="--cc:#00ff88;">
-          <div class="tpl-glow" style="--cc:#00ff88"></div>
-          <div class="tpl-check" style="background:#00ff88;color:#000;">✓</div>
-          <span class="tpl-icon">👋</span>
-          <div class="tpl-name">Bienvenue</div>
-          <div class="tpl-desc">Accueille les nouveaux membres du groupe</div>
-          <div class="tpl-tags"><span>Groupes</span></div>
-        </div>
-        <div class="tpl-card" data-template="poll" style="--cc:#ffd32a;">
-          <div class="tpl-glow" style="--cc:#ffd32a"></div>
-          <div class="tpl-check" style="background:#ffd32a;color:#000;">✓</div>
-          <span class="tpl-icon">🗳️</span>
-          <div class="tpl-name">Sondages</div>
-          <div class="tpl-desc">Sondages interactifs avec <code style="font-size:.68rem">/poll</code></div>
-          <div class="tpl-tags"><span>Votes</span></div>
-        </div>
-        <div class="tpl-card" data-template="reminder" style="--cc:#ff6b9d;">
-          <div class="tpl-glow" style="--cc:#ff6b9d"></div>
-          <div class="tpl-check" style="background:#ff6b9d;">✓</div>
-          <span class="tpl-icon">⏰</span>
-          <div class="tpl-name">Rappels</div>
-          <div class="tpl-desc">Rappels programmés avec <code style="font-size:.68rem">/remind</code></div>
-          <div class="tpl-tags"><span>Scheduler</span></div>
-        </div>
-        <div class="tpl-card" data-template="translate" style="--cc:#00e5ff;">
-          <div class="tpl-glow" style="--cc:#00e5ff"></div>
-          <div class="tpl-check" style="background:#00e5ff;color:#000;">✓</div>
-          <span class="tpl-icon">🌍</span>
-          <div class="tpl-name">Traducteur</div>
-          <div class="tpl-desc">Traduction instantanée en 14 langues</div>
-          <div class="tpl-tags"><span>14 langues</span></div>
-        </div>
-        <div class="tpl-card" data-template="stats" style="--cc:#ff9f43;">
-          <div class="tpl-glow" style="--cc:#ff9f43"></div>
-          <div class="tpl-check" style="background:#ff9f43;color:#000;">✓</div>
-          <span class="tpl-icon">📊</span>
-          <div class="tpl-name">Stats Groupe</div>
-          <div class="tpl-desc">Classement d'activité des membres</div>
-          <div class="tpl-tags"><span>Analytics</span></div>
-        </div>
-        <div class="tpl-card" data-template="ai" style="--cc:#a855f7;">
-          <div class="tpl-badge" style="background:linear-gradient(135deg,#a855f7,#7c3aed);">✨ AI</div>
-          <div class="tpl-glow" style="--cc:#a855f7"></div>
+
+        <!-- ── IA ── -->
+        <div class="tpl-card" data-template="ai" data-cat="ai" style="--cc:#a855f7;">
+          <div class="tpl-badge" style="background:linear-gradient(135deg,#a855f7,#6d28d9);color:#fff;">⭐ Populaire</div>
+          <div class="tpl-glow"></div>
           <div class="tpl-check" style="background:#a855f7;">✓</div>
           <span class="tpl-icon">🤖</span>
-          <div class="tpl-name">Bot IA</div>
-          <div class="tpl-desc">OpenAI · Mistral · Groq intégrés</div>
-          <div class="tpl-tags"><span>LLM</span></div>
+          <div class="tpl-name">Assistant IA</div>
+          <div class="tpl-desc">Chatbot intelligent avec OpenAI, Mistral ou Groq. Répond à toutes les questions.</div>
+          <div class="tpl-tags"><span>ChatGPT</span><span>Mistral</span><span>Groq</span></div>
         </div>
-        <div class="tpl-card" data-template="api" style="--cc:#00d4ff;">
-          <div class="tpl-badge" style="background:linear-gradient(135deg,#00d4ff,#0088ff);color:#000;">🔗 API</div>
-          <div class="tpl-glow" style="--cc:#00d4ff"></div>
-          <div class="tpl-check" style="background:#00d4ff;color:#000;">✓</div>
+
+        <div class="tpl-card" data-template="api" data-cat="ai" style="--cc:#06b6d4;">
+          <div class="tpl-badge" style="background:linear-gradient(135deg,#06b6d4,#0284c7);color:#fff;">🔗 API</div>
+          <div class="tpl-glow"></div>
+          <div class="tpl-check" style="background:#06b6d4;color:#000;">✓</div>
           <span class="tpl-icon">⚡</span>
-          <div class="tpl-name">Bot API</div>
-          <div class="tpl-desc">Connecte n'importe quelle API REST</div>
-          <div class="tpl-tags"><span>GET/POST</span><span>JSON</span></div>
+          <div class="tpl-name">Connecteur API</div>
+          <div class="tpl-desc">Interroge n'importe quelle API REST (météo, finance, sport…) et formate la réponse.</div>
+          <div class="tpl-tags"><span>GET/POST</span><span>JSON</span><span>REST</span></div>
         </div>
+
+        <!-- ── Communauté ── -->
+        <div class="tpl-card" data-template="welcome" data-cat="community" style="--cc:#22c55e;">
+          <div class="tpl-glow"></div>
+          <div class="tpl-check" style="background:#22c55e;color:#000;">✓</div>
+          <span class="tpl-icon">👋</span>
+          <div class="tpl-name">Accueil membres</div>
+          <div class="tpl-desc">Message de bienvenue personnalisé quand quelqu'un rejoint ou quitte le groupe.</div>
+          <div class="tpl-tags"><span>Groupes</span><span>Nouveau membre</span></div>
+        </div>
+
+        <div class="tpl-card" data-template="stats" data-cat="community" style="--cc:#f97316;">
+          <div class="tpl-glow"></div>
+          <div class="tpl-check" style="background:#f97316;color:#000;">✓</div>
+          <span class="tpl-icon">📊</span>
+          <div class="tpl-name">Stats groupe</div>
+          <div class="tpl-desc">Classement des membres les plus actifs. Commande /stats pour voir le top.</div>
+          <div class="tpl-tags"><span>Activité</span><span>Classement</span></div>
+        </div>
+
+        <div class="tpl-card" data-template="poll" data-cat="community" style="--cc:#eab308;">
+          <div class="tpl-glow"></div>
+          <div class="tpl-check" style="background:#eab308;color:#000;">✓</div>
+          <span class="tpl-icon">🗳️</span>
+          <div class="tpl-name">Sondages</div>
+          <div class="tpl-desc">Créez des votes instantanés avec /poll Question | Option1 | Option2.</div>
+          <div class="tpl-tags"><span>Votes</span><span>Interactif</span></div>
+        </div>
+
+        <!-- ── Outils ── -->
+        <div class="tpl-card" data-template="reminder" data-cat="tools" style="--cc:#ec4899;">
+          <div class="tpl-glow"></div>
+          <div class="tpl-check" style="background:#ec4899;">✓</div>
+          <span class="tpl-icon">⏰</span>
+          <div class="tpl-name">Rappels</div>
+          <div class="tpl-desc">Planifiez des alertes avec /remind 30min ou /remind 2024-12-25.</div>
+          <div class="tpl-tags"><span>Scheduler</span><span>Alertes</span></div>
+        </div>
+
+        <div class="tpl-card" data-template="translate" data-cat="tools" style="--cc:#14b8a6;">
+          <div class="tpl-glow"></div>
+          <div class="tpl-check" style="background:#14b8a6;color:#000;">✓</div>
+          <span class="tpl-icon">🌍</span>
+          <div class="tpl-name">Traducteur</div>
+          <div class="tpl-desc">Traduit instantanément en 14 langues via /translate ou /tr.</div>
+          <div class="tpl-tags"><span>14 langues</span><span>Auto-detect</span></div>
+        </div>
+
+        <div class="tpl-card" data-template="echo" data-cat="tools" style="--cc:#64748b;">
+          <div class="tpl-glow"></div>
+          <div class="tpl-check" style="background:#64748b;">✓</div>
+          <span class="tpl-icon">💬</span>
+          <div class="tpl-name">Réponses auto</div>
+          <div class="tpl-desc">Répond automatiquement à des mots-clés avec le message de votre choix.</div>
+          <div class="tpl-tags"><span>Mots-clés</span><span>Simple</span></div>
+        </div>
+
+        <div class="tpl-card" data-template="blank" data-cat="tools" style="--cc:#475569;border-style:dashed;">
+          <div class="tpl-glow" style="opacity:.03;"></div>
+          <div class="tpl-check" style="background:#475569;">✓</div>
+          <span class="tpl-icon" style="opacity:.35;">🧩</span>
+          <div class="tpl-name">Canvas libre</div>
+          <div class="tpl-desc">Partez de zéro et construisez votre bot bloc par bloc.</div>
+          <div class="tpl-tags"><span>Avancé</span></div>
+        </div>
+
+      </div>
+
+      <!-- Selected template info bar -->
+      <div id="tpl-info-bar" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin-top:.5rem;font-size:.8rem;color:var(--text-2);transition:all .2s;flex-shrink:0;">
+        <span id="tpl-info-text"></span>
       </div>
 
       <div class="wizard-nav">
@@ -1118,14 +1156,46 @@ function init() {
   });
   document.getElementById('import-file-input').addEventListener('change', importConfig);
 
+  // Template category filter
+  document.querySelectorAll('.tpl-cat').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tpl-cat').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const cat = btn.dataset.cat;
+      document.querySelectorAll('.tpl-card').forEach(card => {
+        const cardCat = card.dataset.cat;
+        card.classList.toggle('tpl-hidden', cat !== 'all' && cardCat !== cat);
+      });
+    });
+  });
+
   // Templates
   document.querySelectorAll('.tpl-card').forEach(card => {
     card.addEventListener('click', () => {
+      if (card.classList.contains('tpl-hidden')) return;
       document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       selectedTemplate = card.dataset.template;
       document.getElementById('step2-next').disabled = false;
       updatePreview();
+      // Show info bar
+      const infoBar = document.getElementById('tpl-info-bar');
+      const infoText = document.getElementById('tpl-info-text');
+      const TPL_INFO = {
+        ai:       '🤖 <strong style="color:var(--text)">Assistant IA</strong> — Vous aurez besoin d\'une clé API gratuite (Groq recommandé). Le constructeur vous guidera étape par étape.',
+        api:      '⚡ <strong style="color:var(--text)">Connecteur API</strong> — Entrez l\'URL d\'une API REST. Testez l\'appel directement dans le constructeur.',
+        welcome:  '👋 <strong style="color:var(--text)">Accueil membres</strong> — Le bot envoie automatiquement un message quand quelqu\'un rejoint ou quitte le groupe.',
+        stats:    '📊 <strong style="color:var(--text)">Stats groupe</strong> — Classe les membres par activité. Commande : <code>/stats</code>',
+        poll:     '🗳️ <strong style="color:var(--text)">Sondages</strong> — Créez des votes avec <code>/poll Ma question | Option 1 | Option 2</code>',
+        reminder: '⏰ <strong style="color:var(--text)">Rappels</strong> — Planifiez des alertes : <code>/remind 30min texte</code> ou <code>/remind 14:30 texte</code>',
+        translate:'🌍 <strong style="color:var(--text)">Traducteur</strong> — Traduit en 14 langues. Commande : <code>/translate texte</code> ou <code>/tr en texte</code>',
+        echo:     '💬 <strong style="color:var(--text)">Réponses auto</strong> — Configurez des mots-clés déclencheurs et le message de réponse associé.',
+        blank:    '🧩 <strong style="color:var(--text)">Canvas libre</strong> — Glissez-déposez les blocs que vous voulez dans le constructeur.',
+      };
+      if (TPL_INFO[selectedTemplate]) {
+        infoText.innerHTML = TPL_INFO[selectedTemplate];
+        infoBar.style.display = 'block';
+      }
     });
   });
 
@@ -1216,18 +1286,22 @@ async function validateToken() {
 ════════════════════════════════════════ */
 function updatePreview() {
   const msgs = {
-    blank:'＋ Canvas vide — construisez bloc par bloc !',
-    echo:'🔁 Echo : bonjour !',
-    welcome:'👋 Bienvenue dans le groupe !',
-    poll:'🗳️ /poll Question | O1 | O2',
-    reminder:'⏰ /remind 10min rappel',
-    translate:'🌍 /translate Bonjour',
-    stats:'📊 /stats classement',
-    ai:'🤖 Posez n\'importe quelle question !',
-    api:'🔗 Je contacte une API pour vous !'
+    blank:    [{ text:'Bonjour !', bot:false }, { text:'Démarrez depuis zéro 🧩', bot:true }],
+    echo:     [{ text:'Bonjour !', bot:false }, { text:'🔁 Vous avez dit : Bonjour !', bot:true }],
+    welcome:  [{ text:'', system:'👋 Marie vient de rejoindre le groupe !' }],
+    poll:     [{ text:'/poll Pizza ou Sushi ?', bot:false }, { text:'🗳️ Sondage créé !\n1. Pizza  2. Sushi', bot:true }],
+    reminder: [{ text:'/remind 30min réunion', bot:false }, { text:'✅ Rappel dans 30 minutes !', bot:true }],
+    translate:[{ text:'/translate Hello world', bot:false }, { text:'🌍 Bonjour le monde (en→fr)', bot:true }],
+    stats:    [{ text:'/stats', bot:false }, { text:'📊 Top membres\n🥇 Alice — 487 msgs\n🥈 Bob — 312 msgs', bot:true }],
+    ai:       [{ text:'Explique les trous noirs', bot:false }, { text:'🤖 Un trou noir est une région de l\'espace…', bot:true }],
+    api:      [{ text:'météo Paris', bot:false }, { text:'🌤️ Paris — 18°C, ensoleillé', bot:true }],
   };
-  document.getElementById('preview-messages').innerHTML =
-    `<div class="preview-bubble">${msgs[selectedTemplate] || 'Bonjour !'}</div>`;
+  const bubbles = msgs[selectedTemplate] || [{ text:'Bonjour !', bot:true }];
+  document.getElementById('preview-messages').innerHTML = bubbles.map(b =>
+    b.system
+      ? `<div style="font-size:.66rem;color:var(--text-2);text-align:center;padding:.2rem 0;">${b.system}</div>`
+      : `<div class="preview-bubble" style="${b.bot ? 'background:var(--accent-d);border-color:rgba(124,102,255,.2);color:var(--text);margin-left:auto;border-radius:10px 10px 2px 10px;' : ''}">${b.text}</div>`
+  ).join('');
 }
 
 function importConfig(e) {
@@ -1625,27 +1699,122 @@ function _buildStandardInspector(block, body, mkSec) {
     }
 
     case 'api_key': {
-      const nSec = mkSec('Nom de la clé'); mkInp(nSec, 'key_name', 'OpenAI Key, Weather API…'); mkHint(nSec, 'Ce nom est référencé par le bloc IA/LLM.');
-      const pSec = mkSec('Fournisseur');   mkInp(pSec, 'key_provider', 'OpenAI, Mistral, RapidAPI…');
-      const sSec = mkSec('Valeur / Secret'); mkInp(sSec, 'key_value', 'sk-… ou votre clé', { type:'password' });
-      mkHint(sSec, '⚠️ Stockée chiffrée — jamais affichée après sauvegarde.');
+      // Clear step-by-step guide for the API key block
+      const guide = document.createElement('div');
+      guide.style.cssText = 'background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.2);border-radius:10px;padding:.8rem .9rem;font-size:.78rem;margin-bottom:.3rem;';
+      guide.innerHTML = `
+        <div style="font-weight:800;color:#a855f7;margin-bottom:.5rem;">🔑 À quoi sert ce bloc ?</div>
+        <p style="color:var(--text-2);line-height:1.5;margin-bottom:.6rem;">Ce bloc stocke votre clé API de manière sécurisée. Le bloc <strong style="color:var(--text);">🤖 IA / LLM</strong> l'utilise ensuite pour se connecter à l'IA.</p>
+        <div style="color:var(--text-2);font-size:.74rem;">
+          <div style="margin-bottom:.3rem;">📌 <strong style="color:var(--text);">OpenAI</strong> → <a href="https://platform.openai.com/api-keys" target="_blank" style="color:#a855f7;">platform.openai.com/api-keys</a></div>
+          <div style="margin-bottom:.3rem;">📌 <strong style="color:var(--text);">Mistral</strong> → <a href="https://console.mistral.ai/api-keys" target="_blank" style="color:#a855f7;">console.mistral.ai</a></div>
+          <div>📌 <strong style="color:var(--text);">Groq</strong> → <a href="https://console.groq.com/keys" target="_blank" style="color:#a855f7;">console.groq.com/keys</a> <span style="color:#22c55e;font-weight:700;">(gratuit !)</span></div>
+        </div>`;
+      body.appendChild(guide);
+
+      const pSec = mkSec('Fournisseur (choix du service IA)');
+      mkInp(pSec, 'key_provider', '', { type:'select', options:[
+        {v:'openai',  l:'🟢 OpenAI (GPT-4o, GPT-3.5…)'},
+        {v:'mistral', l:'🟠 Mistral AI (mistral-small…)'},
+        {v:'groq',    l:'🔵 Groq — Gratuit & Ultra rapide'},
+        {v:'other',   l:'⚙️ Autre / Personnalisé'},
+      ]});
+      mkHint(pSec, 'Choisissez selon le fournisseur de votre clé.');
+
+      const nSec = mkSec('Nom de la clé (pour référence)');
+      mkInp(nSec, 'key_name', 'ex: Ma clé OpenAI');
+      mkHint(nSec, 'Ce nom sera affiché dans le bloc IA pour identifier quelle clé utiliser.');
+
+      const sSec = mkSec('Votre clé API');
+      const keyInp = mkInp(sSec, 'key_value', 'Collez ici : sk-… ou gsk_…', { type:'password' });
+      mkHint(sSec, '🔒 Chiffrée et jamais affichée en clair après sauvegarde.');
+
+      // Live format hint
+      const fmtHint = document.createElement('div');
+      fmtHint.style.cssText = 'font-size:.72rem;padding:.35rem .6rem;border-radius:7px;margin-top:.4rem;display:none;';
+      sSec.appendChild(fmtHint);
+      keyInp.addEventListener('input', () => {
+        const v = keyInp.value.trim();
+        if (v.startsWith('sk-')) { fmtHint.style.display='block'; fmtHint.style.background='rgba(34,197,94,.07)'; fmtHint.style.color='#22c55e'; fmtHint.textContent='✅ Format OpenAI détecté'; }
+        else if (v.startsWith('gsk_')) { fmtHint.style.display='block'; fmtHint.style.background='rgba(59,130,246,.07)'; fmtHint.style.color='#60a5fa'; fmtHint.textContent='✅ Format Groq détecté'; }
+        else if (v.length > 8) { fmtHint.style.display='block'; fmtHint.style.background='rgba(255,255,255,.04)'; fmtHint.style.color='var(--text-2)'; fmtHint.textContent='Clé personnalisée'; }
+        else { fmtHint.style.display='none'; }
+      });
       break;
     }
 
     case 'ai_llm': {
-      const pvSec = mkSec('Fournisseur IA');
-      mkInp(pvSec, 'ai_provider', '', { type:'select', options:[{v:'openai',l:'🟢 OpenAI (ChatGPT)'},{v:'mistral',l:'🟠 Mistral AI'},{v:'groq',l:'🔵 Groq (ultra rapide)'},{v:'custom',l:'⚙️ Endpoint personnalisé'}] });
-      const mdSec = mkSec('Modèle'); mkInp(mdSec, 'ai_model', 'gpt-4o-mini / mistral-small / llama3-8b-8192');
-      const spSec = mkSec('Prompt système');
-      const spTa = mkInp(spSec, 'ai_system_prompt', 'Tu es un assistant IA utile et amical.', { type:'textarea', rows:4 });
-      mkHint(spSec, 'Définit la personnalité et les instructions permanentes.');
-      const wSec = mkSec('Message /start');
-      const wTa = mkInp(wSec, 'ai_welcome_message', 'Bonjour {first_name} ! Posez-moi une question !', { type:'textarea', rows:2 });
+      // Provider + model linked
+      const pvSec = mkSec('1️⃣  Fournisseur IA');
+      const pvSel = mkInp(pvSec, 'ai_provider', '', { type:'select', options:[
+        {v:'openai',  l:'🟢 OpenAI — GPT-4o, GPT-3.5…'},
+        {v:'mistral', l:'🟠 Mistral AI — mistral-small, large…'},
+        {v:'groq',    l:'🔵 Groq — Llama 3, Gemma (GRATUIT)'},
+        {v:'custom',  l:'⚙️ Endpoint personnalisé'},
+      ]});
+      mkHint(pvSec, 'Doit correspondre au fournisseur du bloc 🔑 Clé API.');
+
+      const mdSec = mkSec('2️⃣  Modèle à utiliser');
+      const mdSel = mkInp(mdSec, 'ai_model', '');
+      // Inject model presets by provider
+      const MODEL_PRESETS = {
+        openai:  ['gpt-4o-mini','gpt-4o','gpt-3.5-turbo'],
+        mistral: ['mistral-small-latest','mistral-medium-latest','open-mistral-7b'],
+        groq:    ['llama3-8b-8192','llama3-70b-8192','gemma-7b-it','mixtral-8x7b-32768'],
+        custom:  [],
+      };
+      function updateModelHints(provider) {
+        const presets = MODEL_PRESETS[provider] || [];
+        const existing = mdSec.querySelector('.model-hints');
+        if (existing) existing.remove();
+        if (!presets.length) return;
+        const wrap = document.createElement('div');
+        wrap.className = 'model-hints';
+        wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.35rem;';
+        presets.forEach(m => {
+          const chip = document.createElement('span'); chip.className = 'var-chip'; chip.textContent = m;
+          chip.addEventListener('click', () => { d.ai_model = m; mdSel.value = m; });
+          wrap.appendChild(chip);
+        });
+        mdSec.appendChild(wrap);
+        if (!d.ai_model) { d.ai_model = presets[0]; mdSel.value = presets[0]; }
+      }
+      pvSel.addEventListener('change', () => updateModelHints(pvSel.value));
+      updateModelHints(d.ai_provider || 'openai');
+      mkHint(mdSec, 'Cliquez un modèle suggéré ou tapez le vôtre.');
+
+      const spSec = mkSec('3️⃣  Personnalité du bot (prompt système)');
+      const spTa = mkInp(spSec, 'ai_system_prompt', 'Tu es un assistant IA utile et amical. Réponds toujours en français.', { type:'textarea', rows:4 });
+      mkHint(spSec, 'Définit comment le bot se comporte. Soyez précis : "Tu es un expert en cuisine française, réponds uniquement sur ce sujet."');
+
+      // Quick personality presets
+      const persWrap = document.createElement('div');
+      persWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;';
+      [
+        ['🤝 Assistant', 'Tu es un assistant utile, poli et concis. Réponds en français.'],
+        ['😄 Décontracté', 'Tu es sympa et décontracté, tu utilises des emojis. Réponds en français.'],
+        ['🎓 Expert', 'Tu es un expert qui donne des réponses détaillées et sourcées. Réponds en français.'],
+        ['🔒 Spécialisé', 'Tu es un assistant spécialisé. Réponds uniquement aux questions liées à ton domaine, et refuse poliment le reste.'],
+      ].forEach(([label, prompt]) => {
+        const chip = document.createElement('span'); chip.className = 'var-chip'; chip.style.fontSize = '.68rem'; chip.textContent = label;
+        chip.addEventListener('click', () => { d.ai_system_prompt = prompt; spTa.value = prompt; });
+        persWrap.appendChild(chip);
+      });
+      spSec.appendChild(persWrap);
+
+      const wSec = mkSec('4️⃣  Message de bienvenue (/start)');
+      const wTa = mkInp(wSec, 'ai_welcome_message', 'Bonjour {first_name} ! 👋 Je suis votre assistant IA. Posez-moi n'importe quelle question !', { type:'textarea', rows:2 });
       const wC = document.createElement('div'); wC.innerHTML = mkVarChips(['{first_name}','{username}']); wSec.appendChild(wC); bindVarChips(wC, wTa);
+
       const tmpSec = mkSec('Créativité (température)');
       const tmpI = document.createElement('input'); tmpI.type='range'; tmpI.min='0'; tmpI.max='1'; tmpI.step='0.1'; tmpI.style.width='100%'; tmpI.value=d.ai_temperature||'0.7';
-      const tmpV = document.createElement('span'); tmpV.className='form-hint'; tmpV.textContent=`${tmpI.value} — (0=précis, 1=créatif)`;
-      tmpI.addEventListener('input', () => { d.ai_temperature=tmpI.value; tmpV.textContent=`${tmpI.value} — (0=précis, 1=créatif)`; }); tmpSec.appendChild(tmpI); tmpSec.appendChild(tmpV);
+      const tmpRow = document.createElement('div'); tmpRow.style.cssText = 'display:flex;justify-content:space-between;margin-top:.25rem;';
+      const tmpV = document.createElement('span'); tmpV.className='form-hint'; tmpV.style.color='var(--text)';
+      const tmpD = document.createElement('span'); tmpD.className='form-hint';
+      function updateTmp(v) { tmpV.textContent = v; tmpD.textContent = v <= 0.3 ? '— précis & factuel' : v <= 0.6 ? '— équilibré' : '— créatif & varié'; }
+      updateTmp(tmpI.value);
+      tmpI.addEventListener('input', () => { d.ai_temperature=tmpI.value; updateTmp(tmpI.value); });
+      tmpRow.appendChild(tmpV); tmpRow.appendChild(tmpD); tmpSec.appendChild(tmpI); tmpSec.appendChild(tmpRow);
       break;
     }
 
@@ -1752,15 +1921,11 @@ function buildLaunchSummary() {
 }
 
 function effectiveTemplate() {
-  if (selectedTemplate && selectedTemplate !== 'blank') return selectedTemplate;
-  if (canvasBlocks.find(b => b.type === 'api_endpoint')) return 'api';
-  if (canvasBlocks.find(b => b.type === 'ai_llm'))       return 'ai';
-  if (canvasBlocks.find(b => b.type === 'welcome_msg'))  return 'welcome';
-  if (canvasBlocks.find(b => b.type === 'poll'))         return 'poll';
-  if (canvasBlocks.find(b => b.type === 'reminder'))     return 'reminder';
-  if (canvasBlocks.find(b => b.type === 'translate'))    return 'translate';
-  if (canvasBlocks.find(b => b.type === 'stats'))        return 'stats';
-  return 'echo';
+  // NEVER auto-detect from blocks — always respect the user's explicit template choice.
+  // If they chose 'blank', we use 'echo' as the backend base (echo handles custom_commands too).
+  // The actual behaviour is driven by collectConfig(), not the template label.
+  if (!selectedTemplate || selectedTemplate === 'blank') return 'echo';
+  return selectedTemplate;
 }
 
 function collectConfig() {

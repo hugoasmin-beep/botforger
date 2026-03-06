@@ -427,28 +427,31 @@ async function loadBotInfo() {
 let _lastStatsData = null;
 
 async function loadStats() {
-  showLoadingState();
+  // Show demo data instantly so the page feels responsive
+  renderMockStats(true);
   try {
     const data = await api(`/api/bots/${botId}/stats?days=${currentDays}`);
     if (data?.success) {
       _lastStatsData = data;
+      // Fade out mock, fade in real
+      document.querySelector('.stats-body').style.opacity = '0.6';
+      document.querySelector('.stats-body').style.transition = 'opacity .25s';
+      await new Promise(r => setTimeout(r, 120));
       renderStats(data);
-    } else {
-      // API answered but no data (e.g. bot never used) — show zeros + mock visuals
+      document.querySelector('.stats-body').style.opacity = '';
+    } else if (data?.success === false) {
       renderNoDataState();
+      document.querySelector('.stats-body').style.opacity = '';
     }
+    // else: mock stays (API unreachable)
   } catch (_) {
-    renderMockStats();
+    // mock already shown, nothing to do
+    document.querySelector('.stats-body').style.opacity = '';
   }
 }
 
 function showLoadingState() {
-  ['kpi-messages','kpi-users','kpi-commands','kpi-engagement'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = '…'; el.style.opacity = '0.4'; }
-    const delta = document.getElementById(id + '-delta');
-    if (delta) delta.textContent = '';
-  });
+  // kept for compat but no longer called
 }
 
 function renderNoDataState() {
@@ -628,9 +631,9 @@ function renderHeatmap(heatmap) {
   wrap.innerHTML = html;
 }
 
-function renderMockStats() {
+function renderMockStats(silent = false) {
   // API unreachable — show preview/demo data with visual indicator
-  document.getElementById('bot-meta').textContent += ' · ⚠ Données de démo';
+  if (!silent) document.getElementById('bot-meta').textContent += ' · ⚠ Données de démo';
   setKPI('kpi-messages',   2847,  12.4, 'données de démonstration');
   setKPI('kpi-users',      143,    8.1, 'utilisateurs uniques');
   setKPI('kpi-commands',   918,   -3.2, 'toutes commandes');
