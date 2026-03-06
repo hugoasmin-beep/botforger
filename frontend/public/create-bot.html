@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Créer un bot — BotForge</title>
+  <title>Create a bot — BotForge</title>
   <link rel="stylesheet" href="/css/style.css"/>
   <style>
     /* ══════════════════════════════════════════
@@ -749,8 +749,8 @@
           <div class="step-connector"></div>
         </div>
         <div class="step-info">
-          <div class="step-name">Token Telegram</div>
-          <div class="step-sub">Connexion</div>
+          <div class="step-name">Telegram Token</div>
+          <div class="step-sub">Connect</div>
         </div>
       </div>
       <div class="step-item" data-step="2">
@@ -760,7 +760,7 @@
         </div>
         <div class="step-info">
           <div class="step-name">Template</div>
-          <div class="step-sub">Point de départ</div>
+          <div class="step-sub">Starting point</div>
         </div>
       </div>
       <div class="step-item" data-step="3">
@@ -769,8 +769,8 @@
           <div class="step-connector"></div>
         </div>
         <div class="step-info">
-          <div class="step-name">Constructeur</div>
-          <div class="step-sub">Glisser-déposer</div>
+          <div class="step-name">Builder</div>
+          <div class="step-sub">Drag & drop</div>
         </div>
       </div>
       <div class="step-item" data-step="4">
@@ -778,24 +778,24 @@
           <div class="step-dot"><span>4</span></div>
         </div>
         <div class="step-info">
-          <div class="step-name">Déploiement</div>
-          <div class="step-sub">Lancer</div>
+          <div class="step-name">Deployment</div>
+          <div class="step-sub">Launch</div>
         </div>
       </div>
     </nav>
 
     <div class="preview-wrap">
-      <div class="preview-label">Aperçu Telegram</div>
+      <div class="preview-label">Telegram Preview</div>
       <div class="preview-phone">
         <div class="preview-header">
           <div class="preview-avatar" id="preview-avatar">🤖</div>
           <div>
-            <div class="preview-bot-name" id="preview-name">Votre bot</div>
-            <div class="preview-status">● En ligne</div>
+            <div class="preview-bot-name" id="preview-name">Your bot</div>
+            <div class="preview-status">● Online</div>
           </div>
         </div>
         <div class="preview-messages" id="preview-messages">
-          <div class="preview-bubble">Configurez-moi 👋</div>
+          <div class="preview-bubble">Configure me 👋</div>
         </div>
       </div>
     </div>
@@ -805,12 +805,12 @@
   <main class="wizard-main">
     <div class="wizard-topbar">
       <div>
-        <div class="topbar-badge" id="step-badge">Étape 1 sur 4</div>
-        <h1 class="wizard-title" id="wizard-title">Créer un nouveau bot</h1>
-        <p class="wizard-sub" id="wizard-sub">Connexion Telegram via BotFather</p>
+        <div class="topbar-badge" id="step-badge">Step 1 of 4</div>
+        <h1 class="wizard-title" id="wizard-title">Create a new bot</h1>
+        <p class="wizard-sub" id="wizard-sub">Connect Telegram via BotFather</p>
       </div>
       <div class="topbar-actions">
-        <a href="/bots.html" class="btn btn-ghost btn-sm">✕ Annuler</a>
+        <a href="/bots.html" class="btn btn-ghost btn-sm">✕ Cancel</a>
       </div>
     </div>
     <div id="alert-global" style="margin-bottom:.5rem;"></div>
@@ -819,36 +819,36 @@
     <div class="wizard-panel active" id="panel-1">
       <div class="token-hero">
         <div class="token-hero-icon">🔑</div>
-        <h2>Connectez votre bot Telegram</h2>
-        <p>Obtenez votre token via <strong>@BotFather</strong> avec <code>/newbot</code></p>
+        <h2>Connect your Telegram bot</h2>
+        <p>Get your token via <strong>@BotFather</strong> with <code>/newbot</code></p>
       </div>
 
       <div class="token-input-wrap">
         <input type="text" class="token-input" id="bot-token"
           placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"
           autocomplete="off"/>
-        <button class="btn btn-primary" id="validate-token-btn">Vérifier →</button>
+        <button class="btn btn-primary" id="validate-token-btn">Verify →</button>
       </div>
       <div id="token-status"></div>
 
       <div class="hint-cards">
         <div class="hint-card">
           <span>1️⃣</span>
-          <div>Ouvrez Telegram, cherchez <strong>@BotFather</strong></div>
+          <div>Open Telegram, find <strong>@BotFather</strong></div>
         </div>
         <div class="hint-card">
           <span>2️⃣</span>
-          <div>Envoyez <code>/newbot</code> et suivez les instructions</div>
+          <div>Send <code>/newbot</code> and follow the instructions</div>
         </div>
         <div class="hint-card">
           <span>3️⃣</span>
-          <div>Copiez le token ici et cliquez <strong>Vérifier</strong></div>
+          <div>Paste the token here and click <strong>Review</strong></div>
         </div>
       </div>
 
       <div class="wizard-nav">
         <span></span>
-        <button class="btn btn-primary btn-lg" id="step1-next" disabled>Continuer →</button>
+        <button class="btn btn-primary btn-lg" id="step1-next" disabled>Continue →</button>
       </div>
     </div>
 
@@ -856,33 +856,33 @@
     <div class="wizard-panel" id="panel-2">
       <div class="step2-header">
         <div>
-          <h3>Choisissez votre point de départ</h3>
-          <p>Tout reste modifiable dans le constructeur — ou importez une config existante</p>
+          <h3>Choose your starting point</h3>
+          <p>Everything is editable in the builder — or import an existing config</p>
         </div>
         <button class="btn btn-cyan btn-sm" id="import-config-btn" title="Importer une configuration JSON">
-          📥 Importer config
+          📥 Import config
         </button>
         <input type="file" id="import-file-input" accept=".json" style="display:none"/>
       </div>
 
       <!-- Template category tabs -->
       <div id="tpl-cat-tabs" style="display:flex;gap:.4rem;margin-bottom:.85rem;flex-wrap:wrap;">
-        <button class="tpl-cat active" data-cat="all">Tous</button>
+        <button class="tpl-cat active" data-cat="all">All</button>
         <button class="tpl-cat" data-cat="ai">✨ IA</button>
-        <button class="tpl-cat" data-cat="community">👥 Communauté</button>
-        <button class="tpl-cat" data-cat="tools">⚙️ Outils</button>
+        <button class="tpl-cat" data-cat="community">👥 Community</button>
+        <button class="tpl-cat" data-cat="tools">⚙️ Tools</button>
       </div>
 
       <div class="template-grid" id="template-grid">
 
-        <!-- ── IA ── -->
+        <!-- ── AI ── -->
         <div class="tpl-card" data-template="ai" data-cat="ai" style="--cc:#a855f7;">
-          <div class="tpl-badge" style="background:linear-gradient(135deg,#a855f7,#6d28d9);color:#fff;">⭐ Populaire</div>
+          <div class="tpl-badge" style="background:linear-gradient(135deg,#a855f7,#6d28d9);color:#fff;">⭐ Popular</div>
           <div class="tpl-glow"></div>
           <div class="tpl-check" style="background:#a855f7;">✓</div>
           <span class="tpl-icon">🤖</span>
-          <div class="tpl-name">Assistant IA</div>
-          <div class="tpl-desc">Chatbot intelligent avec OpenAI, Mistral ou Groq. Répond à toutes les questions.</div>
+          <div class="tpl-name">AI Assistant</div>
+          <div class="tpl-desc">Smart chatbot powered by OpenAI, Mistral, or Groq. Answers any question.</div>
           <div class="tpl-tags"><span>ChatGPT</span><span>Mistral</span><span>Groq</span></div>
         </div>
 
@@ -891,55 +891,55 @@
           <div class="tpl-glow"></div>
           <div class="tpl-check" style="background:#06b6d4;color:#000;">✓</div>
           <span class="tpl-icon">⚡</span>
-          <div class="tpl-name">Connecteur API</div>
-          <div class="tpl-desc">Interroge n'importe quelle API REST (météo, finance, sport…) et formate la réponse.</div>
+          <div class="tpl-name">API Connector</div>
+          <div class="tpl-desc">Query any REST API (weather, finance, sports…) and format the response.</div>
           <div class="tpl-tags"><span>GET/POST</span><span>JSON</span><span>REST</span></div>
         </div>
 
-        <!-- ── Communauté ── -->
+        <!-- ── Community ── -->
         <div class="tpl-card" data-template="welcome" data-cat="community" style="--cc:#22c55e;">
           <div class="tpl-glow"></div>
           <div class="tpl-check" style="background:#22c55e;color:#000;">✓</div>
           <span class="tpl-icon">👋</span>
-          <div class="tpl-name">Accueil membres</div>
-          <div class="tpl-desc">Message de bienvenue personnalisé quand quelqu'un rejoint ou quitte le groupe.</div>
-          <div class="tpl-tags"><span>Groupes</span><span>Nouveau membre</span></div>
+          <div class="tpl-name">Member Welcome</div>
+          <div class="tpl-desc">Custom welcome message when someone joins or leaves the group.</div>
+          <div class="tpl-tags"><span>Groupes</span><span>New member</span></div>
         </div>
 
         <div class="tpl-card" data-template="stats" data-cat="community" style="--cc:#f97316;">
           <div class="tpl-glow"></div>
           <div class="tpl-check" style="background:#f97316;color:#000;">✓</div>
           <span class="tpl-icon">📊</span>
-          <div class="tpl-name">Stats groupe</div>
-          <div class="tpl-desc">Classement des membres les plus actifs. Commande /stats pour voir le top.</div>
-          <div class="tpl-tags"><span>Activité</span><span>Classement</span></div>
+          <div class="tpl-name">Group Stats</div>
+          <div class="tpl-desc">Ranks the most active members. Use /stats to see the leaderboard.</div>
+          <div class="tpl-tags"><span>Activity</span><span>Leaderboard</span></div>
         </div>
 
         <div class="tpl-card" data-template="poll" data-cat="community" style="--cc:#eab308;">
           <div class="tpl-glow"></div>
           <div class="tpl-check" style="background:#eab308;color:#000;">✓</div>
           <span class="tpl-icon">🗳️</span>
-          <div class="tpl-name">Sondages</div>
-          <div class="tpl-desc">Créez des votes instantanés avec /poll Question | Option1 | Option2.</div>
-          <div class="tpl-tags"><span>Votes</span><span>Interactif</span></div>
+          <div class="tpl-name">Polls</div>
+          <div class="tpl-desc">Create instant votes with /poll Question | Option1 | Option2.</div>
+          <div class="tpl-tags"><span>Votes</span><span>Interactive</span></div>
         </div>
 
-        <!-- ── Outils ── -->
+        <!-- ── Tools ── -->
         <div class="tpl-card" data-template="reminder" data-cat="tools" style="--cc:#ec4899;">
           <div class="tpl-glow"></div>
           <div class="tpl-check" style="background:#ec4899;">✓</div>
           <span class="tpl-icon">⏰</span>
-          <div class="tpl-name">Rappels</div>
-          <div class="tpl-desc">Planifiez des alertes avec /remind 30min ou /remind 2024-12-25.</div>
-          <div class="tpl-tags"><span>Scheduler</span><span>Alertes</span></div>
+          <div class="tpl-name">Reminders</div>
+          <div class="tpl-desc">Planifiez des alertes with /remind 30min ou /remind 2024-12-25.</div>
+          <div class="tpl-tags"><span>Scheduler</span><span>Alerts</span></div>
         </div>
 
         <div class="tpl-card" data-template="translate" data-cat="tools" style="--cc:#14b8a6;">
           <div class="tpl-glow"></div>
           <div class="tpl-check" style="background:#14b8a6;color:#000;">✓</div>
           <span class="tpl-icon">🌍</span>
-          <div class="tpl-name">Traducteur</div>
-          <div class="tpl-desc">Traduit instantanément en 14 langues via /translate ou /tr.</div>
+          <div class="tpl-name">Translator</div>
+          <div class="tpl-desc">Instant translation to 14 languages via /translate or /tr.</div>
           <div class="tpl-tags"><span>14 langues</span><span>Auto-detect</span></div>
         </div>
 
@@ -947,18 +947,18 @@
           <div class="tpl-glow"></div>
           <div class="tpl-check" style="background:#64748b;">✓</div>
           <span class="tpl-icon">💬</span>
-          <div class="tpl-name">Réponses auto</div>
-          <div class="tpl-desc">Répond automatiquement à des mots-clés avec le message de votre choix.</div>
-          <div class="tpl-tags"><span>Mots-clés</span><span>Simple</span></div>
+          <div class="tpl-name">Auto-replies</div>
+          <div class="tpl-desc">Auto-replies to keywords with your custom message.</div>
+          <div class="tpl-tags"><span>Keywords</span><span>Simple</span></div>
         </div>
 
         <div class="tpl-card" data-template="blank" data-cat="tools" style="--cc:#475569;border-style:dashed;">
           <div class="tpl-glow" style="opacity:.03;"></div>
           <div class="tpl-check" style="background:#475569;">✓</div>
           <span class="tpl-icon" style="opacity:.35;">🧩</span>
-          <div class="tpl-name">Canvas libre</div>
-          <div class="tpl-desc">Partez de zéro et construisez votre bot bloc par bloc.</div>
-          <div class="tpl-tags"><span>Avancé</span></div>
+          <div class="tpl-name">Blank canvas</div>
+          <div class="tpl-desc">Start from scratch and build your bot block by block.</div>
+          <div class="tpl-tags"><span>Advanced</span></div>
         </div>
 
       </div>
@@ -969,59 +969,59 @@
       </div>
 
       <div class="wizard-nav">
-        <button class="btn btn-ghost" id="step2-back">← Retour</button>
-        <button class="btn btn-primary btn-lg" id="step2-next" disabled>Construire →</button>
+        <button class="btn btn-ghost" id="step2-back">← Back</button>
+        <button class="btn btn-primary btn-lg" id="step2-next" disabled>Build →</button>
       </div>
     </div>
 
     <!-- ══════ STEP 3 — BUILDER ══════ -->
     <div class="wizard-panel" id="panel-3">
       <div class="botname-bar">
-        <label>📝 Nom du bot</label>
+        <label>📝 Bot name</label>
         <input type="text" class="form-control" id="bot-name"
-          placeholder="Ex: Mon bot météo, Bot Stats Serveur" maxlength="50"/>
-        <span style="font-size:.72rem;color:var(--text-2);">Visible dans votre dashboard uniquement</span>
+          placeholder="e.g. My Weather Bot, Server Stats Bot" maxlength="50"/>
+        <span style="font-size:.72rem;color:var(--text-2);">Only visible in your dashboard</span>
       </div>
 
       <div class="builder-shell">
         <!-- Palette -->
         <div class="builder-palette">
-          <div class="palette-group-title">Réponses</div>
+          <div class="palette-group-title">Responses</div>
           <div class="palette-item" draggable="true" data-type="text_reply">
-            <div class="pi-icon">📝</div>Texte
+            <div class="pi-icon">📝</div>Text
           </div>
           <div class="palette-item" draggable="true" data-type="welcome_msg">
-            <div class="pi-icon">👋</div>Bienvenue
+            <div class="pi-icon">👋</div>Welcome
           </div>
           <div class="palette-item" draggable="true" data-type="command">
-            <div class="pi-icon">⌨️</div>Commande /
+            <div class="pi-icon">⌨️</div>Command /
           </div>
           <div class="palette-item" draggable="true" data-type="image_msg">
-            <div class="pi-icon">🖼️</div>Image + texte
+            <div class="pi-icon">🖼️</div>Image + text
           </div>
 
           <div class="palette-sep"></div>
-          <div class="palette-group-title">Connecteurs</div>
+          <div class="palette-group-title">Connectors</div>
           <div class="palette-item" draggable="true" data-type="api_endpoint">
-            <div class="pi-icon">🔗</div>Endpoint API
+            <div class="pi-icon">🔗</div>API Endpoint
           </div>
           <div class="palette-item" draggable="true" data-type="api_key">
-            <div class="pi-icon">🔑</div>Clé API
+            <div class="pi-icon">🔑</div>API Key
           </div>
           <div class="palette-item" draggable="true" data-type="ai_llm">
-            <div class="pi-icon">🤖</div>IA / LLM
+            <div class="pi-icon">🤖</div>AI / LLM
           </div>
 
           <div class="palette-sep"></div>
           <div class="palette-group-title">Actions</div>
           <div class="palette-item" draggable="true" data-type="reminder">
-            <div class="pi-icon">⏰</div>Rappels
+            <div class="pi-icon">⏰</div>Reminders
           </div>
           <div class="palette-item" draggable="true" data-type="poll">
-            <div class="pi-icon">🗳️</div>Sondage
+            <div class="pi-icon">🗳️</div>Poll
           </div>
           <div class="palette-item" draggable="true" data-type="translate">
-            <div class="pi-icon">🌍</div>Traduction
+            <div class="pi-icon">🌍</div>Translation
           </div>
           <div class="palette-item" draggable="true" data-type="stats">
             <div class="pi-icon">📊</div>Stats
@@ -1031,33 +1031,33 @@
         <!-- Canvas -->
         <div class="canvas-wrap">
           <div class="canvas-topbar">
-            <span class="canvas-topbar-title">🧩 Glissez des modules depuis la palette</span>
+            <span class="canvas-topbar-title">🧩 Drag modules from the palette</span>
             <span style="font-size:.7rem;color:var(--text-2);" id="block-count">0 module</span>
           </div>
           <div class="canvas-zone" id="canvas-zone">
             <div class="canvas-empty" id="canvas-empty">
               <div class="canvas-empty-icon">⬇️</div>
-              <p>Glissez un module ici<br>
-                <span style="color:var(--text-3);font-size:.7rem;">ou choisissez un template à l'étape 2</span></p>
+              <p>Drop a module here<br>
+                <span style="color:var(--text-3);font-size:.7rem;">or choose a template in step 2</span></p>
             </div>
           </div>
         </div>
 
         <!-- Inspector -->
         <div class="builder-inspector">
-          <div class="insp-header">⚙ Inspecteur</div>
+          <div class="insp-header">⚙ Inspector</div>
           <div class="insp-body" id="insp-body">
             <div class="insp-empty">
               <div class="insp-empty-icon">🖱</div>
-              <span>Cliquez sur un bloc pour l'éditer</span>
+              <span>Click a block to edit it</span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="wizard-nav">
-        <button class="btn btn-ghost" id="step3-back">← Retour</button>
-        <button class="btn btn-primary btn-lg" id="step3-next">Vérifier →</button>
+        <button class="btn btn-ghost" id="step3-back">← Back</button>
+        <button class="btn btn-primary btn-lg" id="step3-next">Verify →</button>
       </div>
     </div>
 
@@ -1066,19 +1066,19 @@
       <div id="launch-summary"></div>
       <div class="checklist">
         <div class="check-item" id="chk-token">
-          <div class="check-icon">⏳</div><div>Token Telegram vérifié</div>
+          <div class="check-icon">⏳</div><div>Telegram token verified</div>
         </div>
         <div class="check-item" id="chk-webhook">
-          <div class="check-icon">⏳</div><div>Webhook Telegram configuré</div>
+          <div class="check-icon">⏳</div><div>Telegram webhook configured</div>
         </div>
         <div class="check-item" id="chk-db">
-          <div class="check-icon">⏳</div><div>Bot enregistré en base de données</div>
+          <div class="check-icon">⏳</div><div>Bot saved to database</div>
         </div>
       </div>
       <div id="launch-error" style="display:none;margin-top:1rem;"></div>
       <div class="wizard-nav">
-        <button class="btn btn-ghost" id="step4-back">← Modifier</button>
-        <button class="btn btn-primary btn-lg" id="create-btn">🚀 Déployer le bot</button>
+        <button class="btn btn-ghost" id="step4-back">← Edit</button>
+        <button class="btn btn-primary btn-lg" id="create-btn">🚀 Deploy bot</button>
       </div>
     </div>
 
@@ -1108,33 +1108,33 @@ let dragType        = null;
 
 /* ── Block definitions ─────────────────── */
 const BDEFS = {
-  text_reply:   { icon:'📝', name:'Réponse texte',      color:'#00d4ff' },
-  welcome_msg:  { icon:'👋', name:'Msg bienvenue',      color:'#00ff88' },
-  command:      { icon:'⌨️', name:'Commande /',          color:'#ffd32a' },
-  image_msg:    { icon:'🖼️', name:'Image + Texte',       color:'#ff6b9d' },
-  api_endpoint: { icon:'🔗', name:'Endpoint API',        color:'#00bfff' },
-  api_key:      { icon:'🔑', name:'Clé API / Secret',    color:'#ff6b9d' },
-  ai_llm:       { icon:'🤖', name:'IA / LLM',            color:'#a855f7' },
-  reminder:     { icon:'⏰', name:'Rappels',              color:'#ff9f43' },
-  poll:         { icon:'🗳️', name:'Sondages',             color:'#ffd32a' },
-  translate:    { icon:'🌍', name:'Traduction',           color:'#00e5ff' },
-  stats:        { icon:'📊', name:'Stats groupe',         color:'#ff9f43' },
+  text_reply:   { icon:'📝', name:'Text reply',      color:'#00d4ff' },
+  welcome_msg:  { icon:'👋', name:'Welcome msg',      color:'#00ff88' },
+  command:      { icon:'⌨️', name:'Command /',          color:'#ffd32a' },
+  image_msg:    { icon:'🖼️', name:'Image + Text',       color:'#ff6b9d' },
+  api_endpoint: { icon:'🔗', name:'API Endpoint',        color:'#00bfff' },
+  api_key:      { icon:'🔑', name:'API Key / Secret',    color:'#ff6b9d' },
+  ai_llm:       { icon:'🤖', name:'AI / LLM',            color:'#a855f7' },
+  reminder:     { icon:'⏰', name:'Reminders',              color:'#ff9f43' },
+  poll:         { icon:'🗳️', name:'Polls',             color:'#ffd32a' },
+  translate:    { icon:'🌍', name:'Translation',           color:'#00e5ff' },
+  stats:        { icon:'📊', name:'Group Stats',         color:'#ff9f43' },
 };
 
 /* ── Template seeds ────────────────────── */
 const TPL_SEEDS = {
   blank:    [],
-  echo:     [{ type:'text_reply',   data:{ triggers:'', message:'🔁 Echo : {query}' } }],
-  welcome:  [{ type:'welcome_msg',  data:{ welcome_joinMessage:'👋 Bienvenue {first_name} !', include_username:true } }],
+  echo:     [{ type:'text_reply',   data:{ triggers:'', message:'🔁 Echo: {query}' } }],
+  welcome:  [{ type:'welcome_msg',  data:{ welcome_joinMessage:'👋 Welcome {first_name} !', include_username:true } }],
   poll:     [{ type:'poll',         data:{} }],
   reminder: [{ type:'reminder',     data:{} }],
   translate:[{ type:'translate',    data:{} }],
   stats:    [{ type:'stats',        data:{} }],
   ai:       [
-    { type:'api_key',  data:{ key_name:'Clé IA', key_value:'', key_provider:'OpenAI / Mistral / Groq' } },
-    { type:'ai_llm',   data:{ ai_model:'gpt-4o-mini', ai_system_prompt:'Vous êtes un assistant utile.', ai_api_key_ref:'Clé IA' } }
+    { type:'api_key',  data:{ key_name:'AI Key', key_value:'', key_provider:'OpenAI / Mistral / Groq' } },
+    { type:'ai_llm',   data:{ ai_model:'gpt-4o-mini', ai_system_prompt:'You are a helpful assistant.', ai_api_key_ref:'AI Key' } }
   ],
-  api:      [{ type:'api_endpoint', data:{ api_method:'GET', api_url:'', api_triggers:'', api_headers:'', api_body:'', api_response_path:'', api_response_template:'{result}', api_fallback:'❌ Impossible de récupérer les données.', _headerRows:[] } }],
+  api:      [{ type:'api_endpoint', data:{ api_method:'GET', api_url:'', api_triggers:'', api_headers:'', api_body:'', api_response_path:'', api_response_template:'{result}', api_fallback:'❌ Unable to fetch data.', _headerRows:[] } }],
 };
 
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -1182,15 +1182,15 @@ function init() {
       const infoBar = document.getElementById('tpl-info-bar');
       const infoText = document.getElementById('tpl-info-text');
       const TPL_INFO = {
-        ai:       '🤖 <strong style="color:var(--text)">Assistant IA</strong> — Vous aurez besoin d\'une clé API gratuite (Groq recommandé). Le constructeur vous guidera étape par étape.',
-        api:      '⚡ <strong style="color:var(--text)">Connecteur API</strong> — Entrez l\'URL d\'une API REST. Testez l\'appel directement dans le constructeur.',
-        welcome:  '👋 <strong style="color:var(--text)">Accueil membres</strong> — Le bot envoie automatiquement un message quand quelqu\'un rejoint ou quitte le groupe.',
-        stats:    '📊 <strong style="color:var(--text)">Stats groupe</strong> — Classe les membres par activité. Commande : <code>/stats</code>',
-        poll:     '🗳️ <strong style="color:var(--text)">Sondages</strong> — Créez des votes avec <code>/poll Ma question | Option 1 | Option 2</code>',
-        reminder: '⏰ <strong style="color:var(--text)">Rappels</strong> — Planifiez des alertes : <code>/remind 30min texte</code> ou <code>/remind 14:30 texte</code>',
-        translate:'🌍 <strong style="color:var(--text)">Traducteur</strong> — Traduit en 14 langues. Commande : <code>/translate texte</code> ou <code>/tr en texte</code>',
-        echo:     '💬 <strong style="color:var(--text)">Réponses auto</strong> — Configurez des mots-clés déclencheurs et le message de réponse associé.',
-        blank:    '🧩 <strong style="color:var(--text)">Canvas libre</strong> — Glissez-déposez les blocs que vous voulez dans le constructeur.',
+        ai:       '🤖 <strong style="color:var(--text)">AI Assistant</strong> — You need a free API key (Groq is free). The builder will guide you step by step.',
+        api:      '⚡ <strong style="color:var(--text)">API Connector</strong> — Enter a REST API URL. Test the call directly in the builder.',
+        welcome:  '👋 <strong style="color:var(--text)">Member Welcome</strong> — The bot automatically messages when someone joins or leaves the group.',
+        stats:    '📊 <strong style="color:var(--text)">Group Stats</strong> — Ranks members by activity. Command: <code>/stats</code>',
+        poll:     '🗳️ <strong style="color:var(--text)">Polls</strong> — Create votes with <code>/poll Question | Option 1 | Option 2</code>',
+        reminder: '⏰ <strong style="color:var(--text)">Reminders</strong> — Schedule alerts: <code>/remind 30min text</code> or <code>/remind 14:30 text</code>',
+        translate:'🌍 <strong style="color:var(--text)">Translator</strong> — Translates to 14 languages. Command: <code>/translate text</code> or <code>/tr en text</code>',
+        echo:     '💬 <strong style="color:var(--text)">Auto-replies</strong> — Set trigger keywords and the reply message for each.',
+        blank:    '🧩 <strong style="color:var(--text)">Blank canvas</strong> — Drag and drop any blocks you want in the builder.',
       };
       if (TPL_INFO[selectedTemplate]) {
         infoText.innerHTML = TPL_INFO[selectedTemplate];
@@ -1238,9 +1238,9 @@ function goTo(n) {
   document.getElementById('panel-' + n).classList.add('active');
   currentStep = n;
 
-  const titles = ['','Créer un nouveau bot','Choisir un template','Construire votre bot','Déployer le bot'];
-  const subs   = ['','Connexion Telegram via BotFather','Sélectionnez un point de départ','Configurez vos modules','Vérification et lancement'];
-  const badges = ['','Étape 1 sur 4','Étape 2 sur 4','Étape 3 sur 4','Étape 4 sur 4'];
+  const titles = ['','Create a new bot','Choose a template','Build your bot','Deploy bot'];
+  const subs   = ['','Connect Telegram via BotFather','Select a starting point','Configure your modules','Review and launch'];
+  const badges = ['','Step 1 of 4','Step 2 of 4','Step 3 of 4','Step 4 of 4'];
   document.getElementById('wizard-title').textContent = titles[n] || '';
   document.getElementById('wizard-sub').textContent   = subs[n] || '';
   document.getElementById('step-badge').textContent   = badges[n] || '';
@@ -1253,12 +1253,12 @@ async function validateToken() {
   const token  = document.getElementById('bot-token').value.trim();
   const btn    = document.getElementById('validate-token-btn');
   const status = document.getElementById('token-status');
-  if (!token) { status.innerHTML = '<div style="color:var(--amber);font-size:.82rem;margin-top:.5rem;">⚠️ Entrez votre token d\'abord</div>'; return; }
-  btn.disabled = true; btn.textContent = '⏳ Vérification…';
+  if (!token) { status.innerHTML = '<div style="color:var(--amber);font-size:.82rem;margin-top:.5rem;">⚠️ Enter your token first</div>'; return; }
+  btn.disabled = true; btn.textContent = '⏳ Verifying…';
   status.innerHTML = '';
   const data = await api('/bots/validate-token', { method:'POST', body: JSON.stringify({ token }) });
-  btn.disabled = false; btn.textContent = 'Vérifier →';
-  if (!data) { status.innerHTML = '<div style="color:var(--red);font-size:.82rem;margin-top:.5rem;">❌ Serveur inaccessible</div>'; return; }
+  btn.disabled = false; btn.textContent = 'Verify →';
+  if (!data) { status.innerHTML = '<div style="color:var(--red);font-size:.82rem;margin-top:.5rem;">❌ Server unreachable</div>'; return; }
   if (data.success) {
     tokenValidated = true;
     const info = data.botInfo;
@@ -1277,7 +1277,7 @@ async function validateToken() {
     document.getElementById('preview-name').textContent  = '@' + info.username;
     document.getElementById('preview-avatar').textContent = info.first_name?.[0] || '🤖';
   } else {
-    status.innerHTML = `<div class="token-error">❌ ${data.error || 'Token invalide'}</div>`;
+    status.innerHTML = `<div class="token-error">❌ ${data.error || 'Invalid token'}</div>`;
   }
 }
 
@@ -1286,15 +1286,15 @@ async function validateToken() {
 ════════════════════════════════════════ */
 function updatePreview() {
   const msgs = {
-    blank:    [{ text:'Bonjour !', bot:false }, { text:'Démarrez depuis zéro 🧩', bot:true }],
-    echo:     [{ text:'Bonjour !', bot:false }, { text:'🔁 Vous avez dit : Bonjour !', bot:true }],
-    welcome:  [{ text:'', system:'👋 Marie vient de rejoindre le groupe !' }],
-    poll:     [{ text:'/poll Pizza ou Sushi ?', bot:false }, { text:'🗳️ Sondage créé !\n1. Pizza  2. Sushi', bot:true }],
-    reminder: [{ text:'/remind 30min réunion', bot:false }, { text:'✅ Rappel dans 30 minutes !', bot:true }],
-    translate:[{ text:'/translate Hello world', bot:false }, { text:'🌍 Bonjour le monde (en→fr)', bot:true }],
+    blank:    [{ text:'Hello!', bot:false }, { text:'Start from scratch 🧩', bot:true }],
+    echo:     [{ text:'Hello!', bot:false }, { text:'🔁 You said: Hello!', bot:true }],
+    welcome:  [{ text:'', system:'👋 Marie just joined the group!' }],
+    poll:     [{ text:'/poll Pizza or Sushi?', bot:false }, { text:'🗳️ Poll created!\n1. Pizza  2. Sushi', bot:true }],
+    reminder: [{ text:'/remind 30min meeting', bot:false }, { text:'✅ Reminder set for 30 minutes!', bot:true }],
+    translate:[{ text:'/translate Hello', bot:false }, { text:'🌍 Hello (fr→en)', bot:true }],
     stats:    [{ text:'/stats', bot:false }, { text:'📊 Top membres\n🥇 Alice — 487 msgs\n🥈 Bob — 312 msgs', bot:true }],
-    ai:       [{ text:'Explique les trous noirs', bot:false }, { text:'🤖 Un trou noir est une région de l\'espace…', bot:true }],
-    api:      [{ text:'météo Paris', bot:false }, { text:'🌤️ Paris — 18°C, ensoleillé', bot:true }],
+    ai:       [{ text:'Explain black holes', bot:false }, { text:'🤖 A black hole is a region of space…', bot:true }],
+    api:      [{ text:'weather Paris', bot:false }, { text:'🌤️ Paris — 18°C, sunny', bot:true }],
   };
   const bubbles = msgs[selectedTemplate] || [{ text:'Bonjour !', bot:true }];
   document.getElementById('preview-messages').innerHTML = bubbles.map(b =>
@@ -1325,14 +1325,14 @@ function importConfig(e) {
           const ni = document.getElementById('bot-name');
           if (ni) ni.value = parsed.name;
         }
-        Toast.success('✅ Config importée — ' + canvasBlocks.length + ' modules chargés');
+        Toast.success('✅ Config imported — ' + canvasBlocks.length + ' modules loaded');
         seedCanvas(true); // skip re-seeding, already loaded
         goTo(3);
       } else {
-        Toast.error('❌ Format invalide — attendu: { blocks, template }');
+        Toast.error('❌ Invalid format — expected: { blocks, template }');
       }
     } catch {
-      Toast.error('❌ Fichier JSON invalide');
+      Toast.error('❌ Invalid JSON file');
     }
   };
   reader.readAsText(file);
@@ -1353,7 +1353,7 @@ function exportConfig() {
   a.download = (name || 'bot').replace(/\s+/g, '_') + '_config.json';
   a.click();
   URL.revokeObjectURL(a.href);
-  Toast.success('📤 Configuration exportée');
+  Toast.success('📤 Configuration exported');
 }
 
 /* ════════════════════════════════════════
@@ -1383,7 +1383,7 @@ function removeBlock(id) {
 
 function resetInspector() {
   document.getElementById('insp-body').innerHTML =
-    '<div class="insp-empty"><div class="insp-empty-icon">🖱</div><span>Cliquez sur un bloc pour l\'éditer</span></div>';
+    '<div class="insp-empty"><div class="insp-empty-icon">🖱</div><span>Click a block to edit it</span></div>';
 }
 
 function renderCanvas() {
@@ -1420,13 +1420,13 @@ function renderCanvas() {
 function bSummary(block) {
   const d = block.data;
   switch (block.type) {
-    case 'api_endpoint': return d.api_url ? `${d.api_method || 'GET'} ${d.api_url}` : 'URL non configurée';
-    case 'api_key':      return d.key_name ? `${d.key_name} (${d.key_provider || '?'})` : 'Clé non configurée';
-    case 'ai_llm':       return d.ai_model || 'Modèle non choisi';
-    case 'text_reply':   return d.message || 'Message vide';
-    case 'welcome_msg':  return d.welcome_joinMessage || 'Message vide';
-    case 'command':      return d.command_name ? `/${d.command_name}` : 'Commande non définie';
-    case 'image_msg':    return d.caption || (d.image_url ? '🖼️ ' + d.image_url.substring(0,40) + '…' : 'Image non configurée');
+    case 'api_endpoint': return d.api_url ? `${d.api_method || 'GET'} ${d.api_url}` : 'URL not configured';
+    case 'api_key':      return d.key_name ? `${d.key_name} (${d.key_provider || '?'})` : 'Key not configured';
+    case 'ai_llm':       return d.ai_model || 'Model not selected';
+    case 'text_reply':   return d.message || 'Empty message';
+    case 'welcome_msg':  return d.welcome_joinMessage || 'Empty message';
+    case 'command':      return d.command_name ? `/${d.command_name}` : 'Command not defined';
+    case 'image_msg':    return d.caption || (d.image_url ? '🖼️ ' + d.image_url.substring(0,40) + '…' : 'Image not configured');
     default:             return BDEFS[block.type]?.name || block.type;
   }
 }
@@ -1473,41 +1473,41 @@ function buildInspector(block) {
 
   /* ── image_msg (new block type) ─────────────────────────── */
   if (block.type === 'image_msg') {
-    const urlSec = mkSec('URL de l\'image');
+    const urlSec = mkSec('Image URL');
     const urlRow = document.createElement('div'); urlRow.style.cssText = 'display:flex;gap:.35rem;';
     const urlI   = document.createElement('input'); urlI.type = 'text'; urlI.className = 'form-control';
     urlI.style.flex = '1'; urlI.value = block.data.image_url || '';
     urlI.placeholder = 'https://example.com/image.jpg';
     urlI.addEventListener('input', () => { block.data.image_url = urlI.value; refreshImgPreview(); updateSummary(block); });
     urlRow.appendChild(urlI); urlSec.appendChild(urlRow);
-    const urlH = document.createElement('div'); urlH.className = 'form-hint'; urlH.textContent = 'HTTPS public uniquement. Formats: JPG, PNG, GIF, WEBP.';
+    const urlH = document.createElement('div'); urlH.className = 'form-hint'; urlH.textContent = 'Public HTTPS only. Formats: JPG, PNG, GIF, WEBP.';
     urlSec.appendChild(urlH);
 
     // Image preview
     const prevWrap = document.createElement('div'); prevWrap.className = 'img-preview-wrap'; prevWrap.id = 'img-preview-' + block.id;
-    prevWrap.textContent = '🖼️ Entrez une URL pour prévisualiser';
+    prevWrap.textContent = '🖼️ Enter a URL to preview';
     body.appendChild(prevWrap);
 
     function refreshImgPreview() {
       const url = block.data.image_url || '';
       if (url.startsWith('http')) {
-        prevWrap.innerHTML = `<img src="${url}" alt="preview" onerror="this.parentElement.textContent='⚠️ Image non accessible'"><span style="font-size:.68rem;color:var(--text-3);">Aperçu</span>`;
+        prevWrap.innerHTML = `<img src="${url}" alt="preview" onerror="this.parentElement.textContent='⚠️ Image not accessible'"><span style="font-size:.68rem;color:var(--text-3);">Preview</span>`;
       }
     }
     refreshImgPreview();
 
-    const capSec = mkSec('Légende / Texte');
+    const capSec = mkSec('Caption / Text');
     const capTa  = document.createElement('textarea'); capTa.className = 'form-control'; capTa.rows = 3;
-    capTa.value = block.data.caption || ''; capTa.placeholder = 'Voici une belle image ! 🌟\n\nRejoignez-nous → {link}';
+    capTa.value = block.data.caption || ''; capTa.placeholder = 'Here is a beautiful image! 🌟\n\nJoin us → {link}';
     capTa.addEventListener('input', () => { block.data.caption = capTa.value; updateSummary(block); });
     const capChips = document.createElement('div'); capChips.innerHTML = mkVarChips(['{first_name}', '{username}', '{query}']);
     capSec.appendChild(capTa); capSec.appendChild(capChips); bindVarChips(capChips, capTa);
 
-    const trgSec = mkSec('Mots-clés déclencheurs');
+    const trgSec = mkSec('Trigger keywords');
     const trgI   = document.createElement('input'); trgI.type = 'text'; trgI.className = 'form-control';
     trgI.value = block.data.triggers || ''; trgI.placeholder = 'image, photo, logo';
     trgI.addEventListener('input', () => { block.data.triggers = trgI.value; });
-    const trgH = document.createElement('div'); trgH.className = 'form-hint'; trgH.textContent = 'Virgules. Vide = répond à tous les messages.';
+    const trgH = document.createElement('div'); trgH.className = 'form-hint'; trgH.textContent = 'Comma-separated. Empty = reply to all messages.';
     trgSec.appendChild(trgI); trgSec.appendChild(trgH);
 
     // Inline buttons
@@ -1519,54 +1519,54 @@ function buildInspector(block) {
   if (block.type === 'command') {
     const info = document.createElement('div');
     info.style.cssText = 'background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-radius:8px;padding:.55rem .7rem;font-size:.76rem;color:var(--text-2);margin-bottom:.3rem;';
-    info.innerHTML = '💡 Déclenchée par <code>/nom</code> dans Telegram.'; body.appendChild(info);
+    info.innerHTML = '💡 Triggered by <code>/name</code> in Telegram.'; body.appendChild(info);
 
-    const cSec  = mkSec('Nom de la commande (sans /)');
+    const cSec  = mkSec('Command name (without /)');
     const cWrap = document.createElement('div'); cWrap.style.cssText = 'display:flex;align-items:center;gap:.3rem;';
     const cPfx  = document.createElement('span'); cPfx.style.cssText = 'color:var(--accent);font-family:var(--ff-mono);font-weight:800;font-size:1rem;'; cPfx.textContent = '/';
     const cI    = document.createElement('input'); cI.type = 'text'; cI.className = 'form-control'; cI.style.flex = '1';
-    cI.value = block.data.command_name || ''; cI.placeholder = 'start, help, info, stats…';
+    cI.value = block.data.command_name || ''; cI.placeholder = 'start, help, info, stats...';
     cI.addEventListener('input', () => {
       block.data.command_name = cI.value.replace(/[^a-z0-9_]/gi, '').toLowerCase();
       cI.value = block.data.command_name; updateSummary(block);
     });
     cWrap.appendChild(cPfx); cWrap.appendChild(cI); cSec.appendChild(cWrap);
-    const cH = document.createElement('div'); cH.className = 'form-hint'; cH.textContent = 'Lettres, chiffres et _ uniquement.'; cSec.appendChild(cH);
+    const cH = document.createElement('div'); cH.className = 'form-hint'; cH.textContent = 'Letters, numbers and _ only.'; cSec.appendChild(cH);
 
-    const rSec = mkSec('Texte de réponse');
+    const rSec = mkSec('Reply text');
     const rTa  = document.createElement('textarea'); rTa.className = 'form-control'; rTa.rows = 4;
     rTa.value = block.data.reply_text || '';
-    rTa.placeholder = 'Bonjour {first_name} !\n\n<b>Commandes disponibles:</b>\n/help — Aide';
+    rTa.placeholder = 'Hello {first_name}!\n\n<b>Available commands:</b>\n/help — Help';
     rTa.addEventListener('input', () => { block.data.reply_text = rTa.value; });
     const rChips = document.createElement('div'); rChips.innerHTML = mkVarChips(['{first_name}', '{username}', '{chat_title}', '{user_id}']);
     rSec.appendChild(rTa); rSec.appendChild(rChips); bindVarChips(rChips, rTa);
 
-    const dSec = mkSec('Description (menu Telegram)');
+    const dSec = mkSec('Description (Telegram menu)');
     const dI   = document.createElement('input'); dI.type = 'text'; dI.className = 'form-control';
-    dI.value = block.data.command_desc || ''; dI.placeholder = 'Afficher les commandes disponibles';
+    dI.value = block.data.command_desc || ''; dI.placeholder = 'Show available commands';
     dI.addEventListener('input', () => { block.data.command_desc = dI.value; });
-    const dH = document.createElement('div'); dH.className = 'form-hint'; dH.textContent = 'Visible dans le menu / de Telegram.'; dSec.appendChild(dI); dSec.appendChild(dH);
+    const dH = document.createElement('div'); dH.className = 'form-hint'; dH.textContent = 'Visible in Telegram\'s / menu.'; dSec.appendChild(dI); dSec.appendChild(dH);
 
-    const fmtSec = mkSec('Format de réponse');
+    const fmtSec = mkSec('Response format');
     const fmtSel = document.createElement('select'); fmtSel.className = 'form-control';
-    [{ v:'HTML', l:'HTML (gras, liens, code…)' }, { v:'Markdown', l:'Markdown' }, { v:'', l:'Texte brut' }].forEach(o => {
+    [{ v:'HTML', l:'HTML (bold, links, code…)' }, { v:'Markdown', l:'Markdown' }, { v:'', l:'Plain text' }].forEach(o => {
       const op = document.createElement('option'); op.value = o.v; op.textContent = o.l;
       if ((block.data.command_parse_mode || 'HTML') === o.v) op.selected = true; fmtSel.appendChild(op);
     });
     fmtSel.addEventListener('change', () => { block.data.command_parse_mode = fmtSel.value; }); fmtSec.appendChild(fmtSel);
 
-    // ── Image optionnelle dans la réponse ──
-    const imgSec = mkSec('Image dans la réponse (optionnel)');
+    // ── Image optionnelle dans la reply ──
+    const imgSec = mkSec('Image in reply (optional)');
     const imgI   = document.createElement('input'); imgI.type = 'text'; imgI.className = 'form-control';
     imgI.value = block.data.reply_image_url || ''; imgI.placeholder = 'https://example.com/banner.jpg';
     imgI.addEventListener('input', () => { block.data.reply_image_url = imgI.value; refreshCmdImgPreview(); });
-    const imgH = document.createElement('div'); imgH.className = 'form-hint'; imgH.textContent = 'Si renseigné, envoie une photo + légende.'; imgSec.appendChild(imgI); imgSec.appendChild(imgH);
+    const imgH = document.createElement('div'); imgH.className = 'form-hint'; imgH.textContent = 'If set, sends a photo with caption.'; imgSec.appendChild(imgI); imgSec.appendChild(imgH);
     const cmdImgPrev = document.createElement('div'); cmdImgPrev.className = 'img-preview-wrap'; cmdImgPrev.style.marginTop = '.4rem'; cmdImgPrev.id = 'cmd-img-' + block.id;
-    if (block.data.reply_image_url) { cmdImgPrev.innerHTML = `<img src="${block.data.reply_image_url}" alt="" onerror="this.parentElement.textContent='⚠️ Image non accessible'"><span style="font-size:.68rem;color:var(--text-3);">Aperçu</span>`; }
-    else { cmdImgPrev.textContent = '🖼️ Aperçu image'; } imgSec.appendChild(cmdImgPrev);
+    if (block.data.reply_image_url) { cmdImgPrev.innerHTML = `<img src="${block.data.reply_image_url}" alt="" onerror="this.parentElement.textContent='⚠️ Image not accessible'"><span style="font-size:.68rem;color:var(--text-3);">Preview</span>`; }
+    else { cmdImgPrev.textContent = '🖼️ Preview image'; } imgSec.appendChild(cmdImgPrev);
     function refreshCmdImgPreview() {
       const url = imgI.value;
-      if (url.startsWith('http')) cmdImgPrev.innerHTML = `<img src="${url}" alt="" onerror="this.parentElement.textContent='⚠️ Non accessible'"><span style="font-size:.68rem;color:var(--text-3);">Aperçu</span>`;
+      if (url.startsWith('http')) cmdImgPrev.innerHTML = `<img src="${url}" alt="" onerror="this.parentElement.textContent='⚠️ Not accessible'"><span style="font-size:.68rem;color:var(--text-3);">Preview</span>`;
     }
 
     // ── Inline buttons ──
@@ -1580,10 +1580,10 @@ function buildInspector(block) {
 
 /* Buttons builder helper — shared by command + image_msg + api_endpoint */
 function _buildButtonsSection(block, body, mkSec, stateKey, dataKey) {
-  const sec = mkSec('Boutons inline Telegram (optionnel)');
+  const sec = mkSec('Inline Telegram buttons (optional)');
   if (!block.data[stateKey]) block.data[stateKey] = [];
   const wrap = document.createElement('div'); wrap.className = 'btn-keyboard'; sec.appendChild(wrap);
-  const addRowBtn = document.createElement('button'); addRowBtn.className = 'btn-add-row'; addRowBtn.textContent = '+ Ajouter une ligne de boutons';
+  const addRowBtn = document.createElement('button'); addRowBtn.className = 'btn-add-row'; addRowBtn.textContent = '+ Add a row of buttons';
 
   function syncBtns() {
     block.data[dataKey] = block.data[stateKey].length ? JSON.stringify(block.data[stateKey]) : '';
@@ -1592,11 +1592,11 @@ function _buildButtonsSection(block, body, mkSec, stateKey, dataKey) {
     wrap.innerHTML = '';
     block.data[stateKey].forEach((row, ri) => {
       const rowWrap = document.createElement('div');
-      const lbl = document.createElement('div'); lbl.className = 'btn-row-label'; lbl.textContent = `Ligne ${ri + 1}`;
+      const lbl = document.createElement('div'); lbl.className = 'btn-row-label'; lbl.textContent = `Row ${ri + 1}`;
       const items = document.createElement('div'); items.style.cssText = 'display:flex;flex-direction:column;gap:.3rem;';
       row.forEach((btn, bi) => {
         const bEl = document.createElement('div'); bEl.className = 'btn-item';
-        const tI  = document.createElement('input'); tI.className = 'form-control'; tI.placeholder = 'Texte du bouton'; tI.value = btn.text || ''; tI.style.marginBottom = '.3rem';
+        const tI  = document.createElement('input'); tI.className = 'form-control'; tI.placeholder = 'Button text'; tI.value = btn.text || ''; tI.style.marginBottom = '.3rem';
         const row2 = document.createElement('div'); row2.style.cssText = 'display:flex;gap:.3rem;';
         const tSel = document.createElement('select'); tSel.className = 'form-control';
         [{ v:'url', l:'URL' }, { v:'callback', l:'Callback' }].forEach(o => {
@@ -1604,7 +1604,7 @@ function _buildButtonsSection(block, body, mkSec, stateKey, dataKey) {
           if (btn.type === o.v) op.selected = true; tSel.appendChild(op);
         }); tSel.style.width = '90px'; tSel.style.flexShrink = '0';
         const vI = document.createElement('input'); vI.className = 'form-control'; vI.style.flex = '1';
-        vI.placeholder = btn.type === 'url' ? 'https://…' : 'callback_data'; vI.value = btn.value || '';
+        vI.placeholder = btn.type === 'url' ? 'https://...' : 'callback_data'; vI.value = btn.value || '';
         const del = document.createElement('button'); del.className = 'kv-del'; del.textContent = '✕';
         tI.addEventListener('input',  () => { block.data[stateKey][ri][bi].text = tI.value; syncBtns(); });
         tSel.addEventListener('change', () => { block.data[stateKey][ri][bi].type = tSel.value; syncBtns(); });
@@ -1613,7 +1613,7 @@ function _buildButtonsSection(block, body, mkSec, stateKey, dataKey) {
         row2.appendChild(tSel); row2.appendChild(vI); row2.appendChild(del);
         bEl.appendChild(tI); bEl.appendChild(row2); items.appendChild(bEl);
       });
-      const addBtn = document.createElement('button'); addBtn.className = 'btn btn-ghost btn-sm'; addBtn.style.marginTop = '.2rem'; addBtn.textContent = '+ Bouton dans cette ligne';
+      const addBtn = document.createElement('button'); addBtn.className = 'btn btn-ghost btn-sm'; addBtn.style.marginTop = '.2rem'; addBtn.textContent = '+ Button in this row';
       addBtn.addEventListener('click', () => {
         block.data[stateKey][ri].push({ text: 'Bouton', type: 'url', value: 'https://' }); syncBtns(); renderBtns();
       });
@@ -1665,7 +1665,7 @@ function _buildStandardInspector(block, body, mkSec) {
 
   switch (block.type) {
     case 'api_endpoint': {
-      const urlSec = mkSec('Méthode & URL');
+      const urlSec = mkSec('Method & URL');
       const mr = document.createElement('div'); mr.className = 'method-row';
       const mSel = document.createElement('select'); mSel.className = 'method-sel';
       ['GET','POST','PUT','PATCH','DELETE'].forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; if ((d.api_method||'GET')===m) o.selected=true; mSel.appendChild(o); });
@@ -1675,22 +1675,22 @@ function _buildStandardInspector(block, body, mkSec) {
       mr.appendChild(mSel); mr.appendChild(urlI); urlSec.appendChild(mr);
       const uc = document.createElement('div'); uc.innerHTML = mkVarChips(['{query}','{raw_query}','{user_id}','{first_name}']); urlSec.appendChild(uc); bindVarChips(uc, urlI);
 
-      const tSec = mkSec('Mots-clés déclencheurs');
-      const tI = mkInp(tSec, 'api_triggers', 'météo, weather, forecast');
-      mkHint(tSec, 'Virgules. Vide = déclenché par tous les messages.');
+      const tSec = mkSec('Trigger keywords');
+      const tI = mkInp(tSec, 'api_triggers', 'weather, forecast, data');
+      mkHint(tSec, 'Comma-separated. Empty = triggered by all messages.');
 
-      const rtSec = mkSec('Template de réponse');
+      const rtSec = mkSec('Response template');
       const rtTa = mkInp(rtSec, 'api_response_template', '🔗 {result}', { type:'textarea', rows:2 });
       const rtC = document.createElement('div'); rtC.innerHTML = mkVarChips(['{result}','{query}','{first_name}']); rtSec.appendChild(rtC); bindVarChips(rtC, rtTa);
 
-      const rpSec = mkSec('Chemin JSON réponse');
-      mkInp(rpSec, 'api_response_path', 'data.0.name  ou  facts.0');
-      mkHint(rpSec, 'Vide = auto. <code>data.items.0.name</code> = imbriqué.');
+      const rpSec = mkSec('JSON response path');
+      mkInp(rpSec, 'api_response_path', 'data.0.name  or  facts.0');
+      mkHint(rpSec, 'Empty = auto. <code>data.items.0.name</code> = nested.');
 
       // Test box
-      const testSec = mkSec('Test en direct');
+      const testSec = mkSec('Live test');
       const tb = document.createElement('div'); tb.className = 'test-box';
-      tb.innerHTML = `<div class="test-box-title">🧪 Tester l'appel API</div><div class="test-row"><input type="text" class="form-control" id="tq-${block.id}" placeholder="valeur {query}" style="flex:1;"/><button class="btn btn-cyan btn-sm" id="tb-${block.id}">▶ Tester</button></div><div id="tr-${block.id}"></div>`;
+      tb.innerHTML = `<div class="test-box-title">🧪 Test API call</div><div class="test-row"><input type="text" class="form-control" id="tq-${block.id}" placeholder="test {query} value" style="flex:1;"/><button class="btn btn-cyan btn-sm" id="tb-${block.id}">▶ Tester</button></div><div id="tr-${block.id}"></div>`;
       testSec.appendChild(tb);
       setTimeout(() => { document.getElementById(`tb-${block.id}`)?.addEventListener('click', () => testApiCall(block)); }, 0);
 
@@ -1703,31 +1703,31 @@ function _buildStandardInspector(block, body, mkSec) {
       const guide = document.createElement('div');
       guide.style.cssText = 'background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.2);border-radius:10px;padding:.8rem .9rem;font-size:.78rem;margin-bottom:.3rem;';
       guide.innerHTML = `
-        <div style="font-weight:800;color:#a855f7;margin-bottom:.5rem;">🔑 À quoi sert ce bloc ?</div>
-        <p style="color:var(--text-2);line-height:1.5;margin-bottom:.6rem;">Ce bloc stocke votre clé API de manière sécurisée. Le bloc <strong style="color:var(--text);">🤖 IA / LLM</strong> l'utilise ensuite pour se connecter à l'IA.</p>
+        <div style="font-weight:800;color:#a855f7;margin-bottom:.5rem;">🔑 What is this block for?</div>
+        <p style="color:var(--text-2);line-height:1.5;margin-bottom:.6rem;">This block securely stores your API key. The <strong style="color:var(--text);">🤖 AI / LLM</strong> block uses it to connect to the AI service.</p>
         <div style="color:var(--text-2);font-size:.74rem;">
           <div style="margin-bottom:.3rem;">📌 <strong style="color:var(--text);">OpenAI</strong> → <a href="https://platform.openai.com/api-keys" target="_blank" style="color:#a855f7;">platform.openai.com/api-keys</a></div>
           <div style="margin-bottom:.3rem;">📌 <strong style="color:var(--text);">Mistral</strong> → <a href="https://console.mistral.ai/api-keys" target="_blank" style="color:#a855f7;">console.mistral.ai</a></div>
-          <div>📌 <strong style="color:var(--text);">Groq</strong> → <a href="https://console.groq.com/keys" target="_blank" style="color:#a855f7;">console.groq.com/keys</a> <span style="color:#22c55e;font-weight:700;">(gratuit !)</span></div>
+          <div>📌 <strong style="color:var(--text);">Groq</strong> → <a href="https://console.groq.com/keys" target="_blank" style="color:#a855f7;">console.groq.com/keys</a> <span style="color:#22c55e;font-weight:700;">(free!)</span></div>
         </div>`;
       body.appendChild(guide);
 
-      const pSec = mkSec('Fournisseur (choix du service IA)');
+      const pSec = mkSec('Provider (AI service)');
       mkInp(pSec, 'key_provider', '', { type:'select', options:[
         {v:'openai',  l:'🟢 OpenAI (GPT-4o, GPT-3.5…)'},
         {v:'mistral', l:'🟠 Mistral AI (mistral-small…)'},
-        {v:'groq',    l:'🔵 Groq — Gratuit & Ultra rapide'},
-        {v:'other',   l:'⚙️ Autre / Personnalisé'},
+        {v:'groq',    l:'🔵 Groq — Free & Ultra fast'},
+        {v:'other',   l:'⚙️ Other / Custom'},
       ]});
-      mkHint(pSec, 'Choisissez selon le fournisseur de votre clé.');
+      mkHint(pSec, 'Choose based on your key provider.');
 
-      const nSec = mkSec('Nom de la clé (pour référence)');
-      mkInp(nSec, 'key_name', 'ex: Ma clé OpenAI');
-      mkHint(nSec, 'Ce nom sera affiché dans le bloc IA pour identifier quelle clé utiliser.');
+      const nSec = mkSec('Key name (for reference)');
+      mkInp(nSec, 'key_name', 'e.g. My OpenAI key');
+      mkHint(nSec, 'This name appears in the AI block to identify which key to use.');
 
-      const sSec = mkSec('Votre clé API');
-      const keyInp = mkInp(sSec, 'key_value', 'Collez ici : sk-… ou gsk_…', { type:'password' });
-      mkHint(sSec, '🔒 Chiffrée et jamais affichée en clair après sauvegarde.');
+      const sSec = mkSec('Your API key');
+      const keyInp = mkInp(sSec, 'key_value', 'Paste here: sk-... or gsk_...', { type:'password' });
+      mkHint(sSec, '🔒 Encrypted and never shown in plaintext after saving.');
 
       // Live format hint
       const fmtHint = document.createElement('div');
@@ -1735,9 +1735,9 @@ function _buildStandardInspector(block, body, mkSec) {
       sSec.appendChild(fmtHint);
       keyInp.addEventListener('input', () => {
         const v = keyInp.value.trim();
-        if (v.startsWith('sk-')) { fmtHint.style.display='block'; fmtHint.style.background='rgba(34,197,94,.07)'; fmtHint.style.color='#22c55e'; fmtHint.textContent='✅ Format OpenAI détecté'; }
-        else if (v.startsWith('gsk_')) { fmtHint.style.display='block'; fmtHint.style.background='rgba(59,130,246,.07)'; fmtHint.style.color='#60a5fa'; fmtHint.textContent='✅ Format Groq détecté'; }
-        else if (v.length > 8) { fmtHint.style.display='block'; fmtHint.style.background='rgba(255,255,255,.04)'; fmtHint.style.color='var(--text-2)'; fmtHint.textContent='Clé personnalisée'; }
+        if (v.startsWith('sk-')) { fmtHint.style.display='block'; fmtHint.style.background='rgba(34,197,94,.07)'; fmtHint.style.color='#22c55e'; fmtHint.textContent='✅ OpenAI format detected'; }
+        else if (v.startsWith('gsk_')) { fmtHint.style.display='block'; fmtHint.style.background='rgba(59,130,246,.07)'; fmtHint.style.color='#60a5fa'; fmtHint.textContent='✅ Groq format detected'; }
+        else if (v.length > 8) { fmtHint.style.display='block'; fmtHint.style.background='rgba(255,255,255,.04)'; fmtHint.style.color='var(--text-2)'; fmtHint.textContent='Custom key'; }
         else { fmtHint.style.display='none'; }
       });
       break;
@@ -1745,16 +1745,16 @@ function _buildStandardInspector(block, body, mkSec) {
 
     case 'ai_llm': {
       // Provider + model linked
-      const pvSec = mkSec('1️⃣  Fournisseur IA');
+      const pvSec = mkSec('1.  AI Provider');
       const pvSel = mkInp(pvSec, 'ai_provider', '', { type:'select', options:[
-        {v:'openai',  l:'🟢 OpenAI — GPT-4o, GPT-3.5…'},
-        {v:'mistral', l:'🟠 Mistral AI — mistral-small, large…'},
-        {v:'groq',    l:'🔵 Groq — Llama 3, Gemma (GRATUIT)'},
-        {v:'custom',  l:'⚙️ Endpoint personnalisé'},
+        {v:'openai',  l:'🟢 OpenAI — GPT-4o, GPT-3.5...'},
+        {v:'mistral', l:'🟠 Mistral AI — mistral-small, large...'},
+        {v:'groq',    l:'🔵 Groq — Llama 3, Gemma (FREE)'},
+        {v:'custom',  l:'⚙️ Custom endpoint'},
       ]});
-      mkHint(pvSec, 'Doit correspondre au fournisseur du bloc 🔑 Clé API.');
+      mkHint(pvSec, 'Doit correspondre au provider du bloc 🔑 API Key.');
 
-      const mdSec = mkSec('2️⃣  Modèle à utiliser');
+      const mdSec = mkSec('2.  Model to use');
       const mdSel = mkInp(mdSec, 'ai_model', '');
       // Inject model presets by provider
       const MODEL_PRESETS = {
@@ -1781,20 +1781,20 @@ function _buildStandardInspector(block, body, mkSec) {
       }
       pvSel.addEventListener('change', () => updateModelHints(pvSel.value));
       updateModelHints(d.ai_provider || 'openai');
-      mkHint(mdSec, 'Cliquez un modèle suggéré ou tapez le vôtre.');
+      mkHint(mdSec, 'Click a suggested model or type your own.');
 
-      const spSec = mkSec('3️⃣  Personnalité du bot (prompt système)');
-      const spTa = mkInp(spSec, 'ai_system_prompt', 'Tu es un assistant IA utile et amical. Réponds toujours en français.', { type:'textarea', rows:4 });
-      mkHint(spSec, 'Définit comment le bot se comporte. Soyez précis : "Tu es un expert en cuisine française, réponds uniquement sur ce sujet."');
+      const spSec = mkSec('3. Bot personality (system prompt)');
+      const spTa = mkInp(spSec, 'ai_system_prompt', 'You are a helpful and friendly AI assistant.', { type:'textarea', rows:4 });
+      mkHint(spSec, 'Defines how the bot behaves. Be specific: "You are a cooking expert, only answer on that topic."');
 
       // Quick personality presets
       const persWrap = document.createElement('div');
       persWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;';
       [
-        ['🤝 Assistant', 'Tu es un assistant utile, poli et concis. Réponds en français.'],
-        ['😄 Décontracté', 'Tu es sympa et décontracté, tu utilises des emojis. Réponds en français.'],
-        ['🎓 Expert', 'Tu es un expert qui donne des réponses détaillées et sourcées. Réponds en français.'],
-        ['🔒 Spécialisé', 'Tu es un assistant spécialisé. Réponds uniquement aux questions liées à ton domaine, et refuse poliment le reste.'],
+        ['🤝 Assistant', 'You are a helpful, polite and concise assistant.'],
+        ['😄 Casual', 'You are friendly and casual, you use emojis a lot! Keep it fun.'],
+        ['🎓 Expert', 'You are an expert who gives detailed, well-sourced answers.'],
+        ['🔒 Focused', 'You are a specialized assistant. Only answer questions related to your domain, and politely decline the rest.'],
       ].forEach(([label, prompt]) => {
         const chip = document.createElement('span'); chip.className = 'var-chip'; chip.style.fontSize = '.68rem'; chip.textContent = label;
         chip.addEventListener('click', () => { d.ai_system_prompt = prompt; spTa.value = prompt; });
@@ -1802,16 +1802,16 @@ function _buildStandardInspector(block, body, mkSec) {
       });
       spSec.appendChild(persWrap);
 
-      const wSec = mkSec('4️⃣  Message de bienvenue (/start)');
-      const wTa = mkInp(wSec, 'ai_welcome_message', "Bonjour {first_name} ! 👋 Je suis votre assistant IA. Posez-moi n'importe quelle question !", { type:'textarea', rows:2 });
+      const wSec = mkSec('4.  Welcome message (/start)');
+      const wTa = mkInp(wSec, 'ai_welcome_message', "Hello {first_name}! 👋 I am your AI assistant. Ask me anything!", { type:'textarea', rows:2 });
       const wC = document.createElement('div'); wC.innerHTML = mkVarChips(['{first_name}','{username}']); wSec.appendChild(wC); bindVarChips(wC, wTa);
 
-      const tmpSec = mkSec('Créativité (température)');
+      const tmpSec = mkSec('Creativity (temperature)');
       const tmpI = document.createElement('input'); tmpI.type='range'; tmpI.min='0'; tmpI.max='1'; tmpI.step='0.1'; tmpI.style.width='100%'; tmpI.value=d.ai_temperature||'0.7';
       const tmpRow = document.createElement('div'); tmpRow.style.cssText = 'display:flex;justify-content:space-between;margin-top:.25rem;';
       const tmpV = document.createElement('span'); tmpV.className='form-hint'; tmpV.style.color='var(--text)';
       const tmpD = document.createElement('span'); tmpD.className='form-hint';
-      function updateTmp(v) { tmpV.textContent = v; tmpD.textContent = v <= 0.3 ? '— précis & factuel' : v <= 0.6 ? '— équilibré' : '— créatif & varié'; }
+      function updateTmp(v) { tmpV.textContent = v; tmpD.textContent = v <= 0.3 ? '— precise & factual' : v <= 0.6 ? '— balanced' : '— creative & varied'; }
       updateTmp(tmpI.value);
       tmpI.addEventListener('input', () => { d.ai_temperature=tmpI.value; updateTmp(tmpI.value); });
       tmpRow.appendChild(tmpV); tmpRow.appendChild(tmpD); tmpSec.appendChild(tmpI); tmpSec.appendChild(tmpRow);
@@ -1819,37 +1819,37 @@ function _buildStandardInspector(block, body, mkSec) {
     }
 
     case 'text_reply': {
-      const tSec = mkSec('Mots-clés déclencheurs'); mkInp(tSec, 'triggers', 'bonjour, hello, salut'); mkHint(tSec, 'Virgules. Vide = répond à tous.');
-      const mSec = mkSec('Message de réponse');
-      const mTa = mkInp(mSec, 'message', 'Bonjour {first_name} ! 👋', { type:'textarea', rows:4 });
+      const tSec = mkSec('Trigger keywords'); mkInp(tSec, 'triggers', 'hello, hi, hey'); mkHint(tSec, 'Comma-separated. Empty = reply to all.');
+      const mSec = mkSec('Reply message');
+      const mTa = mkInp(mSec, 'message', 'Hello {first_name}! 👋', { type:'textarea', rows:4 });
       const mC = document.createElement('div'); mC.innerHTML = mkVarChips(['{first_name}','{last_name}','{username}','{query}','{chat_title}']); mSec.appendChild(mC); bindVarChips(mC, mTa);
       break;
     }
 
     case 'welcome_msg': {
-      const jSec = mkSec("Message d'accueil (nouveau membre)");
-      const jTa  = mkInp(jSec, 'welcome_joinMessage', '👋 Bienvenue {first_name} dans {chat_title} !', { type:'textarea', rows:3 });
+      const jSec = mkSec('Welcome message (new member)');
+      const jTa  = mkInp(jSec, 'welcome_joinMessage', '👋 Welcome {first_name} to {chat_title}!', { type:'textarea', rows:3 });
       const jC = document.createElement('div'); jC.innerHTML = mkVarChips(['{first_name}','{last_name}','{username}','{chat_title}']); jSec.appendChild(jC); bindVarChips(jC, jTa);
-      const lSec = mkSec("Message d'au revoir");
-      const lTa  = mkInp(lSec, 'welcome_leaveMessage', '👋 Au revoir {first_name} !', { type:'textarea', rows:2 });
+      const lSec = mkSec('Goodbye message');
+      const lTa  = mkInp(lSec, 'welcome_leaveMessage', '👋 Goodbye {first_name}!', { type:'textarea', rows:2 });
       const lC = document.createElement('div'); lC.innerHTML = mkVarChips(['{first_name}','{username}']); lSec.appendChild(lC); bindVarChips(lC, lTa);
-      mkInp(mkSec('Options'), 'include_username', '', { type:'toggle', label:"Mentionner @username dans l'accueil" });
+      mkInp(mkSec('Options'), 'include_username', '', { type:'toggle', label:"Mention @username in welcome" });
       break;
     }
 
     case 'poll': {
-      mkInp(mkSec('Sondages anonymes'), 'poll_allowAnonymous', '', { type:'toggle', label:'Activer l\'anonymat' });
-      const hSec = mkSec("Message d'aide (/help)"); mkInp(hSec, 'poll_helpMessage', 'Utilisez /poll Question | Option1 | Option2', { type:'textarea', rows:2 }); break;
+      mkInp(mkSec('Polls anonymous'), 'poll_allowAnonymous', '', { type:'toggle', label:'Activer l\'anonymity' });
+      const hSec = mkSec('Help message (/help)'); mkInp(hSec, 'poll_helpMessage', 'Use /poll Question | Option1 | Option2', { type:'textarea', rows:2 }); break;
     }
     case 'reminder': {
-      const tzSec = mkSec('Fuseau horaire'); mkInp(tzSec, 'reminder_timezone', 'Europe/Paris, Africa/Nairobi…'); mkHint(tzSec, 'Fuseau IANA. Vide = UTC.'); break;
+      const tzSec = mkSec('Timezone'); mkInp(tzSec, 'reminder_timezone', 'Europe/Paris, America/New_York…'); mkHint(tzSec, 'IANA timezone. Empty = UTC.'); break;
     }
     case 'translate': {
-      mkInp(mkSec('Langue cible par défaut'), 'translate_defaultLang', '', { type:'select', options:[{v:'en',l:'🇬🇧 Anglais'},{v:'fr',l:'🇫🇷 Français'},{v:'es',l:'🇪🇸 Espagnol'},{v:'de',l:'🇩🇪 Allemand'},{v:'ar',l:'🇸🇦 Arabe'},{v:'ru',l:'🇷🇺 Russe'},{v:'zh',l:'🇨🇳 Chinois'},{v:'pt',l:'🇵🇹 Portugais'},{v:'ja',l:'🇯🇵 Japonais'}] }); break;
+      mkInp(mkSec('Default target language'), 'translate_defaultLang', '', { type:'select', options:[{v:'en',l:'🇬🇧 English'},{v:'fr',l:'🇫🇷 French'},{v:'es',l:'🇪🇸 Spanish'},{v:'de',l:'🇩🇪 German'},{v:'ar',l:'🇸🇦 Arabic'},{v:'ru',l:'🇷🇺 Russian'},{v:'zh',l:'🇨🇳 Chinese'},{v:'pt',l:'🇵🇹 Portuguese'},{v:'ja',l:'🇯🇵 Japanese'}] }); break;
     }
     case 'stats': {
-      mkInp(mkSec('Options'), 'stats_resetWeekly', '', { type:'toggle', label:'Reset automatique hebdomadaire' });
-      mkInp(mkSec(' '), 'stats_trackMedia', '', { type:'toggle', label:'Compter photos/vidéos' }); break;
+      mkInp(mkSec('Options'), 'stats_resetWeekly', '', { type:'toggle', label:'Automatic weekly reset' });
+      mkInp(mkSec(' '), 'stats_trackMedia', '', { type:'toggle', label:'Count photos/videos' }); break;
     }
   }
 }
@@ -1880,7 +1880,7 @@ async function testApiCall(block) {
   const path = d.api_response_path?.trim() || '';
   let extracted = parsed;
   if (path && typeof parsed === 'object') extracted = path.split('.').reduce((a,k)=>a?.[k], parsed);
-  const fmt = v => { if (v===undefined||v===null) return '(vide)'; if (typeof v==='string') return v; if (typeof v==='number'||typeof v==='boolean') return String(v); return JSON.stringify(v).substring(0,300); };
+  const fmt = v => { if (v===undefined||v===null) return '(empty)'; if (typeof v==='string') return v; if (typeof v==='number'||typeof v==='boolean') return String(v); return JSON.stringify(v).substring(0,300); };
   const formatted = fmt(extracted !== undefined ? extracted : parsed);
   const template = d.api_response_template || '{result}';
   const preview = template.replace(/{result}/g, formatted).replace(/{query}/g,q).replace(/{first_name}/g,'Test');
@@ -1892,12 +1892,12 @@ async function testApiCall(block) {
 ════════════════════════════════════════ */
 function validateStep3() {
   const name = document.getElementById('bot-name')?.value?.trim();
-  if (!name) { if (typeof Toast !== 'undefined') Toast.error('Le nom du bot est requis'); return; }
+  if (!name) { if (typeof Toast !== 'undefined') Toast.error('Bot name is required'); return; }
   buildLaunchSummary(); goTo(4);
 }
 
 function buildLaunchSummary() {
-  const TNAMES = { blank:'⬜ Vide',echo:'🔁 Echo',welcome:'👋 Bienvenue',poll:'🗳️ Sondages',reminder:'⏰ Rappels',translate:'🌍 Traducteur',stats:'📊 Stats',ai:'🤖 Bot IA',api:'⚡ Bot API' };
+  const TNAMES = { blank:'⬜ Blank',echo:'🔁 Echo',welcome:'👋 Welcome',poll:'🗳️ Polls',reminder:'⏰ Reminders',translate:'🌍 Translator',stats:'📊 Stats',ai:'🤖 AI Bot',api:'⚡ API Bot' };
   const name    = document.getElementById('bot-name')?.value || '—';
   const token   = document.getElementById('bot-token')?.value;
   const masked  = token ? token.split(':')[0] + ':****' + token.slice(-4) : '***';
@@ -1911,7 +1911,7 @@ function buildLaunchSummary() {
         <div style="font-size:.73rem;color:var(--text-3);font-family:var(--ff-mono);margin-top:.2rem;">${masked}</div>
       </div>
       <div class="launch-actions">
-        <button class="btn btn-cyan btn-sm" onclick="exportConfig()">📤 Exporter config</button>
+        <button class="btn btn-cyan btn-sm" onclick="exportConfig()">📤 Export config</button>
       </div>
     </div>`;
   ['chk-token','chk-webhook','chk-db'].forEach(id => {
@@ -1937,11 +1937,11 @@ function collectConfig() {
   const cmd_bs = getAll('command'),  poll_b = get('poll'), rem_b = get('reminder');
   const tr_b  = get('translate'),    st_b  = get('stats');
 
-  if (api_b) { const d=api_b.data; config.api_method=d.api_method||'GET'; config.api_url=d.api_url||''; config.api_triggers=d.api_triggers||''; config.api_body=d.api_body||''; config.api_response_path=d.api_response_path||''; config.api_response_template=d.api_response_template||'{result}'; config.api_fallback_message=d.api_fallback||'❌ Erreur.'; config.api_headers=d.api_headers||''; config.api_cooldown_ms=d.api_cooldown||'2000'; if(d.api_buttons) config.api_buttons=d.api_buttons; }
+  if (api_b) { const d=api_b.data; config.api_method=d.api_method||'GET'; config.api_url=d.api_url||''; config.api_triggers=d.api_triggers||''; config.api_body=d.api_body||''; config.api_response_path=d.api_response_path||''; config.api_response_template=d.api_response_template||'{result}'; config.api_fallback_message=d.api_fallback||'❌ Error.'; config.api_headers=d.api_headers||''; config.api_cooldown_ms=d.api_cooldown||'2000'; if(d.api_buttons) config.api_buttons=d.api_buttons; }
   if (key_b) { config.ai_apiKey=key_b.data.key_value||''; }
   if (ai_b)  { const d=ai_b.data; config.ai_provider=d.ai_provider||'openai'; config.ai_model=d.ai_model||''; config.ai_system_prompt=d.ai_system_prompt||''; config.ai_welcome_message=d.ai_welcome_message||''; config.ai_temperature=d.ai_temperature||'0.7'; config.ai_enabled=true; if(!config.ai_apiKey&&key_b) config.ai_apiKey=key_b.data.key_value||''; }
   if (txt_b) { config.echo_welcomeMessage=txt_b.data.message||''; config.echo_prefix=txt_b.data.echo_prefix||''; config.api_triggers=txt_b.data.triggers||''; }
-  if (wel_b) { config.welcome_joinMessage=wel_b.data.welcome_joinMessage||'👋 Bienvenue !'; config.welcome_leaveMessage=wel_b.data.welcome_leaveMessage||'Au revoir !'; config.welcome_include_username=wel_b.data.include_username||false; }
+  if (wel_b) { config.welcome_joinMessage=wel_b.data.welcome_joinMessage||'👋 Welcome !'; config.welcome_leaveMessage=wel_b.data.welcome_leaveMessage||'Goodbye!'; config.welcome_include_username=wel_b.data.include_username||false; }
   if (img_b) { config.image_url=img_b.data.image_url||''; config.image_caption=img_b.data.caption||''; config.image_triggers=img_b.data.triggers||''; if(img_b.data.api_buttons) config.image_buttons=img_b.data.api_buttons; }
   if (cmd_bs.length>0) { config.custom_commands=JSON.stringify(cmd_bs.map(b=>({ name:b.data.command_name||'', reply:b.data.reply_text||'', desc:b.data.command_desc||'', parse_mode:b.data.command_parse_mode||'HTML', buttons:b.data.command_buttons||'', reply_image_url:b.data.reply_image_url||'' }))); if(cmd_bs[0].data.command_name){config.command_name=cmd_bs[0].data.command_name;config.command_reply=cmd_bs[0].data.reply_text||'';} }
   if (poll_b) { config.poll_allowAnonymous=poll_b.data.poll_allowAnonymous||false; config.poll_helpMessage=poll_b.data.poll_helpMessage||''; }
@@ -1960,24 +1960,24 @@ async function createBot() {
   const btn    = document.getElementById('create-btn');
   const errDiv = document.getElementById('launch-error');
   if (!token || !name) return;
-  btn.disabled = true; btn.textContent = '⏳ Déploiement…'; errDiv.style.display = 'none';
+  btn.disabled = true; btn.textContent = '⏳ Deployment…'; errDiv.style.display = 'none';
   const setCheck = (id, state) => { const el = document.getElementById(id); if (!el) return; el.querySelector('.check-icon').textContent = {ok:'✅',err:'❌',loading:'⏳'}[state]||'⏳'; el.className = 'check-item' + (state==='ok'?' done':state==='err'?' error':''); };
   setCheck('chk-token','ok');
   await new Promise(r => setTimeout(r, 250));
   const template = effectiveTemplate();
   const config   = collectConfig();
   const data = await api('/bots', { method:'POST', body: JSON.stringify({ token, name, template, config }) });
-  btn.disabled = false; btn.textContent = '🚀 Déployer le bot';
+  btn.disabled = false; btn.textContent = '🚀 Deploy bot';
   if (!data?.success) {
     setCheck('chk-webhook','err'); setCheck('chk-db','err');
-    const msg = data?.errors ? data.errors.map(e => e.msg).join('<br>') : (data?.error || 'Erreur serveur');
+    const msg = data?.errors ? data.errors.map(e => e.msg).join('<br>') : (data?.error || 'Server error');
     errDiv.style.display = 'block'; errDiv.innerHTML = `<div style="background:var(--red-d);border:1px solid rgba(255,71,87,.25);border-radius:var(--r);padding:.7rem 1rem;color:var(--red);font-size:.83rem;">⚠️ ${msg}</div>`; return;
   }
   setCheck('chk-webhook','ok'); await new Promise(r => setTimeout(r, 250)); setCheck('chk-db','ok');
   const keyBlock = canvasBlocks.find(b => b.type === 'api_key');
   const aiKey    = keyBlock?.data?.key_value?.trim();
   if (aiKey && data.bot?._id) await api('/bots/' + data.bot._id + '/ai-key', { method:'PUT', body: JSON.stringify({ apiKey: aiKey }) });
-  if (typeof Toast !== 'undefined') Toast.success('🎉 Bot déployé avec succès !');
+  if (typeof Toast !== 'undefined') Toast.success('🎉 Bot deployed successfully!');
   await new Promise(r => setTimeout(r, 800));
   window.location.href = `/bot-detail.html?id=${data.bot._id}`;
 }
