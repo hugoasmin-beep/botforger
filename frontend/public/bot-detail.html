@@ -50,10 +50,11 @@
           <span id="page-bot-username" style="font-family:var(--font-mono);font-size:0.75rem;"></span>
         </div>
       </div>
-      <div class="bot-detail-actions">
-        <button class="btn btn-secondary btn-sm" id="toggle-bot-btn">…</button>
-        <a href="/bots.html" class="btn btn-ghost btn-sm">← Retour</a>
-      </div>
+    <div class="bot-detail-actions">
+      <a href="/bot-stats.html?id=" + botId class="btn btn-ghost btn-sm" aria-label="Voir les statistiques du bot">📊 Statistiques</a>
+      <button class="btn btn-secondary btn-sm" id="toggle-bot-btn" aria-label="Activer ou désactiver le bot">…</button>
+      <a href="/bots.html" class="btn btn-ghost btn-sm" aria-label="Retour à la liste des bots">← Retour</a>
+    </div>
     </div>
 
     <!-- Stat mini cards -->
