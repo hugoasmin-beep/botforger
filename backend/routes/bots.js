@@ -372,3 +372,87 @@ router.post('/:id/test', protect, async (req, res) => {
 });
 
 module.exports = router;
+
+// ─── POST /api/bots/:id/broadcast ────────────────────────────────────────
+// Send a message to all chats the bot has ever interacted with
+router.post('/:id/broadcast', protect, async (req, res) => {
+  try {
+    const { message, parseMode } = req.body;
+    if (!message) return res.status(400).json({ success: false, error: 'Message requis' });
+
+    const bot = await Bot.findOne({ _id: req.params.id, owner: req.user._id });
+    if (!bot) return res.status(404).json({ success: false, error: 'Bot introuvable' });
+
+    let chats = [];
+    try { chats = JSON.parse(bot.config.broadcast_chats || '[]'); } catch (_) {}
+    if (!chats.length) return res.json({ success: true, sent: 0, failed: 0, message: 'Aucun chat enregistré' });
+
+    const TelegramBot = require('node-telegram-bot-api');
+    const tgBot = new TelegramBot(bot.token, { polling: false });
+
+    let sent = 0, failed = 0;
+    for (const chat of chats) {
+      try {
+        await tgBot.sendMessage(chat.chatId, message, { parse_mode: parseMode || 'HTML' });
+        sent++;
+        await new Promise(r => setTimeout(r, 50)); // Telegram rate limit
+      } catch (_) { failed++; }
+    }
+
+    await bot.addLog('info', `Broadcast envoyé: ${sent} réussi(s), ${failed} échoué(s)`);
+    res.json({ success: true, sent, failed, total: chats.length });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+});
+
+// ─── PUT /api/bots/:id/maintenance ───────────────────────────────────────
+router.put('/:id/maintenance', protect, async (req, res) => {
+  try {
+    const bot = await Bot.findOne({ _id: req.params.id, owner: req.user._id });
+    if (!bot) return res.status(404).json({ success: false, error: 'Bot introuvable' });
+
+    const { enabled, message } = req.body;
+    bot.config.maintenance_mode = enabled !== undefined ? enabled : !bot.config.maintenance_mode;
+    if (message !== undefined) bot.config.maintenance_message = message;
+    await bot.save();
+    const state = bot.config.maintenance_mode ? 'activé' : 'désactivé';
+    await bot.addLog('info', `Mode maintenance ${state}`);
+    res.json({ success: true, maintenance_mode: bot.config.maintenance_mode });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+});
+
+// ─── GET /api/bots/:id/command-stats ─────────────────────────────────────
+router.get('/:id/command-stats', protect, async (req, res) => {
+  try {
+    const bot = await Bot.findOne({ _id: req.params.id, owner: req.user._id }).select('config.command_stats');
+    if (!bot) return res.status(404).json({ success: false, error: 'Bot introuvable' });
+
+    let stats = {};
+    try { stats = JSON.parse(bot.config.command_stats || '{}'); } catch (_) {}
+
+    const sorted = Object.entries(stats)
+      .sort((a, b) => b[1] - a[1])
+      .map(([cmd, count]) => ({ cmd, count }));
+
+    res.json({ success: true, stats: sorted, total: sorted.reduce((s, e) => s + e.count, 0) });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+});
+
+// ─── GET /api/bots/:id/broadcast-chats ───────────────────────────────────
+router.get('/:id/broadcast-chats', protect, async (req, res) => {
+  try {
+    const bot = await Bot.findOne({ _id: req.params.id, owner: req.user._id }).select('config.broadcast_chats');
+    if (!bot) return res.status(404).json({ success: false, error: 'Bot introuvable' });
+
+    let chats = [];
+    try { chats = JSON.parse(bot.config.broadcast_chats || '[]'); } catch (_) {}
+    res.json({ success: true, chats, total: chats.length });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Erreur serveur' });
+  }
+});

@@ -17,6 +17,89 @@ const { createApiBot       } = require('../bot-templates/apiBot');
 // Clé : botId, Valeur : { handler, configHash, tgBot }
 const botInstanceCache = new Map();
 
+// ─── Rate limiter store (in-memory, per botId:userId) ─────────────────────
+// Map<"botId:userId", { count, windowStart }>
+const rateLimitStore = new Map();
+
+// ─── Universal pre/post middleware ────────────────────────────────────────
+const universalMiddleware = async (update, botDoc, tgBot) => {
+  const msg = update.message || update.edited_message;
+  if (!msg) return { pass: true };
+
+  const config    = botDoc.config;
+  const chatId    = msg.chat?.id;
+  const userId    = msg.from?.id;
+  const chatTitle = msg.chat?.title || msg.chat?.first_name || String(chatId);
+  const firstName = msg.from?.first_name || 'User';
+
+  // ── 1. Track chat for broadcast ──────────────────────────────────────
+  if (chatId) {
+    // Fire-and-forget
+    botDoc.trackChat(chatId, chatTitle).catch(() => {});
+  }
+
+  // ── 2. Maintenance mode ───────────────────────────────────────────────
+  if (config.maintenance_mode) {
+    const maintMsg = config.maintenance_message || '🔧 Bot en maintenance.';
+    await tgBot.sendMessage(chatId, maintMsg, { parse_mode: 'HTML' }).catch(() => {});
+    await botDoc.addLog('info', `[Maintenance] Message ignoré de ${firstName}`);
+    return { pass: false };
+  }
+
+  // ── 3. Blacklist ──────────────────────────────────────────────────────
+  if (config.blacklist_enabled && userId) {
+    const ids = (config.blacklist_ids || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (ids.includes(String(userId))) {
+      await botDoc.addLog('warning', `[Blacklist] User ${userId} (${firstName}) bloqué`);
+      return { pass: false };
+    }
+  }
+
+  // ── 4. Whitelist ──────────────────────────────────────────────────────
+  if (config.whitelist_enabled && userId) {
+    const ids = (config.whitelist_ids || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (ids.length > 0 && !ids.includes(String(userId))) {
+      await botDoc.addLog('warning', `[Whitelist] User ${userId} (${firstName}) non autorisé`);
+      return { pass: false };
+    }
+  }
+
+  // ── 5. Rate limiter ───────────────────────────────────────────────────
+  if (config.rate_limit_enabled && userId && chatId) {
+    const max     = parseInt(config.rate_limit_max)        || 5;
+    const winSec  = parseInt(config.rate_limit_window_sec) || 60;
+    const key     = `${botDoc._id}:${userId}`;
+    const now     = Date.now();
+    const entry   = rateLimitStore.get(key) || { count: 0, windowStart: now };
+
+    if (now - entry.windowStart > winSec * 1000) {
+      // New window
+      entry.count = 1; entry.windowStart = now;
+    } else {
+      entry.count++;
+    }
+    rateLimitStore.set(key, entry);
+
+    if (entry.count > max) {
+      const ratMsg = config.rate_limit_message || '⏱ Trop de messages ! Patientez.';
+      if (entry.count === max + 1) { // Only send warning once per window
+        await tgBot.sendMessage(chatId, ratMsg, { parse_mode: 'HTML' }).catch(() => {});
+        await botDoc.addLog('warning', `[RateLimit] User ${userId} (${firstName}) limité`);
+      }
+      return { pass: false };
+    }
+  }
+
+  // ── 6. Track command stats ────────────────────────────────────────────
+  if (msg.text?.startsWith('/')) {
+    const cmd = msg.text.split(' ')[0].split('@')[0].toLowerCase();
+    botDoc.trackCommand(cmd).catch(() => {});
+  }
+
+  return { pass: true, needsDefaultMsg: true };
+};
+
+
 const getBotHandler = (botDoc) => {
   const id     = botDoc._id.toString();
   const cached = botInstanceCache.get(id);
@@ -128,12 +211,30 @@ router.post('/:secret', async (req, res) => {
     const cached = getBotHandler(botDoc);
     if (!cached) return;
 
-    // 1. Commandes personnalisées en priorité
+    // 0. Universal middleware (maintenance, blacklist, whitelist, rate limit, tracking)
+    const mw = await universalMiddleware(req.body, botDoc, cached.tgBot);
+    if (!mw.pass) return;
+
+    // 1. Custom commands (priority)
     const handled = await handleCustomCommand(req.body, botDoc, cached.tgBot);
     if (handled) return;
 
-    // 2. Handler du template
-    await cached.handler.handleUpdate(req.body, botDoc);
+    // 2. Template handler
+    const templateHandled = await cached.handler.handleUpdate(req.body, botDoc);
+
+    // 3. Default message fallback
+    const msg = req.body.message;
+    if (templateHandled === false && msg && msg.text && !msg.text.startsWith('/')) {
+      const cfg = botDoc.config;
+      if (cfg.default_message_enabled && cfg.default_message_text) {
+        const chatId = msg.chat && msg.chat.id;
+        const firstName = (msg.from && msg.from.first_name) || 'User';
+        const reply = cfg.default_message_text
+          .replace(/{first_name}/g, firstName)
+          .replace(/{query}/g, msg.text);
+        await cached.tgBot.sendMessage(chatId, reply, { parse_mode: 'HTML' }).catch(() => {});
+      }
+    }
   } catch (err) {
     console.error(`Erreur webhook (${secret}):`, err.message);
   }

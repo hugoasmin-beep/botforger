@@ -105,8 +105,9 @@ const createEchoBot = (botDoc) => {
 
         // 3. /start
         if (text === '/start') {
-          const startMsg = config.echo_welcomeMessage
-            || `Hi ${firstName}! I am ready.`;
+          // Use dedicated start_message — NOT the first text_reply block
+          const startMsg = config.start_message || config.echo_welcomeMessage
+            || `👋 Hi ${firstName}! I am ready. Type /help to see available commands.`;
           await safeSend(bot, chatId, interpolate(startMsg, vars));
           await freshDoc.addLog('info', `/start from ${firstName} (${chatId})`);
           return;
@@ -168,11 +169,14 @@ const createEchoBot = (botDoc) => {
         // 8. Pure echo fallback (only if bot has no custom blocks at all)
         const hasBlocks = imgBlocks.length > 0 || txtBlocks.length > 0
           || config.welcome_enabled || safeJSON(config.custom_commands).length > 0
-          || config.echo_welcomeMessage || config.image_url;
+          || config.image_url;
         if (!hasBlocks) {
           const prefix = config.echo_prefix ? config.echo_prefix + ' ' : '';
           await bot.sendMessage(chatId, `${prefix}${text}`);
           await freshDoc.incrementStats(userId);
+        } else {
+          // Has blocks but nothing matched — signal the webhook to try default message
+          return false;
         }
 
       } catch (err) {

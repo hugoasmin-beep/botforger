@@ -200,6 +200,7 @@ select.form-control {
 .badge-accent { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(124,102,255,0.22); }
 .badge-green  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,204,113,0.22); }
 .badge-red    { background: var(--red-dim); color: var(--red); border: 1px solid rgba(231,76,60,0.22); }
+.badge-amber  { background: rgba(243,156,18,0.12); color: #f59e0b; border: 1px solid rgba(243,156,18,0.25); }
 .badge-amber  { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(243,156,18,0.22); }
 
 /* ─── Loader ─── */

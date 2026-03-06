@@ -1026,6 +1026,27 @@
           <div class="palette-item" draggable="true" data-type="stats">
             <div class="pi-icon">📊</div>Stats
           </div>
+
+          <div class="palette-sep"></div>
+          <div class="palette-group-title">Advanced</div>
+          <div class="palette-item" draggable="true" data-type="start_msg">
+            <div class="pi-icon">🚀</div>Start msg
+          </div>
+          <div class="palette-item" draggable="true" data-type="default_msg">
+            <div class="pi-icon">🔇</div>Default msg
+          </div>
+          <div class="palette-item" draggable="true" data-type="rate_limit">
+            <div class="pi-icon">🚫</div>Anti-spam
+          </div>
+          <div class="palette-item" draggable="true" data-type="maintenance">
+            <div class="pi-icon">🔧</div>Maintenance
+          </div>
+          <div class="palette-item" draggable="true" data-type="whitelist">
+            <div class="pi-icon">🔒</div>Whitelist
+          </div>
+          <div class="palette-item" draggable="true" data-type="scheduled_msg">
+            <div class="pi-icon">🗓️</div>Scheduled
+          </div>
         </div>
 
         <!-- Canvas -->
@@ -1119,6 +1140,12 @@ const BDEFS = {
   poll:         { icon:'🗳️', name:'Polls',             color:'#ffd32a' },
   translate:    { icon:'🌍', name:'Translation',           color:'#00e5ff' },
   stats:        { icon:'📊', name:'Group Stats',         color:'#ff9f43' },
+  start_msg:    { icon:'🚀', name:'Start /start msg',     color:'#22c55e' },
+  default_msg:  { icon:'🔇', name:'Default message',       color:'#6366f1' },
+  rate_limit:   { icon:'🚫', name:'Anti-spam',             color:'#ef4444' },
+  maintenance:  { icon:'🔧', name:'Maintenance mode',      color:'#f59e0b' },
+  whitelist:    { icon:'🔒', name:'Whitelist / Blacklist', color:'#0ea5e9' },
+  scheduled_msg:{ icon:'🗓️', name:'Scheduled message',     color:'#8b5cf6' },
 };
 
 /* ── Template seeds ────────────────────── */
@@ -1427,6 +1454,12 @@ function bSummary(block) {
     case 'welcome_msg':  return d.welcome_joinMessage || 'Empty message';
     case 'command':      return d.command_name ? `/${d.command_name}` : 'Command not defined';
     case 'image_msg':    return d.caption || (d.image_url ? '🖼️ ' + d.image_url.substring(0,40) + '…' : 'Image not configured');
+    case 'start_msg':    return d.start_message ? d.start_message.substring(0,60)+'…' : 'Start message not set';
+    case 'default_msg':  return d.default_message_text ? d.default_message_text.substring(0,60)+'…' : 'Fallback not set';
+    case 'rate_limit':   return d.rate_limit_enabled ? `Max ${d.rate_limit_max||5} msg / ${d.rate_limit_window_sec||60}s` : 'Disabled';
+    case 'maintenance':  return d.maintenance_mode ? '🔧 Mode ON' : 'Mode OFF';
+    case 'whitelist':    return d.whitelist_enabled ? `Whitelist: ${d.whitelist_ids||'empty'}` : (d.blacklist_enabled ? `Blacklist: ${d.blacklist_ids||'empty'}` : 'Not configured');
+    case 'scheduled_msg':return d.sched_message ? `${d.sched_cron||'?'} — ${d.sched_message.substring(0,40)}` : 'Not configured';
     default:             return BDEFS[block.type]?.name || block.type;
   }
 }
@@ -1851,6 +1884,109 @@ function _buildStandardInspector(block, body, mkSec) {
       mkInp(mkSec('Options'), 'stats_resetWeekly', '', { type:'toggle', label:'Automatic weekly reset' });
       mkInp(mkSec(' '), 'stats_trackMedia', '', { type:'toggle', label:'Count photos/videos' }); break;
     }
+
+    // ── start_msg ────────────────────────────────────────────────────────
+    case 'start_msg': {
+      const info = document.createElement('div');
+      info.style.cssText = 'background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:.55rem .7rem;font-size:.76rem;color:var(--text-2);margin-bottom:.3rem;';
+      info.innerHTML = '🚀 This message is sent when a user types <code>/start</code>. It is <strong style="color:var(--text)">independent</strong> from auto-reply blocks.';
+      body.appendChild(info);
+      const smSec = mkSec('Message for /start');
+      const smTa = mkInp(smSec, 'start_message', 'Hello {first_name}! 👋\n\nWelcome to this bot! Type /help to see available commands.', { type:'textarea', rows:4 });
+      const smC = document.createElement('div'); smC.innerHTML = mkVarChips(['{first_name}','{username}','{chat_title}']); smSec.appendChild(smC); bindVarChips(smC, smTa);
+      mkHint(smSec, 'Variables: {first_name}, {username}, {chat_title}. Supports HTML formatting.');
+      break;
+    }
+
+    // ── default_msg ──────────────────────────────────────────────────────
+    case 'default_msg': {
+      const info = document.createElement('div');
+      info.style.cssText = 'background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:.55rem .7rem;font-size:.76rem;color:var(--text-2);margin-bottom:.3rem;';
+      info.innerHTML = '🔇 Sent when the bot receives a message that <strong style="color:var(--text)">matches no rule</strong>. Avoids the bot staying silent.';
+      body.appendChild(info);
+      mkInp(mkSec('Activate fallback'), 'default_message_enabled', '', { type:'toggle', label:'Enable default message' });
+      const dmSec = mkSec('Fallback message');
+      const dmTa = mkInp(dmSec, 'default_message_text', "🤖 I didn't understand. Type /help to see what I can do!", { type:'textarea', rows:3 });
+      const dmC = document.createElement('div'); dmC.innerHTML = mkVarChips(['{first_name}','{query}']); dmSec.appendChild(dmC); bindVarChips(dmC, dmTa);
+      mkHint(dmSec, '{query} = the message that was not understood.');
+      break;
+    }
+
+    // ── rate_limit ───────────────────────────────────────────────────────
+    case 'rate_limit': {
+      const info = document.createElement('div');
+      info.style.cssText = 'background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:.55rem .7rem;font-size:.76rem;color:var(--text-2);margin-bottom:.3rem;';
+      info.innerHTML = '🚫 Limits the number of messages a user can send per time window. Prevents spam.';
+      body.appendChild(info);
+      mkInp(mkSec('Activate anti-spam'), 'rate_limit_enabled', '', { type:'toggle', label:'Enable rate limiter' });
+      const rlMaxSec = mkSec('Max messages');
+      const rlMaxI = document.createElement('input'); rlMaxI.type='number'; rlMaxI.className='form-control'; rlMaxI.min='1'; rlMaxI.max='100';
+      rlMaxI.value = d.rate_limit_max||'5'; rlMaxI.addEventListener('input',()=>{ d.rate_limit_max=rlMaxI.value; updateSummary(block); }); rlMaxSec.appendChild(rlMaxI);
+      mkHint(rlMaxSec, 'Number of messages allowed per time window per user.');
+      const rlWinSec = mkSec('Time window (seconds)');
+      const rlWinI = document.createElement('input'); rlWinI.type='number'; rlWinI.className='form-control'; rlWinI.min='5'; rlWinI.max='3600';
+      rlWinI.value = d.rate_limit_window_sec||'60'; rlWinI.addEventListener('input',()=>{ d.rate_limit_window_sec=rlWinI.value; updateSummary(block); }); rlWinSec.appendChild(rlWinI);
+      mkHint(rlWinSec, 'e.g. 60 = max 5 messages per 60 seconds per user.');
+      const rlMsgSec = mkSec('Warning message');
+      mkInp(rlMsgSec, 'rate_limit_message', '⏱ Too many messages! Please wait a moment.', { type:'textarea', rows:2 });
+      break;
+    }
+
+    // ── maintenance ──────────────────────────────────────────────────────
+    case 'maintenance': {
+      const info = document.createElement('div');
+      info.style.cssText = 'background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:.55rem .7rem;font-size:.76rem;color:var(--text-2);margin-bottom:.3rem;';
+      info.innerHTML = '🔧 When maintenance mode is ON, the bot replies with a maintenance message and ignores all other logic.';
+      body.appendChild(info);
+      mkInp(mkSec('Maintenance mode'), 'maintenance_mode', '', { type:'toggle', label:'Activate maintenance mode' });
+      const maintSec = mkSec('Maintenance message');
+      mkInp(maintSec, 'maintenance_message', '🔧 Bot is under maintenance. Come back soon!', { type:'textarea', rows:2 });
+      mkHint(maintSec, 'This message is shown to ALL users when maintenance mode is active.');
+      break;
+    }
+
+    // ── whitelist ────────────────────────────────────────────────────────
+    case 'whitelist': {
+      const info = document.createElement('div');
+      info.style.cssText = 'background:rgba(14,165,233,.07);border:1px solid rgba(14,165,233,.2);border-radius:8px;padding:.55rem .7rem;font-size:.76rem;color:var(--text-2);margin-bottom:.3rem;';
+      info.innerHTML = '🔒 Control who can interact with your bot. Whitelist = only listed users. Blacklist = block listed users.';
+      body.appendChild(info);
+      const wlSec = mkSec('Whitelist (exclusive access)');
+      mkInp(wlSec, 'whitelist_enabled', '', { type:'toggle', label:'Enable whitelist' });
+      mkInp(wlSec, 'whitelist_ids', '123456789, 987654321');
+      mkHint(wlSec, 'Comma-separated Telegram user IDs. Only these users can use the bot.');
+      const blSec = mkSec('Blacklist (block users)');
+      mkInp(blSec, 'blacklist_enabled', '', { type:'toggle', label:'Enable blacklist' });
+      mkInp(blSec, 'blacklist_ids', '');
+      mkHint(blSec, 'Comma-separated Telegram user IDs. These users will be silently ignored.');
+      const tipDiv = document.createElement('div');
+      tipDiv.style.cssText = 'background:var(--card-2);border:1px solid var(--border);border-radius:8px;padding:.5rem .7rem;font-size:.72rem;color:var(--text-2);margin-top:.3rem;';
+      tipDiv.innerHTML = '💡 <strong style="color:var(--text)">Find your user ID</strong>: Send a message to <code>@userinfobot</code> on Telegram.';
+      body.appendChild(tipDiv);
+      break;
+    }
+
+    // ── scheduled_msg ────────────────────────────────────────────────────
+    case 'scheduled_msg': {
+      const info = document.createElement('div');
+      info.style.cssText = 'background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.2);border-radius:8px;padding:.55rem .7rem;font-size:.76rem;color:var(--text-2);margin-bottom:.3rem;';
+      info.innerHTML = '🗓️ Send an automatic message on a schedule. Configurable after deployment in the bot settings.';
+      body.appendChild(info);
+      const schedSec = mkSec('Frequency');
+      mkInp(schedSec, 'sched_cron', '', { type:'select', options:[
+        {v:'daily_morning',  l:'🌅 Every day at 9:00 AM'},
+        {v:'daily_evening',  l:'🌙 Every day at 6:00 PM'},
+        {v:'weekly_monday',  l:'📅 Every Monday at 9:00 AM'},
+        {v:'weekly_friday',  l:'🎉 Every Friday at 5:00 PM'},
+        {v:'hourly',         l:'⏰ Every hour'},
+      ]});
+      const smsgSec = mkSec('Message to send');
+      const smsgTa = mkInp(smsgSec, 'sched_message', '📢 Scheduled announcement!', { type:'textarea', rows:3 });
+      const smsgC = document.createElement('div'); smsgC.innerHTML = mkVarChips(['{date}','{time}','{chat_title}']); smsgSec.appendChild(smsgC); bindVarChips(smsgC, smsgTa);
+      mkInp(mkSec('Active'), 'sched_enabled', '', { type:'toggle', label:'Enable this scheduled message' });
+      mkHint(mkSec(''), '📌 The bot will send this message to all chats it has interacted with.');
+      break;
+    }
   }
 }
 
@@ -1969,7 +2105,8 @@ function collectConfig() {
     config.custom_text_replies = JSON.stringify(txt_bs.map(b => ({
       triggers: b.data.triggers||'', message: b.data.message||'', parse_mode: b.data.parse_mode||'HTML'
     })));
-    config.echo_welcomeMessage = txt_bs[0].data.message||'';
+    // BUG FIX: Do NOT overwrite echo_welcomeMessage with a text_reply block.
+    // echo_welcomeMessage is only for the /start command and is set from the start_msg block.
     config.api_triggers = txt_bs[0].data.triggers||'';
   }
   if (img_bs.length > 0) {
@@ -1996,6 +2133,48 @@ function collectConfig() {
   if (rem_b)  { config.reminder_timezone = rem_b.data.reminder_timezone||'UTC'; }
   if (tr_b)   { config.translate_defaultLang = tr_b.data.translate_defaultLang||'en'; }
   if (st_b)   { config.stats_resetWeekly = st_b.data.stats_resetWeekly||false; config.stats_trackMedia = st_b.data.stats_trackMedia||false; }
+
+  // ── New advanced blocks ──────────────────────────────────────────────────
+  const start_b  = get('start_msg');
+  const defmsg_b = get('default_msg');
+  const rl_b     = get('rate_limit');
+  const maint_b  = get('maintenance');
+  const wl_b     = get('whitelist');
+  const sched_b  = get('scheduled_msg');
+
+  if (start_b) {
+    config.start_message       = start_b.data.start_message || '';
+    config.echo_welcomeMessage = start_b.data.start_message || ''; // keep legacy compat
+  }
+  if (defmsg_b) {
+    config.default_message_enabled = defmsg_b.data.default_message_enabled || false;
+    config.default_message_text    = defmsg_b.data.default_message_text || '';
+  }
+  if (rl_b) {
+    config.rate_limit_enabled    = rl_b.data.rate_limit_enabled    || false;
+    config.rate_limit_max        = parseInt(rl_b.data.rate_limit_max)        || 5;
+    config.rate_limit_window_sec = parseInt(rl_b.data.rate_limit_window_sec) || 60;
+    config.rate_limit_message    = rl_b.data.rate_limit_message    || '';
+  }
+  if (maint_b) {
+    config.maintenance_mode    = maint_b.data.maintenance_mode    || false;
+    config.maintenance_message = maint_b.data.maintenance_message || '';
+  }
+  if (wl_b) {
+    config.whitelist_enabled = wl_b.data.whitelist_enabled || false;
+    config.whitelist_ids     = wl_b.data.whitelist_ids     || '';
+    config.blacklist_enabled = wl_b.data.blacklist_enabled || false;
+    config.blacklist_ids     = wl_b.data.blacklist_ids     || '';
+  }
+  if (sched_b) {
+    const schedMsgs = [{
+      cron:    sched_b.data.sched_cron    || 'daily_morning',
+      message: sched_b.data.sched_message || '',
+      enabled: sched_b.data.sched_enabled || false,
+    }];
+    config.scheduled_messages = JSON.stringify(schedMsgs);
+  }
+
   return config;
 }
 

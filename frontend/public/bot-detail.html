@@ -71,6 +71,7 @@
       <button class="tab-btn" data-tab="commands">⌨ Commandes</button>
       <button class="tab-btn" data-tab="logs">📋 Logs</button>
       <button class="tab-btn" data-tab="test">🧪 Test</button>
+      <button class="tab-btn" data-tab="tools">🛠️ Tools</button>
       <button class="tab-btn" data-tab="danger" style="color:var(--red);">⚠ Danger</button>
     </div>
 
@@ -189,6 +190,118 @@
       </div>
     </div>
 
+    <!-- Tab: TOOLS -->
+    <div class="tab-content" id="tab-tools">
+
+      <!-- Maintenance Mode -->
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-header">
+          <h3 class="card-title">🔧 Maintenance mode</h3>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span id="maint-badge" class="badge badge-red">OFF</span>
+            <button class="btn btn-secondary btn-sm" id="toggle-maint-btn">Toggle</button>
+          </div>
+        </div>
+        <div id="alert-maint" style="margin-bottom:0.5rem;"></div>
+        <p style="font-size:0.83rem;color:var(--text-2);margin-bottom:0.85rem;">
+          When active, the bot responds to ALL messages with a maintenance message and ignores all other logic.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Maintenance message</label>
+          <textarea class="form-control" id="maint-message" rows="2" placeholder="🔧 Bot is under maintenance..."></textarea>
+        </div>
+        <button class="btn btn-primary btn-sm" id="save-maint-btn">💾 Save message</button>
+      </div>
+
+      <!-- Rate Limiter -->
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-header">
+          <h3 class="card-title">🚫 Anti-spam (Rate limiter)</h3>
+          <button class="btn btn-primary btn-sm" id="save-ratelimit-btn">💾 Save</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.9rem;margin-bottom:0.85rem;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="display:flex;align-items:center;gap:0.5rem;">
+              <span>Enable anti-spam</span>
+              <div class="toggle" id="rl-toggle" style="margin-left:auto;"></div>
+            </label>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Max messages</label>
+            <input type="number" class="form-control" id="rl-max" min="1" max="100" value="5" />
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Window (seconds)</label>
+            <input type="number" class="form-control" id="rl-window" min="5" max="3600" value="60" />
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Warning message</label>
+            <input type="text" class="form-control" id="rl-message" placeholder="⏱ Too many messages!" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Whitelist / Blacklist -->
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-header">
+          <h3 class="card-title">🔒 Whitelist / Blacklist</h3>
+          <button class="btn btn-primary btn-sm" id="save-access-btn">💾 Save</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.9rem;">
+          <div>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;">
+              <label class="form-label" style="margin:0;">Whitelist</label>
+              <div class="toggle" id="wl-toggle"></div>
+            </div>
+            <textarea class="form-control" id="wl-ids" rows="3" placeholder="123456789, 987654321"></textarea>
+            <div class="form-hint">Only these user IDs can use the bot</div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;">
+              <label class="form-label" style="margin:0;">Blacklist</label>
+              <div class="toggle" id="bl-toggle"></div>
+            </div>
+            <textarea class="form-control" id="bl-ids" rows="3" placeholder="123456789"></textarea>
+            <div class="form-hint">These user IDs will be silently ignored</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Broadcast -->
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-header">
+          <h3 class="card-title">📢 Broadcast</h3>
+          <span id="broadcast-count" class="badge badge-accent">0 chats</span>
+        </div>
+        <div id="alert-broadcast" style="margin-bottom:0.5rem;"></div>
+        <p style="font-size:0.83rem;color:var(--text-2);margin-bottom:0.85rem;">
+          Send a message to all chats and users that have interacted with this bot.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Message to broadcast</label>
+          <textarea class="form-control" id="broadcast-message" rows="4" placeholder="📢 Hello everyone! ..."></textarea>
+          <div class="form-hint">Supports HTML formatting: &lt;b&gt;bold&lt;/b&gt;, &lt;i&gt;italic&lt;/i&gt;, &lt;code&gt;code&lt;/code&gt;</div>
+        </div>
+        <div id="broadcast-chat-list" style="margin-bottom:0.85rem;display:none;">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem;">Known chats</div>
+          <div id="broadcast-chats-ul" style="display:flex;flex-wrap:wrap;gap:0.4rem;"></div>
+        </div>
+        <button class="btn btn-primary" id="send-broadcast-btn">📢 Send broadcast</button>
+      </div>
+
+      <!-- Command Stats -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">📊 Command stats</h3>
+          <button class="btn btn-ghost btn-sm" id="refresh-cmdstats-btn">↻ Refresh</button>
+        </div>
+        <div id="cmdstats-container">
+          <div style="text-align:center;padding:1.5rem;color:var(--text-2);font-size:0.82rem;">Click refresh to load stats</div>
+        </div>
+      </div>
+
+    </div>
+
     <!-- Tab: DANGER -->
     <div class="tab-content" id="tab-danger">
       <div class="danger-zone">
@@ -264,6 +377,20 @@
     });
     document.getElementById('save-ai-key-btn').addEventListener('click', saveAiKey);
     document.getElementById('test-ai-btn').addEventListener('click', testAiConnection);
+
+    // ── Tools tab bindings ──
+    document.getElementById('toggle-maint-btn').addEventListener('click', toggleMaintenance);
+    document.getElementById('save-maint-btn').addEventListener('click', saveMaintenanceMsg);
+    document.getElementById('save-ratelimit-btn').addEventListener('click', saveRateLimit);
+    document.getElementById('save-access-btn').addEventListener('click', saveAccessControl);
+    document.getElementById('send-broadcast-btn').addEventListener('click', sendBroadcast);
+    document.getElementById('refresh-cmdstats-btn').addEventListener('click', loadCmdStats);
+
+    // Toggle buttons in Tools tab
+    ['rl-toggle','wl-toggle','bl-toggle'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', () => el.classList.toggle('active'));
+    });
   }
 
   function switchTab(tabName, btn) {
@@ -272,6 +399,7 @@
     document.getElementById('tab-' + tabName)?.classList.add('active');
     if (btn) btn.classList.add('active');
     if (tabName === 'logs') loadLogs();
+    if (tabName === 'tools') { loadToolsTab(); loadCmdStats(); loadBroadcastChats(); }
   }
 
   async function loadBot() {
@@ -633,6 +761,174 @@
     const data = await api('/bots/' + botId, { method: 'DELETE' });
     if (data?.success) { Toast.success('Bot supprimé'); setTimeout(() => window.location.href = '/bots.html', 1000); }
     else { btn.classList.remove('btn-loading'); btn.disabled = false; Toast.error(data?.error || 'Erreur'); }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TOOLS TAB
+  ══════════════════════════════════════════════════════════ */
+
+  function loadToolsTab() {
+    if (!currentBot) return;
+    const cfg = currentBot.config || {};
+
+    // Maintenance
+    const maintMode = cfg.maintenance_mode || false;
+    const maintBadge = document.getElementById('maint-badge');
+    if (maintBadge) {
+      maintBadge.textContent = maintMode ? 'ON 🔧' : 'OFF';
+      maintBadge.className = 'badge ' + (maintMode ? 'badge-amber' : 'badge-red');
+    }
+    const maintMsg = document.getElementById('maint-message');
+    if (maintMsg) maintMsg.value = cfg.maintenance_message || '🔧 Bot is under maintenance. Come back soon!';
+
+    // Rate limiter
+    const rlTog = document.getElementById('rl-toggle');
+    if (rlTog) { rlTog.className = 'toggle' + (cfg.rate_limit_enabled ? ' active' : ''); }
+    const rlMax = document.getElementById('rl-max');
+    if (rlMax) rlMax.value = cfg.rate_limit_max || 5;
+    const rlWin = document.getElementById('rl-window');
+    if (rlWin) rlWin.value = cfg.rate_limit_window_sec || 60;
+    const rlMsg = document.getElementById('rl-message');
+    if (rlMsg) rlMsg.value = cfg.rate_limit_message || '⏱ Too many messages! Please wait.';
+
+    // Whitelist / Blacklist
+    const wlTog = document.getElementById('wl-toggle');
+    if (wlTog) wlTog.className = 'toggle' + (cfg.whitelist_enabled ? ' active' : '');
+    const wlIds = document.getElementById('wl-ids');
+    if (wlIds) wlIds.value = cfg.whitelist_ids || '';
+    const blTog = document.getElementById('bl-toggle');
+    if (blTog) blTog.className = 'toggle' + (cfg.blacklist_enabled ? ' active' : '');
+    const blIds = document.getElementById('bl-ids');
+    if (blIds) blIds.value = cfg.blacklist_ids || '';
+  }
+
+  async function toggleMaintenance() {
+    const data = await api('/bots/' + botId + '/maintenance', { method: 'PUT', body: JSON.stringify({}) });
+    if (data?.success) {
+      Toast.success(data.maintenance_mode ? '🔧 Maintenance ON' : '✅ Maintenance OFF');
+      await loadBot();
+      loadToolsTab();
+    } else {
+      Toast.error(data?.error || 'Error');
+    }
+  }
+
+  async function saveMaintenanceMsg() {
+    const message = document.getElementById('maint-message')?.value?.trim();
+    const data = await api('/bots/' + botId + '/maintenance', {
+      method: 'PUT',
+      body: JSON.stringify({ message })
+    });
+    if (data?.success) Toast.success('✅ Maintenance message saved');
+    else Toast.error(data?.error || 'Error');
+  }
+
+  async function saveRateLimit() {
+    const enabled    = document.getElementById('rl-toggle')?.classList.contains('active');
+    const max        = parseInt(document.getElementById('rl-max')?.value) || 5;
+    const window_sec = parseInt(document.getElementById('rl-window')?.value) || 60;
+    const message    = document.getElementById('rl-message')?.value?.trim() || '';
+
+    const data = await api('/bots/' + botId, {
+      method: 'PUT',
+      body: JSON.stringify({ config: {
+        rate_limit_enabled: enabled,
+        rate_limit_max: max,
+        rate_limit_window_sec: window_sec,
+        rate_limit_message: message,
+      }})
+    });
+    if (data?.success) { currentBot = data.bot; Toast.success('✅ Anti-spam settings saved'); }
+    else Toast.error(data?.error || 'Error');
+  }
+
+  async function saveAccessControl() {
+    const wlEnabled = document.getElementById('wl-toggle')?.classList.contains('active');
+    const wlIds     = document.getElementById('wl-ids')?.value?.trim() || '';
+    const blEnabled = document.getElementById('bl-toggle')?.classList.contains('active');
+    const blIds     = document.getElementById('bl-ids')?.value?.trim() || '';
+
+    const data = await api('/bots/' + botId, {
+      method: 'PUT',
+      body: JSON.stringify({ config: {
+        whitelist_enabled: wlEnabled,
+        whitelist_ids: wlIds,
+        blacklist_enabled: blEnabled,
+        blacklist_ids: blIds,
+      }})
+    });
+    if (data?.success) { currentBot = data.bot; Toast.success('✅ Access control saved'); }
+    else Toast.error(data?.error || 'Error');
+  }
+
+  async function loadBroadcastChats() {
+    const data = await api('/bots/' + botId + '/broadcast-chats');
+    if (!data?.success) return;
+    const badge = document.getElementById('broadcast-count');
+    if (badge) badge.textContent = data.total + ' chat' + (data.total !== 1 ? 's' : '');
+
+    const listDiv = document.getElementById('broadcast-chat-list');
+    const ul = document.getElementById('broadcast-chats-ul');
+    if (data.chats.length > 0 && ul) {
+      listDiv.style.display = 'block';
+      ul.innerHTML = data.chats.map(c => `
+        <span style="background:var(--card-2);border:1px solid var(--border);border-radius:8px;padding:.25rem .6rem;font-size:.72rem;color:var(--text-2);">
+          ${c.chatTitle || c.chatId}
+        </span>`).join('');
+    }
+  }
+
+  async function sendBroadcast() {
+    const message = document.getElementById('broadcast-message')?.value?.trim();
+    const alertDiv = document.getElementById('alert-broadcast');
+    if (!message) { Toast.error('Message is required'); return; }
+
+    const btn = document.getElementById('send-broadcast-btn');
+    btn.disabled = true; btn.textContent = '⏳ Sending…';
+    alertDiv.innerHTML = '';
+
+    const data = await api('/bots/' + botId + '/broadcast', {
+      method: 'POST',
+      body: JSON.stringify({ message })
+    });
+
+    btn.disabled = false; btn.textContent = '📢 Send broadcast';
+
+    if (data?.success) {
+      const msg = `✅ Sent: <strong>${data.sent}</strong> | Failed: ${data.failed} | Total: ${data.total}`;
+      alertDiv.innerHTML = `<div style="background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.2);border-radius:8px;padding:.65rem .85rem;font-size:.82rem;color:var(--green);">${msg}</div>`;
+      Toast.success('📢 Broadcast sent!');
+    } else {
+      alertDiv.innerHTML = `<div style="background:var(--red-dim);border:1px solid rgba(231,76,60,.2);border-radius:8px;padding:.65rem .85rem;font-size:.82rem;color:var(--red);">❌ ${data?.error || 'Error'}</div>`;
+    }
+  }
+
+  async function loadCmdStats() {
+    const container = document.getElementById('cmdstats-container');
+    if (!container) return;
+    container.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text-2);font-size:.82rem;">⏳ Loading…</div>';
+
+    const data = await api('/bots/' + botId + '/command-stats');
+    if (!data?.success || !data.stats.length) {
+      container.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text-2);font-size:.82rem;">No command usage recorded yet</div>';
+      return;
+    }
+
+    const max = data.stats[0]?.count || 1;
+    container.innerHTML = `
+      <div style="margin-bottom:0.5rem;font-size:0.72rem;color:var(--text-2);">
+        Total calls: <strong style="color:var(--text);">${data.total}</strong>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.55rem;">
+        ${data.stats.map(s => `
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <code style="font-size:0.8rem;color:var(--accent);min-width:110px;">${s.cmd}</code>
+            <div style="flex:1;background:var(--input);border-radius:99px;height:8px;overflow:hidden;">
+              <div style="width:${Math.round((s.count/max)*100)}%;height:100%;background:linear-gradient(90deg,var(--accent),#5040cc);border-radius:99px;transition:width .4s;"></div>
+            </div>
+            <span style="font-size:0.78rem;font-weight:700;color:var(--text);min-width:40px;text-align:right;">${s.count}</span>
+          </div>`).join('')}
+      </div>`;
   }
 </script>
 </body>

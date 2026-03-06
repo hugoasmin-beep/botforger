@@ -80,6 +80,41 @@ const BotSchema = new mongoose.Schema({
     // Legacy (premier bloc commande du create-bot)
     command_name:      { type: String, default: '' },
     command_reply:     { type: String, default: '' },
+
+    // ─ Default / Fallback message ─
+    default_message_enabled: { type: Boolean, default: false },
+    default_message_text:    { type: String,  default: "🤖 Je n'ai pas compris votre message. Tapez /help pour voir les commandes disponibles." },
+
+    // ─ Maintenance mode ─
+    maintenance_mode:    { type: Boolean, default: false },
+    maintenance_message: { type: String,  default: '🔧 Le bot est actuellement en maintenance. Revenez bientôt !' },
+
+    // ─ Rate limiter (anti-spam) ─
+    rate_limit_enabled:    { type: Boolean, default: false },
+    rate_limit_max:        { type: Number,  default: 5 },
+    rate_limit_window_sec: { type: Number,  default: 60 },
+    rate_limit_message:    { type: String,  default: '⏱ Trop de messages ! Patientez un peu.' },
+
+    // ─ Whitelist / Blacklist ─
+    whitelist_enabled: { type: Boolean, default: false },
+    whitelist_ids:     { type: String,  default: '' },
+    blacklist_enabled: { type: Boolean, default: false },
+    blacklist_ids:     { type: String,  default: '' },
+
+    // ─ Scheduled messages ─
+    // JSON: [{id, cron, message, chatIds, enabled, lastSent}]
+    scheduled_messages: { type: String, default: '' },
+
+    // ─ Broadcast ─
+    // JSON: [{chatId, chatTitle, lastSeen}] — auto-populated on first message
+    broadcast_chats: { type: String, default: '' },
+
+    // ─ Command stats ─
+    // JSON: {"/start": 42, "/help": 15, ...}
+    command_stats: { type: String, default: '' },
+
+    // ─ Start / Welcome message for /start command (separate from text replies) ─
+    start_message: { type: String, default: '' },
   },
 
   stats: {
@@ -112,6 +147,32 @@ BotSchema.methods.addLog = async function (type, message) {
   await Bot.findByIdAndUpdate(this._id, {
     $push: { logs: { $each: [{ type, message, timestamp: new Date() }], $slice: -100 } },
   });
+};
+
+// Track a chat for broadcast (upsert by chatId)
+BotSchema.methods.trackChat = async function (chatId, chatTitle) {
+  if (!chatId) return;
+  const doc = await Bot.findById(this._id).select('config.broadcast_chats');
+  let chats = [];
+  try { chats = JSON.parse(doc?.config?.broadcast_chats || '[]'); } catch (_) {}
+  const idx = chats.findIndex(c => String(c.chatId) === String(chatId));
+  if (idx === -1) {
+    chats.push({ chatId: String(chatId), chatTitle: chatTitle || String(chatId), lastSeen: new Date() });
+  } else {
+    chats[idx].lastSeen  = new Date();
+    if (chatTitle) chats[idx].chatTitle = chatTitle;
+  }
+  await Bot.findByIdAndUpdate(this._id, { 'config.broadcast_chats': JSON.stringify(chats) });
+};
+
+// Increment command usage stat
+BotSchema.methods.trackCommand = async function (cmdName) {
+  if (!cmdName) return;
+  const doc = await Bot.findById(this._id).select('config.command_stats');
+  let stats = {};
+  try { stats = JSON.parse(doc?.config?.command_stats || '{}'); } catch (_) {}
+  stats[cmdName] = (stats[cmdName] || 0) + 1;
+  await Bot.findByIdAndUpdate(this._id, { 'config.command_stats': JSON.stringify(stats) });
 };
 
 BotSchema.methods.getMaskedToken = function () {
