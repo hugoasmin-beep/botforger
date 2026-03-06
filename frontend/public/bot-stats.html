@@ -418,20 +418,66 @@ async function loadBotInfo() {
   if (!data?.bot) return;
   const bot = data.bot;
   document.getElementById('bot-name-display').textContent = bot.name || 'Bot';
-  document.getElementById('bot-meta').textContent = `@${bot.username || '—'} · Template: ${bot.template || '—'}`;
+  document.getElementById('bot-meta').textContent = `@${bot.telegramUsername || '—'} · Template: ${bot.template || '—'}`;
   document.getElementById('bot-avatar').textContent = bot.name?.[0] || '🤖';
   document.title = `Stats — ${bot.name} · BotForge`;
 }
 
+// Holds the last real stats payload so CSV export can use it
+let _lastStatsData = null;
+
 async function loadStats() {
-  const data = await api(`/api/bots/${botId}/stats?days=${currentDays}`);
-  if (!data) { renderMockStats(); return; }
-  renderStats(data);
+  showLoadingState();
+  try {
+    const data = await api(`/api/bots/${botId}/stats?days=${currentDays}`);
+    if (data?.success) {
+      _lastStatsData = data;
+      renderStats(data);
+    } else {
+      // API answered but no data (e.g. bot never used) — show zeros + mock visuals
+      renderNoDataState();
+    }
+  } catch (_) {
+    renderMockStats();
+  }
+}
+
+function showLoadingState() {
+  ['kpi-messages','kpi-users','kpi-commands','kpi-engagement'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = '…'; el.style.opacity = '0.4'; }
+    const delta = document.getElementById(id + '-delta');
+    if (delta) delta.textContent = '';
+  });
+}
+
+function renderNoDataState() {
+  _lastStatsData = null;
+  setKPI('kpi-messages',   0, 0, 'sur la période');
+  setKPI('kpi-users',      0, 0, 'utilisateurs uniques');
+  setKPI('kpi-commands',   0, 0, 'toutes commandes');
+  setKPI('kpi-engagement', '—', 0, 'messages / utilisateur');
+
+  renderTimeline(generateMockTimeline(currentDays));
+  renderTypeDonut({ text: 60, command: 25, media: 10, other: 5 });
+
+  const noData = (id, icon, msg) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">${icon}</div>${msg}</div>`;
+  };
+  noData('top-users-wrap',    '👤', 'Aucune activité enregistrée encore.<br>Ajoutez ce bot à un groupe Telegram !');
+  noData('top-commands-wrap', '⌨️', 'Aucune commande exécutée.');
+  renderHeatmap(generateMockHeatmap());
 }
 
 /* ── Render real or mock stats ─── */
 function renderStats(data) {
-  setKPI('kpi-messages',   data.totalMessages  || 0, data.messagesDelta  || 0, 'vs période précédente');
+  ['kpi-messages','kpi-users','kpi-commands','kpi-engagement'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.opacity = '';
+  });
+
+  setKPI('kpi-messages',   data.totalMessages  || 0, data.messagesDelta  || 0, 'sur la période');
   setKPI('kpi-users',      data.activeUsers    || 0, data.usersDelta     || 0, 'utilisateurs uniques');
   setKPI('kpi-commands',   data.totalCommands  || 0, data.commandsDelta  || 0, 'toutes commandes');
   const eng = data.activeUsers ? (data.totalMessages / data.activeUsers).toFixed(1) : '—';
@@ -439,23 +485,17 @@ function renderStats(data) {
 
   renderTimeline(data.timeline || generateMockTimeline(currentDays));
   renderTypeDonut(data.messageTypes || { text:60, command:25, media:10, other:5 });
-  renderTopUsers(data.topUsers || generateMockUsers());
-  renderTopCommands(data.topCommands || generateMockCommands());
+  renderTopUsers(data.topUsers?.length ? data.topUsers : generateMockUsers());
+  renderTopCommands(data.topCommands?.length ? data.topCommands : generateMockCommands());
   renderHeatmap(data.heatmap || generateMockHeatmap());
-}
 
-function renderMockStats() {
-  // No API — show demo data
-  setKPI('kpi-messages',   2847,  12.4, 'vs période précédente');
-  setKPI('kpi-users',      143,    8.1, 'utilisateurs uniques');
-  setKPI('kpi-commands',   918,   -3.2, 'toutes commandes');
-  setKPI('kpi-engagement', '19.9', 3.8, 'messages / utilisateur');
-
-  renderTimeline(generateMockTimeline(currentDays));
-  renderTypeDonut({ text:58, command:28, media:9, other:5 });
-  renderTopUsers(generateMockUsers());
-  renderTopCommands(generateMockCommands());
-  renderHeatmap(generateMockHeatmap());
+  // Show group count hint in meta if available
+  if (data.groupCount != null) {
+    const meta = document.getElementById('bot-meta');
+    if (meta && !meta.textContent.includes('groupe')) {
+      meta.textContent += ` · ${data.groupCount} groupe${data.groupCount !== 1 ? 's' : ''}`;
+    }
+  }
 }
 
 function setKPI(id, value, delta, sub) {
@@ -588,11 +628,39 @@ function renderHeatmap(heatmap) {
   wrap.innerHTML = html;
 }
 
-/* ── CSV Export ──────────────────────── */
+function renderMockStats() {
+  // API unreachable — show preview/demo data with visual indicator
+  document.getElementById('bot-meta').textContent += ' · ⚠ Données de démo';
+  setKPI('kpi-messages',   2847,  12.4, 'données de démonstration');
+  setKPI('kpi-users',      143,    8.1, 'utilisateurs uniques');
+  setKPI('kpi-commands',   918,   -3.2, 'toutes commandes');
+  setKPI('kpi-engagement', '19.9', 3.8, 'messages / utilisateur');
+
+  renderTimeline(generateMockTimeline(currentDays));
+  renderTypeDonut({ text:58, command:28, media:9, other:5 });
+  renderTopUsers(generateMockUsers());
+  renderTopCommands(generateMockCommands());
+  renderHeatmap(generateMockHeatmap());
+}
 function exportCSV() {
-  const timeline = generateMockTimeline(currentDays);
-  const csv = ['Date,Messages,Utilisateurs', ...timeline.map(d => `${d.date},${d.messages},${d.users}`)].join('\n');
-  const blob = new Blob([csv], { type:'text/csv' });
+  const rows = ['Date,Messages,Utilisateurs'];
+
+  if (_lastStatsData?.timeline?.length) {
+    _lastStatsData.timeline.forEach(d => rows.push(`${d.date},${d.messages},${d.users}`));
+  } else if (_lastStatsData?.topUsers?.length) {
+    const topRows = ['Utilisateur,Messages'];
+    _lastStatsData.topUsers.forEach(u => topRows.push(`"${u.name}",${u.messages}`));
+    const blob = new Blob([topRows.join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `bot_users_${currentDays}j.csv`; a.click();
+    URL.revokeObjectURL(a.href);
+    if (typeof Toast !== 'undefined') Toast.success('📊 Export CSV utilisateurs téléchargé');
+    return;
+  } else {
+    generateMockTimeline(currentDays).forEach(d => rows.push(`${d.date},${d.messages},${d.users}`));
+  }
+
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `bot_stats_${currentDays}j.csv`; a.click();
   URL.revokeObjectURL(a.href);

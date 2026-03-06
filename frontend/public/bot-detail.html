@@ -51,7 +51,7 @@
         </div>
       </div>
     <div class="bot-detail-actions">
-      <a href="/bot-stats.html?id=" + botId class="btn btn-ghost btn-sm" aria-label="Voir les statistiques du bot">📊 Statistiques</a>
+      <a href="/bots.html" id="stats-link" class="btn btn-ghost btn-sm" aria-label="Voir les statistiques du bot">📊 Statistiques</a>
       <button class="btn btn-secondary btn-sm" id="toggle-bot-btn" aria-label="Activer ou désactiver le bot">…</button>
       <a href="/bots.html" class="btn btn-ghost btn-sm" aria-label="Retour à la liste des bots">← Retour</a>
     </div>
@@ -284,7 +284,7 @@
     currentBot = data.bot;
     renderBot(currentBot);
     // Set the correct URL for the statistics link
-    const statsLink = document.querySelector('.bot-detail-actions a[href*="bot-stats.html"]');
+    const statsLink = document.getElementById('stats-link');
     if (statsLink) {
       statsLink.href = `/bot-stats.html?id=${botId}`;
     }
