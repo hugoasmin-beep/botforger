@@ -97,7 +97,19 @@ const handleCustomCommand = async (update, botDoc, tgBot) => {
   }
 
   if (reply) {
-    await tgBot.sendMessage(chatId, reply, sendOpts);
+    if (match.reply_image_url) {
+      // Send photo with caption
+      await tgBot.sendPhoto(chatId, match.reply_image_url, {
+        caption:     reply,
+        parse_mode:  match.parse_mode || 'HTML',
+        ...(sendOpts.reply_markup ? { reply_markup: sendOpts.reply_markup } : {}),
+      }).catch(async () => {
+        // Image failed, send text only
+        await tgBot.sendMessage(chatId, reply, sendOpts);
+      });
+    } else {
+      await tgBot.sendMessage(chatId, reply, sendOpts);
+    }
   }
 
   await botDoc.incrementStats(msg.from?.id);

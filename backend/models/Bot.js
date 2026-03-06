@@ -66,6 +66,14 @@ const BotSchema = new mongoose.Schema({
     msg_start_blocks:  { type: String, default: '' },
     msg_help_blocks:   { type: String, default: '' },
     msg_custom_blocks: { type: String, default: '' },
+    // ─ Blocs text reply (universel) ─
+    // JSON: [{triggers:'hello,hi', message:'Hey {first_name}!', parse_mode:'HTML'}, ...]
+    custom_text_replies:  { type: String, default: '' },
+    // ─ Blocs image reply (universel) ─
+    // JSON: [{triggers:'image,photo', image_url:'https://...', caption:'...', buttons:''}, ...]
+    custom_image_replies: { type: String, default: '' },
+    // ─ Welcome enabled flag ─
+    welcome_enabled:      { type: Boolean, default: false },
     // ─ Commandes personnalisées (universel, tous templates) ─
     // JSON stringifié : [{name:'test', reply:'Bonjour !', desc:'...', parse_mode:'HTML', buttons:''}]
     custom_commands:   { type: String, default: '' },

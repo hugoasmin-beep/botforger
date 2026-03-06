@@ -34,21 +34,17 @@ const createWelcomeBot = (botDoc) => {
           for (const member of msg.new_chat_members) {
             if (member.id === me.id) continue;
             const vars = {
-              first_name: member.first_name || 'Utilisateur',
-              last_name: member.last_name || '',
-              full_name: `${member.first_name || ''} ${member.last_name || ''}`.trim(),
-              username: member.username ? `@${member.username}` : member.first_name || 'Utilisateur',
-              chat_title: chatTitle || 'ce groupe',
+              first_name: member.first_name || 'User',
+              last_name:  member.last_name  || '',
+              full_name:  `${member.first_name || ''} ${member.last_name || ''}`.trim(),
+              username:   member.username ? `@${member.username}` : member.first_name || 'User',
+              chat_title: chatTitle || 'this group',
             };
 
-            const joinBlocks = parseBlocks(config.msg_start_blocks);
-            if (joinBlocks.length > 0) {
-              await sendBlocks(bot, chatId, joinBlocks, vars);
-            } else {
-              const joinMsg = interpolate(config.welcome_joinMessage || '👋 Bienvenue {first_name} dans le groupe !', vars);
-              await bot.sendMessage(chatId, joinMsg, { parse_mode: 'HTML' });
-            }
-            await freshDoc.addLog('info', `Bienvenue envoyé à ${member.first_name}`);
+            const joinMsg = interpolate(config.welcome_joinMessage || 'Welcome {first_name}!', vars);
+            await bot.sendMessage(chatId, joinMsg, { parse_mode: 'HTML' })
+              .catch(() => bot.sendMessage(chatId, joinMsg));
+            await freshDoc.addLog('info', `Welcome sent to ${member.first_name}`);
             await freshDoc.incrementStats(member.id);
           }
         }
@@ -59,20 +55,15 @@ const createWelcomeBot = (botDoc) => {
           const me = await bot.getMe();
           if (member.id === me.id) return;
           const vars = {
-            first_name: member.first_name || 'Utilisateur',
-            last_name: member.last_name || '',
-            username: member.username ? `@${member.username}` : member.first_name || 'Utilisateur',
-            chat_title: chatTitle || 'ce groupe',
+            first_name: member.first_name || 'User',
+            last_name:  member.last_name  || '',
+            username:   member.username ? `@${member.username}` : member.first_name || 'User',
+            chat_title: chatTitle || 'this group',
           };
-
-          const leaveBlocks = parseBlocks(config.msg_custom_blocks);
-          if (leaveBlocks.length > 0) {
-            await sendBlocks(bot, chatId, leaveBlocks, vars);
-          } else {
-            const leaveMsg = interpolate(config.welcome_leaveMessage || '👋 Au revoir {first_name} !', vars);
-            await bot.sendMessage(chatId, leaveMsg, { parse_mode: 'HTML' });
-          }
-          await freshDoc.addLog('info', `Au revoir envoyé pour ${member.first_name}`);
+          const leaveMsg = interpolate(config.welcome_leaveMessage || 'Goodbye {first_name}!', vars);
+          await bot.sendMessage(chatId, leaveMsg, { parse_mode: 'HTML' })
+            .catch(() => bot.sendMessage(chatId, leaveMsg));
+          await freshDoc.addLog('info', `Goodbye sent for ${member.first_name}`);
         }
 
       } catch (err) {

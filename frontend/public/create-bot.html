@@ -1930,24 +1930,72 @@ function effectiveTemplate() {
 
 function collectConfig() {
   const config = {};
-  const get = (type) => canvasBlocks.find(b => b.type === type);
+  const get    = (type) => canvasBlocks.find(b => b.type === type);
   const getAll = (type) => canvasBlocks.filter(b => b.type === type);
-  const api_b = get('api_endpoint'), key_b = get('api_key'), ai_b = get('ai_llm');
-  const txt_b = get('text_reply'),   wel_b = get('welcome_msg'), img_b = get('image_msg');
-  const cmd_bs = getAll('command'),  poll_b = get('poll'), rem_b = get('reminder');
-  const tr_b  = get('translate'),    st_b  = get('stats');
 
-  if (api_b) { const d=api_b.data; config.api_method=d.api_method||'GET'; config.api_url=d.api_url||''; config.api_triggers=d.api_triggers||''; config.api_body=d.api_body||''; config.api_response_path=d.api_response_path||''; config.api_response_template=d.api_response_template||'{result}'; config.api_fallback_message=d.api_fallback||'❌ Error.'; config.api_headers=d.api_headers||''; config.api_cooldown_ms=d.api_cooldown||'2000'; if(d.api_buttons) config.api_buttons=d.api_buttons; }
-  if (key_b) { config.ai_apiKey=key_b.data.key_value||''; }
-  if (ai_b)  { const d=ai_b.data; config.ai_provider=d.ai_provider||'openai'; config.ai_model=d.ai_model||''; config.ai_system_prompt=d.ai_system_prompt||''; config.ai_welcome_message=d.ai_welcome_message||''; config.ai_temperature=d.ai_temperature||'0.7'; config.ai_enabled=true; if(!config.ai_apiKey&&key_b) config.ai_apiKey=key_b.data.key_value||''; }
-  if (txt_b) { config.echo_welcomeMessage=txt_b.data.message||''; config.echo_prefix=txt_b.data.echo_prefix||''; config.api_triggers=txt_b.data.triggers||''; }
-  if (wel_b) { config.welcome_joinMessage=wel_b.data.welcome_joinMessage||'👋 Welcome !'; config.welcome_leaveMessage=wel_b.data.welcome_leaveMessage||'Goodbye!'; config.welcome_include_username=wel_b.data.include_username||false; }
-  if (img_b) { config.image_url=img_b.data.image_url||''; config.image_caption=img_b.data.caption||''; config.image_triggers=img_b.data.triggers||''; if(img_b.data.api_buttons) config.image_buttons=img_b.data.api_buttons; }
-  if (cmd_bs.length>0) { config.custom_commands=JSON.stringify(cmd_bs.map(b=>({ name:b.data.command_name||'', reply:b.data.reply_text||'', desc:b.data.command_desc||'', parse_mode:b.data.command_parse_mode||'HTML', buttons:b.data.command_buttons||'', reply_image_url:b.data.reply_image_url||'' }))); if(cmd_bs[0].data.command_name){config.command_name=cmd_bs[0].data.command_name;config.command_reply=cmd_bs[0].data.reply_text||'';} }
-  if (poll_b) { config.poll_allowAnonymous=poll_b.data.poll_allowAnonymous||false; config.poll_helpMessage=poll_b.data.poll_helpMessage||''; }
-  if (rem_b)  { config.reminder_timezone=rem_b.data.reminder_timezone||'Europe/Paris'; config.reminder_helpMessage=rem_b.data.reminder_helpMessage||''; }
-  if (tr_b)   { config.translate_defaultLang=tr_b.data.translate_defaultLang||'en'; }
-  if (st_b)   { config.stats_resetWeekly=st_b.data.stats_resetWeekly||false; config.stats_trackMedia=st_b.data.stats_trackMedia||false; }
+  const api_b  = get('api_endpoint'), key_b = get('api_key'), ai_b = get('ai_llm');
+  const wel_b  = get('welcome_msg');
+  const txt_bs = getAll('text_reply');
+  const img_bs = getAll('image_msg');
+  const cmd_bs = getAll('command');
+  const poll_b = get('poll'), rem_b = get('reminder');
+  const tr_b   = get('translate'), st_b = get('stats');
+
+  if (api_b) {
+    const d = api_b.data;
+    config.api_method = d.api_method||'GET'; config.api_url = d.api_url||'';
+    config.api_triggers = d.api_triggers||''; config.api_body = d.api_body||'';
+    config.api_response_path = d.api_response_path||'';
+    config.api_response_template = d.api_response_template||'{result}';
+    config.api_fallback_message = d.api_fallback||'Unable to fetch data.';
+    config.api_headers = d.api_headers||''; config.api_cooldown_ms = d.api_cooldown||'2000';
+    if (d.api_buttons) config.api_buttons = d.api_buttons;
+  }
+  if (key_b) config.ai_apiKey = key_b.data.key_value||'';
+  if (ai_b) {
+    const d = ai_b.data;
+    config.ai_provider = d.ai_provider||'openai'; config.ai_model = d.ai_model||'';
+    config.ai_system_prompt = d.ai_system_prompt||''; config.ai_welcome_message = d.ai_welcome_message||'';
+    config.ai_temperature = d.ai_temperature||'0.7'; config.ai_enabled = true;
+    if (!config.ai_apiKey && key_b) config.ai_apiKey = key_b.data.key_value||'';
+  }
+  if (wel_b) {
+    config.welcome_joinMessage  = wel_b.data.welcome_joinMessage  || 'Welcome {first_name}!';
+    config.welcome_leaveMessage = wel_b.data.welcome_leaveMessage || 'Goodbye {first_name}!';
+    config.welcome_include_username = wel_b.data.include_username || false;
+    config.welcome_enabled = true;
+  }
+  if (txt_bs.length > 0) {
+    config.custom_text_replies = JSON.stringify(txt_bs.map(b => ({
+      triggers: b.data.triggers||'', message: b.data.message||'', parse_mode: b.data.parse_mode||'HTML'
+    })));
+    config.echo_welcomeMessage = txt_bs[0].data.message||'';
+    config.api_triggers = txt_bs[0].data.triggers||'';
+  }
+  if (img_bs.length > 0) {
+    config.custom_image_replies = JSON.stringify(img_bs.map(b => ({
+      triggers: b.data.triggers||'', image_url: b.data.image_url||'',
+      caption: b.data.caption||'', buttons: b.data.api_buttons||''
+    })));
+    config.image_url = img_bs[0].data.image_url||'';
+    config.image_caption = img_bs[0].data.caption||'';
+    config.image_triggers = img_bs[0].data.triggers||'';
+  }
+  if (cmd_bs.length > 0) {
+    config.custom_commands = JSON.stringify(cmd_bs.map(b => ({
+      name: b.data.command_name||'', reply: b.data.reply_text||'', desc: b.data.command_desc||'',
+      parse_mode: b.data.command_parse_mode||'HTML', buttons: b.data.command_buttons||'',
+      reply_image_url: b.data.reply_image_url||''
+    })));
+    if (cmd_bs[0].data.command_name) {
+      config.command_name = cmd_bs[0].data.command_name;
+      config.command_reply = cmd_bs[0].data.reply_text||'';
+    }
+  }
+  if (poll_b) { config.poll_allowAnonymous = poll_b.data.poll_allowAnonymous||false; config.poll_helpMessage = poll_b.data.poll_helpMessage||''; }
+  if (rem_b)  { config.reminder_timezone = rem_b.data.reminder_timezone||'UTC'; }
+  if (tr_b)   { config.translate_defaultLang = tr_b.data.translate_defaultLang||'en'; }
+  if (st_b)   { config.stats_resetWeekly = st_b.data.stats_resetWeekly||false; config.stats_trackMedia = st_b.data.stats_trackMedia||false; }
   return config;
 }
 
