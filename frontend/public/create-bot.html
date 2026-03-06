@@ -1803,7 +1803,7 @@ function _buildStandardInspector(block, body, mkSec) {
       spSec.appendChild(persWrap);
 
       const wSec = mkSec('4️⃣  Message de bienvenue (/start)');
-      const wTa = mkInp(wSec, 'ai_welcome_message', 'Bonjour {first_name} ! 👋 Je suis votre assistant IA. Posez-moi n'importe quelle question !', { type:'textarea', rows:2 });
+      const wTa = mkInp(wSec, 'ai_welcome_message', "Bonjour {first_name} ! 👋 Je suis votre assistant IA. Posez-moi n'importe quelle question !", { type:'textarea', rows:2 });
       const wC = document.createElement('div'); wC.innerHTML = mkVarChips(['{first_name}','{username}']); wSec.appendChild(wC); bindVarChips(wC, wTa);
 
       const tmpSec = mkSec('Créativité (température)');
