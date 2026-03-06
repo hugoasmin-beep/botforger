@@ -283,6 +283,11 @@
     }
     currentBot = data.bot;
     renderBot(currentBot);
+    // Set the correct URL for the statistics link
+    const statsLink = document.querySelector('.bot-detail-actions a[href*="bot-stats.html"]');
+    if (statsLink) {
+      statsLink.href = `/bot-stats.html?id=${botId}`;
+    }
   }
 
   function renderBot(bot) {
